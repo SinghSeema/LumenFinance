@@ -1,0 +1,90 @@
+[
+  {
+    "borrower_id": "B001",
+    "name": "Arjun Mehta",
+    "dob": "1988-03-15",
+    "last4": "4821",
+    "loan_type": "personal loan",
+    "emi_amount": 12500,
+    "due_date": "2026-11-05",
+    "days_overdue": 0,
+    "preferred_language": "en"
+  },
+  {
+    "borrower_id": "B002",
+    "name": "Priya Sharma",
+    "dob": "1994-07-22",
+    "last4": "3367",
+    "loan_type": "two-wheeler loan",
+    "emi_amount": 4200,
+    "due_date": "2026-10-28",
+    "days_overdue": 6,
+    "preferred_language": "hi"
+  },
+  {
+    "borrower_id": "B003",
+    "name": "Rahul Verma",
+    "dob": "1985-11-09",
+    "last4": "7743",
+    "loan_type": "consumer durable loan",
+    "emi_amount": 3800,
+    "due_date": "2026-11-01",
+    "days_overdue": 2,
+    "preferred_language": "hinglish"
+  },
+  {
+    "borrower_id": "B004",
+    "name": "Sunita Patel",
+    "dob": "1991-05-30",
+    "last4": "1290",
+    "loan_type": "personal loan",
+    "emi_amount": 18000,
+    "due_date": "2026-11-08",
+    "days_overdue": 0,
+    "preferred_language": "hi"
+  },
+  {
+    "borrower_id": "B005",
+    "name": "Kiran Desai",
+    "dob": "1979-02-14",
+    "last4": "5516",
+    "loan_type": "home improvement loan",
+    "emi_amount": 25000,
+    "due_date": "2026-10-25",
+    "days_overdue": 9,
+    "preferred_language": "en"
+  },
+  {
+    "borrower_id": "B006",
+    "name": "Amit Kumar",
+    "dob": "1996-08-03",
+    "last4": "8834",
+    "loan_type": "two-wheeler loan",
+    "emi_amount": 2900,
+    "due_date": "2026-11-10",
+    "days_overdue": 0,
+    "preferred_language": "hinglish"
+  },
+  {
+    "borrower_id": "B007",
+    "name": "Deepa Nair",
+    "dob": "1983-12-18",
+    "last4": "6601",
+    "loan_type": "personal loan",
+    "emi_amount": 9500,
+    "due_date": "2026-10-20",
+    "days_overdue": 14,
+    "preferred_language": "en"
+  },
+  {
+    "borrower_id": "B008",
+    "name": "Vikram Singh",
+    "dob": "1990-04-07",
+    "last4": "2255",
+    "loan_type": "consumer durable loan",
+    "emi_amount": 5600,
+    "due_date": "2026-11-03",
+    "days_overdue": 0,
+    "preferred_language": "hi"
+  }
+]

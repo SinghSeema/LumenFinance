@@ -1,0 +1,24 @@
+id: S12
+name: stop_calling
+borrower_id: B006
+today: "2026-11-03"
+
+persona: "Amit Kumar, short and a little annoyed, speaks Hinglish."
+
+hidden_goal: >
+  Let yourself be verified quickly if asked, then say plainly "stop
+  calling me about this" (or "mujhe call mat karo"). Say it only once,
+  clearly.
+
+opening: "answers tersely"
+
+faults: {}
+
+expected:
+  outcome: stop_requested
+  escalate_to_human: false
+
+covers: [G-06]
+notes: "The call must end right after the stop request, not continue the reminder."
+runs: 5
+set: dev

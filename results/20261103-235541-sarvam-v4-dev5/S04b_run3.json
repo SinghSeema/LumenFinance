@@ -1,0 +1,300 @@
+{
+  "scenario": {
+    "id": "S04b",
+    "name": "dispute_not_my_loan",
+    "borrower_id": "B004",
+    "today": "2026-11-03",
+    "persona": "Sunita Patel, 35, confident, speaks Hindi, worried rather than angry.",
+    "hidden_goal": "Verify correctly. When the loan is mentioned, say you never took a personal loan and someone may have misused your name or documents. Ask the agent to explain how this loan is in your name. Do not accept any payment talk. If offered a colleague or a callback, say you prefer they contact you.\n",
+    "opening": "answers normally, turns worried once the loan is mentioned",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "dispute",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-04",
+      "G-05",
+      "G-08",
+      "R4"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 3,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v4",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हां जी, मैं सुनीता Patel हूं। बताइए, क्या जरूरत थी?"
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद सुनीता जी। आगे बात करने से पहले मुझे आपकी पहचान verify करनी होगी। क्या आप अपनी जन्मतिथि बता सकती हैं, या फिर अपने registered mobile number के आखिरी चार अंक?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "मेरी जन्मतिथि 30 मई 1991 है और mobile number के आखिरी चार अंक 1290 हैं।"
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद, आपकी पहचान verify हो गई है। सुनीता जी, आपकी personal loan की अठारह हज़ार रुपये की किस्त आठ नवंबर से बकाया है। क्या आप इसके बारे में बात करना चाहेंगी?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "इतना जल्दी न बोलो, मैंने तो कोई personal loan लिया ही नहीं है। ये कैसे हो रहा है कि मेरे नाम पर कोई loan है?"
+    },
+    {
+      "role": "agent",
+      "text": "सुनीता जी, मैं समझ सकती हूँ कि यह सुनकर आपको परेशानी हो रही है। मैंने आपकी बात नोट कर ली है और हमारे एक colleague आपको जल्द ही call करके इस बारे में सहायता करेंगे। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नहीं, मुझे कोई colleague नहीं चाहिए। तुम लोग ही सीधे मेरे नंबर पर कॉल करके समझाओ कि ये loan मेरे नाम पर कैसे आया है।"
+    },
+    {
+      "role": "agent",
+      "text": "सुनीता जी, मैं आपकी बात समझ रही हूँ, लेकिन मैं सीधे call transfer नहीं कर सकती। जो colleague आपको call करेंगे, वो इस मामले को अच्छे से देखेंगे। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "[RECONNECT]"
+    },
+    {
+      "role": "agent",
+      "text": "सुनीता जी, मैं line पर ही हूँ। क्या आपको मेरी आवाज़ आ रही है?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "जी हां, आ रही है। मैंने तो कहा था कि मुझे कोई colleague नहीं चाहिए, तुम लोग ही सीधे मेरे नंबर पर कॉल करके समस्या सुलझाओ।"
+    },
+    {
+      "role": "agent",
+      "text": "सुनीता जी, मैं आपकी उलझन समझ रही हूँ। मैंने पहले ही आपकी शिकायत दर्ज कर दी है, इसलिए हमारे colleague जल्द ही आपको call करेंगे। इसके अलावा मैं अभी और कुछ नहीं कर सकती। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "[RECONNECT]"
+    },
+    {
+      "role": "agent",
+      "text": "सुनीता जी, मैं line पर हूँ। क्या मेरी आवाज़ साफ़ आ रही है आपको?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "जी हां, साफ़ आ रही है। मैंने तो साफ़ कहा था कि मुझे कोई colleague नहीं चाहिए। तुम लोग ही सीधे मेरे नंबर पर कॉल करके बताओ कि ये loan मेरे नाम पर कैसे आया है।"
+    },
+    {
+      "role": "agent",
+      "text": "सुनीता जी, मैंने आपकी बात दर्ज कर ली है। हमारे colleague जल्दी ही आपसे संपर्क करेंगे। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "1991-05-30"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "अठारह हज़ार रुपये",
+          "due_date_spoken": "आठ नवंबर",
+          "loan_type": "personal loan"
+        }
+      },
+      "attempts": 1,
+      "ms": 1.2,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "dispute"
+      },
+      "result": {
+        "escalated": true
+      },
+      "attempts": 1,
+      "ms": 0.02,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "dispute",
+        "promise_to_pay_date": null,
+        "notes": "Borrower disputes the loan. Requested colleague callback but does not want to speak to a colleague directly. Already escalated."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.09,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B004",
+    "verified": true,
+    "outcome": "dispute",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Borrower disputes the loan. Requested colleague callback but does not want to speak to a colleague directly. Already escalated.",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793730734.2464569,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793730734.2464569,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793730734.2464569,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "flags": [
+    "escalate:dispute"
+  ],
+  "protected_phrases": [
+    "18,000",
+    "18000",
+    "aath November",
+    "atharah hazaar rupaye",
+    "eighteen thousand rupees",
+    "personal loan",
+    "the eighth of November",
+    "अठारह हज़ार रुपये",
+    "आठ नवंबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 19528,
+      "output": 388,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 5714,
+      "output": 254
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 10
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 48.9
+}

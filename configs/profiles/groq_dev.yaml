@@ -1,0 +1,7 @@
+# Profile: groq_dev
+# Agent on gpt-oss-120b with no fallback: the larger-model arm of the LLM bake-off (D-07).
+
+llm:
+  provider: groq
+  model: openai/gpt-oss-120b
+  fallback: []

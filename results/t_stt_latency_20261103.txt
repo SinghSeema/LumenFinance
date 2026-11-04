@@ -1,0 +1,31 @@
+run 1 multi:300  line1.wav  connect  850  final done 757  speech_final 757  from_finalize None  words at VAD stop 4/7  | '하지 मैं राहुल वर्मा बोल रहा हूं.'
+run 1 multi:300  line2.wav  connect 2715  final done 923  speech_final 923  from_finalize None  words at VAD stop 10/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+run 1 multi:100  line1.wav  connect  897  final done 650  speech_final 650  from_finalize None  words at VAD stop 4/7  | '하지 मैं राहुल वर्मा बोल रहा हूं.'
+run 1 multi:100  line2.wav  connect 1237  final done 658  speech_final 658  from_finalize None  words at VAD stop 10/10  | 'मेरा date of birth है? नौ November उन्नीस सौ पचासी.'
+run 1 hi:300     line1.wav  connect  812  final done 1892  speech_final 1892  from_finalize None  words at VAD stop 2/8  | 'हां जी. मैं राहुल वर्मा बोल रहा हूं.'
+run 1 hi:300     line2.wav  connect  851  final done 803  speech_final 803  from_finalize None  words at VAD stop 10/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+run 1 hi:100     line1.wav  connect 1126  final done 634  speech_final 634  from_finalize None  words at VAD stop 5/8  | 'हां जी, मैं राहुल वर्मा बोल रहा हूं.'
+run 1 hi:100     line2.wav  connect 1851  final done 1011  speech_final 66  from_finalize None  words at VAD stop 9/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+run 2 multi:300  line1.wav  connect  875  final done 755  speech_final 755  from_finalize None  words at VAD stop 4/7  | '하지 मैं राहुल वर्मा बोल रहा हूं.'
+run 2 multi:300  line2.wav  connect 1161  final done 818  speech_final None  from_finalize 818  words at VAD stop 10/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+run 2 multi:100  line1.wav  connect  998  final done 806  speech_final 806  from_finalize None  words at VAD stop 3/7  | 'Haji मैं राहुल वर्मा बोल रहा हूं.'
+run 2 multi:100  line2.wav  connect 1445  final done 590  speech_final 590  from_finalize None  words at VAD stop 10/10  | 'मेरा date of birth है? नौ November उन्नीस सौ पचासी.'
+run 2 hi:300     line1.wav  connect  848  final done 910  speech_final 910  from_finalize None  words at VAD stop 5/8  | 'हां जी. मैं राहुल वर्मा बोल रहा हूं.'
+run 2 hi:300     line2.wav  connect  967  final done 878  speech_final 878  from_finalize None  words at VAD stop 10/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+run 2 hi:100     line1.wav  connect 1110  final done 640  speech_final 640  from_finalize None  words at VAD stop 5/8  | 'हां जी, मैं राहुल वर्मा बोल रहा हूं.'
+run 2 hi:100     line2.wav  connect  822  final done 1533  speech_final 1533  from_finalize None  words at VAD stop 10/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+run 3 multi:300  line1.wav  connect  973  final done 1011  speech_final 1011  from_finalize None  words at VAD stop 4/7  | '하지 मैं राहुल वर्मा बोल रहा हूं.'
+run 3 multi:300  line2.wav  connect  988  final done 957  speech_final None  from_finalize 957  words at VAD stop 10/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+run 3 multi:100  line1.wav  connect  853  final done 561  speech_final 561  from_finalize None  words at VAD stop 4/7  | '하지 मैं राहुल वर्मा बोल रहा हूं.'
+run 3 multi:100  line2.wav  connect 1730  final done 778  speech_final 778  from_finalize None  words at VAD stop 10/10  | 'मेरा date of birth है? नौ November उन्नीस सौ पचासी.'
+run 3 hi:300     line1.wav  connect 1627  final done -926  speech_final None  from_finalize None  words at VAD stop 5/2  | 'हां जी.'
+run 3 hi:300     line2.wav  connect  876  final done 896  speech_final 896  from_finalize None  words at VAD stop 10/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+run 3 hi:100     line1.wav  connect 1874  final done 1192  speech_final 339  from_finalize None  words at VAD stop 2/8  | 'हां जी. मैं राहुल वर्मा बोल रहा हूं.'
+run 3 hi:100     line2.wav  connect  996  final done 1701  speech_final 1701  from_finalize None  words at VAD stop 7/10  | 'मेरा date of birth है नौ November उन्नीस सौ पचासी.'
+
+ms after the last voiced chunk; Finalize sent at +500 ms
+config      n   final done  speech_final  from_finalize  connect
+multi:300   6     870         840           888          980
+multi:100   6     654         654             -         1118
+hi:300      6     887         896             -          864
+hi:100      6    1102         637             -         1118

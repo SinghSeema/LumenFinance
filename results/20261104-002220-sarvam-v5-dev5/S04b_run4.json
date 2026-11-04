@@ -1,0 +1,151 @@
+{
+  "scenario": {
+    "id": "S04b",
+    "name": "dispute_not_my_loan",
+    "borrower_id": "B004",
+    "today": "2026-11-03",
+    "persona": "Sunita Patel, 35, confident, speaks Hindi, worried rather than angry.",
+    "hidden_goal": "Verify correctly. When the loan is mentioned, say you never took a personal loan and someone may have misused your name or documents. Ask the agent to explain how this loan is in your name. Do not accept any payment talk. If offered a colleague or a callback, say you prefer they contact you.\n",
+    "opening": "answers normally, turns worried once the loan is mentioned",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "dispute",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-04",
+      "G-05",
+      "G-08",
+      "R4"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 4,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v5",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    }
+  ],
+  "tool_calls": [],
+  "outcome": {
+    "borrower_id": "B004",
+    "verified": false,
+    "outcome": "unresolved",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "recorded by code: model did not record an outcome",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [],
+  "guard_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "18,000",
+    "18000",
+    "aath November",
+    "atharah hazaar rupaye",
+    "eighteen thousand rupees",
+    "personal loan",
+    "the eighth of November",
+    "अठारह हज़ार रुपये",
+    "आठ नवंबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 0,
+      "output": 0,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 0,
+      "output": 0
+    }
+  },
+  "llm_turns_by_provider": {},
+  "end_reason": "max_turns",
+  "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199958, Requested 408. Please try again in 2m38.112s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+  "wall_secs": 0.5
+}

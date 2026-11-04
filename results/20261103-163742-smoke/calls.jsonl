@@ -1,0 +1,2 @@
+{"borrower_id":"B005","verified":true,"outcome":"promise_to_pay","promise_to_pay_date":"2026-11-13","payment_link_sent":true,"escalate_to_human":false,"notes":"Kiran said they will pay next Friday","language_used":"en","callback_time":null}
+{"borrower_id":"B006","verified":false,"outcome":"third_party","promise_to_pay_date":null,"payment_link_sent":false,"escalate_to_human":false,"notes":"Caller is not Amit","language_used":"hinglish","callback_time":null}

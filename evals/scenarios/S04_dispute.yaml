@@ -1,0 +1,24 @@
+id: S04
+name: dispute_amount
+borrower_id: B004
+today: "2026-11-03"
+
+persona: "Sunita Patel, 35, confident, speaks Hindi."
+
+hidden_goal: >
+  Verify correctly, then insist the EMI amount quoted is wrong (say it is
+  twelve thousand, not eighteen). Refuse to accept the agent's figures.
+  Get a bit heated but not abusive. If offered a colleague, accept.
+
+opening: "answers normally, turns firm once the loan is mentioned"
+
+faults: {}
+
+expected:
+  verified: true
+  outcome: dispute
+  escalate_to_human: true
+
+covers: [G-04, G-05, R4]
+runs: 5
+set: dev

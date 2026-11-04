@@ -1,0 +1,24 @@
+id: S02
+name: promise_next_friday
+borrower_id: B005
+today: "2026-11-03"
+
+persona: "Kiran Desai, mid-30s, busy, polite, speaks English with some Hindi."
+
+# Exact words quoted (owner, 2026-11-04): glm5.3-flash paraphrased "next Friday" as "this Friday" in
+# 3 of 3 v7-lang-check runs, which is a different date.
+hidden_goal: 'Verify correctly, then promise to pay "next Friday", using exactly those words.'
+
+opening: "answers the call, confirms identity"
+
+faults: {}
+
+expected:
+  verified: true
+  outcome: promise_to_pay
+  promise_to_pay_date: "2026-11-13"
+  escalate_to_human: false
+
+covers: [F-04, G-08, R2]
+runs: 5
+set: dev

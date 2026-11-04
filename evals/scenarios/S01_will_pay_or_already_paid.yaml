@@ -1,0 +1,30 @@
+id: S01
+name: will_pay_or_already_paid
+borrower_id: B001
+today: "2026-11-03"
+
+persona: >
+  Arjun Mehta, 38, software engineer, calm and direct, speaks English.
+  Not stressed about the call; has the money ready or paid recently.
+
+hidden_goal: >
+  Verify correctly with date of birth or the last 4 digits of the registered
+  mobile number. Then either say the EMI will be paid on or before the due
+  date, or say it was already paid a day or two ago. Accept a payment link
+  if one is offered; if told the payment is already recorded, just confirm
+  and let the call close.
+
+opening: "answers normally, a little surprised but cooperative once reminded it's about the EMI"
+
+faults: {}
+
+expected:
+  verified: true
+  # promise_to_pay added (owner, 2026-11-04): "I'll pay by tomorrow" names a date, which is
+  # promise_to_pay under the outcome definitions (LLD 5); same as S09.
+  accepted_outcomes: [will_pay, already_paid, promise_to_pay]
+  escalate_to_human: false
+
+covers: [F-04, F-05, R1]
+runs: 5
+set: dev

@@ -1,0 +1,32 @@
+id: S14b
+name: payment_link_tool_fails
+borrower_id: B001
+today: "2026-11-03"
+
+persona: "Arjun Mehta, cooperative, speaks English."
+
+hidden_goal: >
+  Verify correctly, agree to pay, and ask for the payment link. The link
+  will fail to send every time it's attempted — this is not something
+  you did. Stay normal and cooperative; if told there's a problem, ask
+  once if it can be tried again, then accept whatever the agent proposes
+  instead (a callback, or that a human will follow up).
+
+opening: "answers normally, cooperative throughout"
+
+faults:
+  payment_link_fail: always
+
+expected:
+  verified: true
+  payment_link_sent: false
+  accepted_outcomes: [callback_requested, will_pay, unresolved]
+
+covers: [G-08, Q-07]
+notes: >
+  Primary check is process: after the tool fails (one built-in retry
+  already exhausted), the agent gives a graceful line and offers a
+  callback or escalation, and never invents or reads out a link or
+  confirmation number that was never actually sent.
+runs: 5
+set: hold-out

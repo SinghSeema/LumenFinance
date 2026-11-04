@@ -1,0 +1,256 @@
+{
+  "scenario": {
+    "id": "S01",
+    "name": "will_pay_or_already_paid",
+    "borrower_id": "B001",
+    "today": "2026-11-03",
+    "persona": "Arjun Mehta, 38, software engineer, calm and direct, speaks English. Not stressed about the call; has the money ready or paid recently.\n",
+    "hidden_goal": "Verify correctly with date of birth or the last 4 digits of the registered mobile number. Then either say the EMI will be paid on or before the due date, or say it was already paid a day or two ago. Accept a payment link if one is offered; if told the payment is already recorded, just confirm and let the call close.\n",
+    "opening": "answers normally, a little surprised but cooperative once reminded it's about the EMI",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "will_pay",
+        "already_paid"
+      ],
+      "escalate_to_human": false
+    },
+    "covers": [
+      "F-04",
+      "F-05",
+      "R1"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 3,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v4",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, this is the virtual assistant from Lumen Finance. Am I speaking with Arjun?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, this is Arjun. Who is calling?"
+    },
+    {
+      "role": "agent",
+      "text": "मैं Lumen Finance से virtual assistant बोल रही हूँ। सुरक्षा के लिए मुझे आपकी पहचान verify करनी होगी। क्या आप अपनी date of birth या registered mobile number के आखिरी चार अंक बता सकते हैं?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "ठीक है, मेरी birth date है 15 March 1988."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद, verify हो गया है। आपके personal loan की EMI बारह हज़ार पाँच सौ रुपये है, जो परसों due है। क्या आप इस payment के बारे में कुछ कहना चाहेंगे?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, मैंने यह EMI दो दिन पहले ही pay कर दी थी।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है, मैंने यह note कर लिया है। अगर payment हो चुकी है तो system में update होने में थोड़ा समय लग सकता है। मैं इसे आगे बढ़ा देती हूँ। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "1988-03-15"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "twelve thousand five hundred rupees",
+          "due_date_spoken": "the day after tomorrow",
+          "loan_type": "personal loan"
+        }
+      },
+      "attempts": 1,
+      "ms": 3.12,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "already_paid",
+        "promise_to_pay_date": null,
+        "notes": "Borrower claims payment was made two days ago."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.14,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B001",
+    "verified": true,
+    "outcome": "already_paid",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower claims payment was made two days ago.",
+    "language_used": "en+hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793730347.8215945,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793730347.8215945,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793730347.8215945,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793730348.6516142,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793730348.6516142,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793730348.6516142,
+      "stage": "intent",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "12,500",
+    "12500",
+    "barah hazaar paanch sau rupaye",
+    "parson",
+    "personal loan",
+    "the day after tomorrow",
+    "twelve thousand five hundred rupees",
+    "परसों",
+    "बारह हज़ार पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 6916,
+      "output": 171,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1344,
+      "output": 49
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 4
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 3.6
+}

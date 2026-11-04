@@ -1,0 +1,226 @@
+{
+  "scenario": {
+    "id": "S12",
+    "name": "stop_calling",
+    "borrower_id": "B006",
+    "today": "2026-11-03",
+    "persona": "Amit Kumar, short and a little annoyed, speaks Hinglish.",
+    "hidden_goal": "Let yourself be verified quickly if asked, then say plainly \"stop calling me about this\" (or \"mujhe call mat karo\"). Say it only once, clearly.\n",
+    "opening": "answers tersely",
+    "faults": {},
+    "expected": {
+      "outcome": "stop_requested",
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-06"
+    ],
+    "notes": "The call must end right after the stop request, not continue the reminder.",
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "groq:openai/gpt-oss-20b",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 300,
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v3",
+      "script": "roman",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-20b",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "max_retries": 8,
+      "fallback": [
+        {
+          "provider": "groq",
+          "model": "openai/gpt-oss-120b"
+        }
+      ],
+      "groq_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v1",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    },
+    "livekit": {
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Namaste, main Lumen Finance ki virtual assistant bol rahi hoon. Kya meri baat Amit ji se ho rahi hai?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, Amit bhalla. Bolte kya hai ab?"
+    },
+    {
+      "role": "agent",
+      "text": "Namaste Amit ji, aapki identity confirm karne ke liye kya aap apni date of birth ya phir apne registered mobile number ke aakhri chaar digits bata sakte hain?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "DOB 3 August 1996 hai. Aur mobile ke last four digits 8834 hain."
+    },
+    {
+      "role": "agent",
+      "text": "Amit ji, aapka EMI do hazaar nau sau rupees ka hai aur due date tenth of November hai. Kya aap abhi payment karna chahenge ya kisi aur din ke liye schedule karna pasand karenge?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Na, na. Mujhe call mat karo."
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, Amit ji. Dhanyavaad, alvida.",
+      "verified": true,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "1996-08-03"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "two thousand nine hundred rupees",
+          "due_date_spoken": "the tenth of November",
+          "loan_type": "two-wheeler loan"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.63,
+      "stage": "reminding"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "notes": "Borrower requested stop",
+        "outcome": "stop_requested",
+        "promise_to_pay_date": null
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.24,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B006",
+    "verified": true,
+    "outcome": "stop_requested",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower requested stop",
+    "language_used": "hinglish",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793709287.0381124,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793709287.0381124,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793709287.0381124,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "flags": [
+    "stop_requested"
+  ],
+  "protected_phrases": [
+    "2,900",
+    "2900",
+    "das November",
+    "do hazaar nau sau rupaye",
+    "the tenth of November",
+    "two thousand nine hundred rupees",
+    "two-wheeler loan",
+    "दस नवंबर",
+    "दो हज़ार नौ सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 6901,
+      "output": 454,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1166,
+      "output": 53
+    }
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 39.7
+}

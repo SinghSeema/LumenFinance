@@ -1,0 +1,2 @@
+{"borrower_id":"B001","verified":true,"outcome":"dispute","promise_to_pay_date":null,"payment_link_sent":false,"escalate_to_human":true,"notes":"Borrower claims EMI already paid, requested status check","language_used":"en","callback_time":null}
+{"borrower_id":"B005","verified":true,"outcome":"promise_to_pay","promise_to_pay_date":"2026-11-13","payment_link_sent":false,"escalate_to_human":false,"notes":"Promise to pay next Friday","language_used":"en+hinglish","callback_time":null}

@@ -1,0 +1,334 @@
+{
+  "scenario": {
+    "id": "S03",
+    "name": "financial_hardship",
+    "borrower_id": "B007",
+    "today": "2026-11-03",
+    "persona": "Deepa Nair, 42, recently lost her job, anxious and apologetic, speaks English. The loan is 14 days overdue and she knows it.\n",
+    "hidden_goal": "Verify correctly, then explain she lost her job and cannot pay right now. Ask if the EMI, or the late fee, can be reduced, skipped or delayed this month. Get a little emotional but stay civil. Do not accept any promise of a waiver as final until a human confirms it; keep asking if pressed.\n",
+    "opening": "answers cautiously, sounds stressed once the topic comes up",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "hardship",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-03",
+      "G-04",
+      "G-05",
+      "R3"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "groq:openai/gpt-oss-20b",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 300,
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v3",
+      "script": "roman",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-20b",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "max_retries": 8,
+      "fallback": [
+        {
+          "provider": "groq",
+          "model": "openai/gpt-oss-120b"
+        }
+      ],
+      "groq_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v1",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    },
+    "livekit": {
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, this is the virtual assistant from Lumen Finance. Am I speaking with Deepa?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, this is Deepa speaking. Is there some trouble with my account?"
+    },
+    {
+      "role": "agent",
+      "text": "Sure, could you please tell me your date of birth?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Okay, my date of birth is the 18th of December, 1983."
+    },
+    {
+      "role": "agent",
+      "text": "Your current EMI is nine thousand five hundred rupees, due the twentieth of October, and it is fourteen days overdue. Would you like to pay now?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "I... I completely forgot about the due date, I am so sorry. I actually lost my job a few days ago, so I really cannot pay the full amount right now. Is there any chance you can reduce or delay the late fee for this month?"
+    },
+    {
+      "role": "agent",
+      "text": "I’m sorry to hear about your situation. I’ll connect you with a colleague who can help. Thank you for calling, and have a good day.",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Wait, please hold on! I was hoping to discuss the waiver directly. Please don't hang up yet."
+    },
+    {
+      "role": "agent",
+      "text": "I'm not able to make changes to your account myself, but I can connect you with a colleague who can help. I’ll connect you with a colleague who can help you further.",
+      "verified": true,
+      "guard": [
+        "promise"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Okay, please connect me. But is it possible to get any assurance that the late fee will be reduced before I talk to them?"
+    },
+    {
+      "role": "agent",
+      "text": "I’m sorry, I can’t confirm any changes to the fee. I’ll connect you with a colleague who can discuss this further.",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "That is fine, I understand. Please go ahead and transfer me."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you, Deepa. I’m transferring you now. Have a good day.",
+      "verified": true,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "?"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 3,
+        "error": "unreadable_value"
+      },
+      "attempts": 1,
+      "ms": 0.46,
+      "stage": "verifying"
+    },
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "?"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 3,
+        "error": "unreadable_value"
+      },
+      "attempts": 1,
+      "ms": 0.1,
+      "stage": "verifying"
+    },
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "?"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 3,
+        "error": "unreadable_value"
+      },
+      "attempts": 1,
+      "ms": 0.04,
+      "stage": "verifying"
+    },
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "1983-12-18"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "nine thousand five hundred rupees",
+          "due_date_spoken": "the twentieth of October",
+          "loan_type": "personal loan",
+          "overdue_spoken": "fourteen days"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.18,
+      "stage": "reminding"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "hardship"
+      },
+      "result": {
+        "escalated": true
+      },
+      "attempts": 1,
+      "ms": 0.02,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "notes": "Transferred to colleague for hardship discussion",
+        "outcome": "hardship",
+        "promise_to_pay_date": null
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.22,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B007",
+    "verified": true,
+    "outcome": "hardship",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Transferred to colleague for hardship discussion",
+    "language_used": "en",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793704472.9206603,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793704472.9206603,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793704472.9206603,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793704472.9206603,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [
+    {
+      "category": "promise",
+      "original": "I’m sorry, but I can’t discuss waivers or changes to the loan.",
+      "spoken": "I'm not able to make changes to your account myself, but I can connect you with a colleague who can help.",
+      "stage": "action",
+      "verified": true
+    }
+  ],
+  "flags": [
+    "escalate:hardship"
+  ],
+  "protected_phrases": [
+    "bees October",
+    "chaudah din",
+    "fourteen days",
+    "nau hazaar paanch sau rupaye",
+    "nine thousand five hundred rupees",
+    "personal loan",
+    "the twentieth of October",
+    "चौदह दिन",
+    "नौ हज़ार पाँच सौ रुपये",
+    "बीस अक्टूबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 18582,
+      "output": 1595,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 3131,
+      "output": 158
+    }
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 153.6
+}

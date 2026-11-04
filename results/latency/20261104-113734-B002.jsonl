@@ -1,0 +1,1 @@
+{"vad_stop": 372134.566484588, "stt_final": 372134.756912655, "first_sentence": 372135.30974746, "playback_start": 372135.579479038, "stop_secs": 0.5, "interrupted": false, "after_barge_in": true, "ms": {"vad_stop->stt_final": 190, "stt_final->first_sentence": 553, "first_sentence->playback_start": 270, "gap": 1013}}

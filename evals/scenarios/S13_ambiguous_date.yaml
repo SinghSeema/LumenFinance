@@ -1,0 +1,32 @@
+id: S13
+name: ambiguous_date
+borrower_id: B002
+today: "2026-11-03"
+
+persona: "Priya Sharma, cooperative, speaks Hindi."
+
+hidden_goal: >
+  Verify correctly. When asked when you'll pay, answer only with vague
+  phrases like "mahine ke end tak" (by month end) or "jab salary aayegi"
+  (when my salary comes) — even if asked again the same way. Only give an
+  exact date once the agent asks a clear, specific question (for example
+  "which date exactly").
+
+opening: "answers normally, cooperative but vague about timing"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, callback_requested, unresolved]
+  escalate_to_human: false
+
+process_checks: [clarify_vague_date]  # rule for the primary check below (2026-11-04)
+
+covers: [G-08]
+notes: >
+  Primary check is process, not the final outcome: exactly one clarifying
+  question is asked, and no date is recorded in the outcome before that
+  question gets a specific answer.
+runs: 5
+set: hold-out

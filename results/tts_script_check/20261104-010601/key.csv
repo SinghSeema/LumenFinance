@@ -1,0 +1,69 @@
+clip,line,form,engine,model,voice,request_ms,error,text
+c001,L1_verify,deva,cartesia,sonic-3.6,arushi,1289,,बस आगे बढ़ने से पहले मुझे आपकी पहचान वेरिफाई करनी होगी। क्या आप अपनी डेट ऑफ बर्थ या रजिस्टर्ड मोबाइल नंबर के लास्ट फोर डिजिट्स बता सकते हैं?
+c002,L1_verify,roman,cartesia,sonic-3.6,arushi,1248,,Bas aage badhne se pehle mujhe aapki pehchaan verify karni hogi. Kya aap apni date of birth ya registered mobile number ke last four digits bata sakte hain?
+c003,L1_verify,mixed,cartesia,sonic-3.6,arushi,1273,,बस आगे बढ़ने से पहले मुझे आपकी पहचान verify करनी होगी। क्या आप अपनी date of birth या registered mobile number के last four digits बता सकते हैं?
+c004,L1_verify,roman,cartesia,sonic-3.6,kriti,1348,,Bas aage badhne se pehle mujhe aapki pehchaan verify karni hogi. Kya aap apni date of birth ya registered mobile number ke last four digits bata sakte hain?
+c005,L1_verify,roman,sarvam,bulbul:v4-flash,simran,2314,,Bas aage badhne se pehle mujhe aapki pehchaan verify karni hogi. Kya aap apni date of birth ya registered mobile number ke last four digits bata sakte hain?
+c006,L1_verify,deva,sarvam,bulbul:v4-flash,simran,1898,,बस आगे बढ़ने से पहले मुझे आपकी पहचान वेरिफाई करनी होगी। क्या आप अपनी डेट ऑफ बर्थ या रजिस्टर्ड मोबाइल नंबर के लास्ट फोर डिजिट्स बता सकते हैं?
+c007,L1_verify,roman,sarvam,bulbul:v4-flash,ishita,2076,,Bas aage badhne se pehle mujhe aapki pehchaan verify karni hogi. Kya aap apni date of birth ya registered mobile number ke last four digits bata sakte hain?
+c008,L1_verify,mixed,sarvam,bulbul:v4-flash,ishita,2132,,बस आगे बढ़ने से पहले मुझे आपकी पहचान verify करनी होगी। क्या आप अपनी date of birth या registered mobile number के last four digits बता सकते हैं?
+c009,L1_verify,mixed,sarvam,bulbul:v4-flash,simran,1690,,बस आगे बढ़ने से पहले मुझे आपकी पहचान verify करनी होगी। क्या आप अपनी date of birth या registered mobile number के last four digits बता सकते हैं?
+c010,L1_verify,deva,cartesia,sonic-3.6,kriti,1303,,बस आगे बढ़ने से पहले मुझे आपकी पहचान वेरिफाई करनी होगी। क्या आप अपनी डेट ऑफ बर्थ या रजिस्टर्ड मोबाइल नंबर के लास्ट फोर डिजिट्स बता सकते हैं?
+c011,L1_verify,mixed,cartesia,sonic-3.6,kriti,1158,,बस आगे बढ़ने से पहले मुझे आपकी पहचान verify करनी होगी। क्या आप अपनी date of birth या registered mobile number के last four digits बता सकते हैं?
+c012,L1_verify,deva,sarvam,bulbul:v4-flash,ishita,2719,,बस आगे बढ़ने से पहले मुझे आपकी पहचान वेरिफाई करनी होगी। क्या आप अपनी डेट ऑफ बर्थ या रजिस्टर्ड मोबाइल नंबर के लास्ट फोर डिजिट्स बता सकते हैं?
+c013,L2_emi,unsupported,sarvam,bulbul:v4-flash,simran,1156,,आपकी personal loan ki बारह हज़ार पाँच सौ rupaye की EMI paanch नवंबर ko due है।
+c014,L2_emi,roman,sarvam,bulbul:v4-flash,ishita,1278,,Aapki personal loan ki barah hazaar paanch sau rupaye ki EMI paanch November ko due hai.
+c015,L2_emi,english,cartesia,sonic-3.6,arushi,838,,Your personal loan EMI of twelve thousand five hundred rupees is due on the fifth of November.
+c016,L2_emi,roman,cartesia,sonic-3.6,kriti,748,,Aapki personal loan ki barah hazaar paanch sau rupaye ki EMI paanch November ko due hai.
+c017,L2_emi,deva,sarvam,bulbul:v4-flash,simran,1620,,आपकी पर्सनल लोन की बारह हज़ार पाँच सौ रुपये की ई एम आई पाँच नवंबर को ड्यू है।
+c018,L2_emi,deva,sarvam,bulbul:v4-flash,ishita,1822,,आपकी पर्सनल लोन की बारह हज़ार पाँच सौ रुपये की ई एम आई पाँच नवंबर को ड्यू है।
+c019,L2_emi,deva,cartesia,sonic-3.6,arushi,772,,आपकी पर्सनल लोन की बारह हज़ार पाँच सौ रुपये की ई एम आई पाँच नवंबर को ड्यू है।
+c020,L2_emi,roman,cartesia,sonic-3.6,arushi,952,,Aapki personal loan ki barah hazaar paanch sau rupaye ki EMI paanch November ko due hai.
+c021,L2_emi,mixed,sarvam,bulbul:v4-flash,simran,1184,,आपकी personal loan की बारह हज़ार पाँच सौ रुपये की EMI पाँच नवंबर को due है।
+c022,L2_emi,unsupported,cartesia,sonic-3.6,kriti,741,,आपकी personal loan ki बारह हज़ार पाँच सौ rupaye की EMI paanch नवंबर ko due है।
+c023,L2_emi,roman,sarvam,bulbul:v4-flash,simran,2583,,Aapki personal loan ki barah hazaar paanch sau rupaye ki EMI paanch November ko due hai.
+c024,L2_emi,unsupported,cartesia,sonic-3.6,arushi,861,,आपकी personal loan ki बारह हज़ार पाँच सौ rupaye की EMI paanch नवंबर ko due है।
+c025,L2_emi,mixed,cartesia,sonic-3.6,arushi,707,,आपकी personal loan की बारह हज़ार पाँच सौ रुपये की EMI पाँच नवंबर को due है।
+c026,L2_emi,english,sarvam,bulbul:v4-flash,ishita,1515,,Your personal loan EMI of twelve thousand five hundred rupees is due on the fifth of November.
+c027,L2_emi,english,cartesia,sonic-3.6,kriti,740,,Your personal loan EMI of twelve thousand five hundred rupees is due on the fifth of November.
+c028,L2_emi,unsupported,sarvam,bulbul:v4-flash,ishita,1502,,आपकी personal loan ki बारह हज़ार पाँच सौ rupaye की EMI paanch नवंबर ko due है।
+c029,L2_emi,mixed,cartesia,sonic-3.6,kriti,641,,आपकी personal loan की बारह हज़ार पाँच सौ रुपये की EMI पाँच नवंबर को due है।
+c030,L2_emi,mixed,sarvam,bulbul:v4-flash,ishita,1235,,आपकी personal loan की बारह हज़ार पाँच सौ रुपये की EMI पाँच नवंबर को due है।
+c031,L2_emi,deva,cartesia,sonic-3.6,kriti,779,,आपकी पर्सनल लोन की बारह हज़ार पाँच सौ रुपये की ई एम आई पाँच नवंबर को ड्यू है।
+c032,L2_emi,english,sarvam,bulbul:v4-flash,simran,1373,,Your personal loan EMI of twelve thousand five hundred rupees is due on the fifth of November.
+c033,L3_link,deva,sarvam,bulbul:v4-flash,ishita,1293,,"मैं आपको एसएमएस पर पेमेंट लिंक भेज देती हूँ, जिससे आप यूपीआई से पे कर सकें।"
+c034,L3_link,deva,sarvam,bulbul:v4-flash,simran,1040,,"मैं आपको एसएमएस पर पेमेंट लिंक भेज देती हूँ, जिससे आप यूपीआई से पे कर सकें।"
+c035,L3_link,deva,cartesia,sonic-3.6,kriti,867,,"मैं आपको एसएमएस पर पेमेंट लिंक भेज देती हूँ, जिससे आप यूपीआई से पे कर सकें।"
+c036,L3_link,roman,sarvam,bulbul:v4-flash,ishita,2085,,"Main aapko SMS par payment link bhej deti hoon, jisse aap UPI se pay kar sakein."
+c037,L3_link,mixed,sarvam,bulbul:v4-flash,ishita,1653,,"मैं आपको SMS पर payment link भेज देती हूँ, जिससे आप UPI से pay कर सकें।"
+c038,L3_link,roman,cartesia,sonic-3.6,kriti,564,,"Main aapko SMS par payment link bhej deti hoon, jisse aap UPI se pay kar sakein."
+c039,L3_link,deva,cartesia,sonic-3.6,arushi,579,,"मैं आपको एसएमएस पर पेमेंट लिंक भेज देती हूँ, जिससे आप यूपीआई से पे कर सकें।"
+c040,L3_link,mixed,cartesia,sonic-3.6,kriti,611,,"मैं आपको SMS पर payment link भेज देती हूँ, जिससे आप UPI से pay कर सकें।"
+c041,L3_link,roman,sarvam,bulbul:v4-flash,simran,4007,,"Main aapko SMS par payment link bhej deti hoon, jisse aap UPI se pay kar sakein."
+c042,L3_link,roman,cartesia,sonic-3.6,arushi,572,,"Main aapko SMS par payment link bhej deti hoon, jisse aap UPI se pay kar sakein."
+c043,L3_link,mixed,cartesia,sonic-3.6,arushi,669,,"मैं आपको SMS पर payment link भेज देती हूँ, जिससे आप UPI से pay कर सकें।"
+c044,L3_link,mixed,sarvam,bulbul:v4-flash,simran,1406,,"मैं आपको SMS पर payment link भेज देती हूँ, जिससे आप UPI से pay कर सकें।"
+c045,L4_readback,roman,cartesia,sonic-3.6,arushi,529,,"Maine saat saat chaar teen suna, kya ye last four digits sahi hain?"
+c046,L4_readback,deva,cartesia,sonic-3.6,arushi,545,,"मैंने सात सात चार तीन सुना, क्या ये लास्ट फोर डिजिट्स सही हैं?"
+c047,L4_readback,deva,cartesia,sonic-3.6,kriti,616,,"मैंने सात सात चार तीन सुना, क्या ये लास्ट फोर डिजिट्स सही हैं?"
+c048,L4_readback,deva,sarvam,bulbul:v4-flash,ishita,4784,,"मैंने सात सात चार तीन सुना, क्या ये लास्ट फोर डिजिट्स सही हैं?"
+c049,L4_readback,deva,sarvam,bulbul:v4-flash,simran,1571,,"मैंने सात सात चार तीन सुना, क्या ये लास्ट फोर डिजिट्स सही हैं?"
+c050,L4_readback,mixed,sarvam,bulbul:v4-flash,simran,1318,,"मैंने सात सात चार तीन सुना, क्या ये last four digits सही हैं?"
+c051,L4_readback,roman,sarvam,bulbul:v4-flash,ishita,1323,,"Maine saat saat chaar teen suna, kya ye last four digits sahi hain?"
+c052,L4_readback,mixed,cartesia,sonic-3.6,arushi,597,,"मैंने सात सात चार तीन सुना, क्या ये last four digits सही हैं?"
+c053,L4_readback,mixed,sarvam,bulbul:v4-flash,ishita,1260,,"मैंने सात सात चार तीन सुना, क्या ये last four digits सही हैं?"
+c054,L4_readback,mixed,cartesia,sonic-3.6,kriti,510,,"मैंने सात सात चार तीन सुना, क्या ये last four digits सही हैं?"
+c055,L4_readback,roman,cartesia,sonic-3.6,kriti,579,,"Maine saat saat chaar teen suna, kya ye last four digits sahi hain?"
+c056,L4_readback,roman,sarvam,bulbul:v4-flash,simran,1094,,"Maine saat saat chaar teen suna, kya ye last four digits sahi hain?"
+c057,L5_hardship,mixed,sarvam,bulbul:v4-flash,simran,1142,,मैं समझ सकती हूँ कि अभी हालात मुश्किल हैं। मेरे एक colleague आपको जल्दी call करेंगे।
+c058,L5_hardship,deva,sarvam,bulbul:v4-flash,ishita,1233,,मैं समझ सकती हूँ कि अभी हालात मुश्किल हैं। मेरे एक कलीग आपको जल्दी कॉल करेंगे।
+c059,L5_hardship,mixed,sarvam,bulbul:v4-flash,ishita,4219,,मैं समझ सकती हूँ कि अभी हालात मुश्किल हैं। मेरे एक colleague आपको जल्दी call करेंगे।
+c060,L5_hardship,deva,sarvam,bulbul:v4-flash,simran,1658,,मैं समझ सकती हूँ कि अभी हालात मुश्किल हैं। मेरे एक कलीग आपको जल्दी कॉल करेंगे।
+c061,L5_hardship,roman,cartesia,sonic-3.6,kriti,669,,Main samajh sakti hoon ki abhi haalaat mushkil hain. Mere ek colleague aapko jaldi call karenge.
+c062,L5_hardship,mixed,cartesia,sonic-3.6,kriti,535,,मैं समझ सकती हूँ कि अभी हालात मुश्किल हैं। मेरे एक colleague आपको जल्दी call करेंगे।
+c063,L5_hardship,roman,cartesia,sonic-3.6,arushi,617,,Main samajh sakti hoon ki abhi haalaat mushkil hain. Mere ek colleague aapko jaldi call karenge.
+c064,L5_hardship,deva,cartesia,sonic-3.6,kriti,640,,मैं समझ सकती हूँ कि अभी हालात मुश्किल हैं। मेरे एक कलीग आपको जल्दी कॉल करेंगे।
+c065,L5_hardship,roman,sarvam,bulbul:v4-flash,simran,1438,,Main samajh sakti hoon ki abhi haalaat mushkil hain. Mere ek colleague aapko jaldi call karenge.
+c066,L5_hardship,deva,cartesia,sonic-3.6,arushi,641,,मैं समझ सकती हूँ कि अभी हालात मुश्किल हैं। मेरे एक कलीग आपको जल्दी कॉल करेंगे।
+c067,L5_hardship,mixed,cartesia,sonic-3.6,arushi,588,,मैं समझ सकती हूँ कि अभी हालात मुश्किल हैं। मेरे एक colleague आपको जल्दी call करेंगे।
+c068,L5_hardship,roman,sarvam,bulbul:v4-flash,ishita,1681,,Main samajh sakti hoon ki abhi haalaat mushkil hain. Mere ek colleague aapko jaldi call karenge.

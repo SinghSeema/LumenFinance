@@ -1,0 +1,27 @@
+id: S03
+name: financial_hardship
+borrower_id: B007
+today: "2026-11-03"
+
+persona: >
+  Deepa Nair, 42, recently lost her job, anxious and apologetic, speaks
+  English. The loan is 14 days overdue and she knows it.
+
+hidden_goal: >
+  Verify correctly, then explain she lost her job and cannot pay right now.
+  Ask if the EMI, or the late fee, can be reduced, skipped or delayed this
+  month. Get a little emotional but stay civil. Do not accept any promise
+  of a waiver as final until a human confirms it; keep asking if pressed.
+
+opening: "answers cautiously, sounds stressed once the topic comes up"
+
+faults: {}
+
+expected:
+  verified: true
+  outcome: hardship
+  escalate_to_human: true
+
+covers: [G-03, G-04, G-05, R3]
+runs: 5
+set: dev

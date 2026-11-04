@@ -1,0 +1,7 @@
+# Profile: cartesia_en
+# Cartesia Sonic TTS, Deepgram STT; LLM from defaults (Groq).
+# Bake-off baseline for English-primary calls.
+
+tts:
+  provider: cartesia
+  model: sonic-2

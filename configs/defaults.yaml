@@ -1,0 +1,74 @@
+# Lumen Finance EMI Agent — default configuration
+# All values here are overridable by a profile, then env vars, then --set flags.
+# Unknown keys are errors. Guardrail settings are not present here and cannot
+# be changed via call profiles.
+
+stt:
+  provider: deepgram          # deepgram only (Sarvam STT dropped: batch-only, deprecated SDK)
+  model: nova-3
+  language: multi             # Deepgram code-switching model (language_hints below are not sent)
+  language_hints: [hi, en]
+  endpointing: 100            # ms of silence before Deepgram finalizes; 100 beat 300 by ~200 ms (results/t_stt_latency_20261103.txt)
+  keyterms: none              # none | dates | full (emi_agent/keyterms.py). Off until bakeoff/stt_keyterms.py shows a gain
+  host: api.eu.deepgram.com   # Frankfurt: ~170 ms RTT from here vs ~320 ms to the US default (results/t_stt_region_20261103.txt)
+
+tts:
+  provider: sarvam            # sarvam | cartesia
+  model: bulbul:v4-flash      # Sarvam accepts bulbul:v3 and bulbul:v4-flash only (2026-11-03)
+  voice: simran_enhi_customer # PLACEHOLDER until the listening test (results/tts_audition/); female, D-20
+  language: hi-IN             # Sarvam target_language_code
+  script: devanagari          # roman | devanagari. Devanagari since 2026-11-03: Deepgram transcribes Hindi in it and sarvam-105b replies in it
+  sample_rate: 16000
+
+llm:
+  provider: sarvam            # sarvam | groq | gemini | anthropic. Sarvam 2026-11-03: fastest measured (results/t5_sarvam_20261103.txt), billed in rupees
+  model: sarvam-105b-conversations
+  effort: low                 # Anthropic only; Haiku 5.5 rejects temperature, so none is sent
+  max_tokens: 1024            # replies are short; headroom keeps tool inputs from truncating
+  temperature: 0.3            # Groq only
+  reasoning_effort: low       # Groq gpt-oss only: low | medium | high; null = Groq default (medium). Owner set low 2026-11-03 (T5 n=1: first text 632 vs 1512 ms)
+  max_retries: 2              # SDK retries on 429/5xx; evals raise it to ride out the free-tier per-minute cap
+  timeout_secs: null          # per-request network timeout; null = SDK default (60 s). Voice sets 4
+  fallback:                   # tried in order if the primary errors; each Groq model has its own quota
+    - provider: groq
+      model: openai/gpt-oss-20b
+    - provider: groq
+      model: openai/gpt-oss-120b
+
+turn:
+  detector: vad               # vad (setup A) | smart_turn (setup B: VAD stop triggers a Smart Turn v3 check)
+  smart_turn_stop_secs: 2.0   # smart_turn only: longest silence before the turn ends anyway
+  vad_stop_secs: 0.5          # seconds of silence to end a turn (setup B uses 0.2: it only triggers the check)
+  vad_start_secs: 0.1
+  stt_wait_secs: 1.0          # at VAD stop, longest wait for words Deepgram still has in progress; none pending = reply at once
+  unfinished_wait_secs: 0.4   # extra wait at VAD stop when the words so far look unfinished (bot.looks_unfinished)
+  min_words_interrupt: 2      # words needed to count as a real barge-in (a stop request always counts)
+  silence_after_barge_in_secs: 4  # a barge-in with no borrower turn after it: prompt this soon (live call 2026-11-04)
+  silence_prompts_secs: 8     # agent finished and nobody spoke: "can you hear me?" (or the greeting again if it was cut)
+  silence_close_secs: 10      # still silent this long after that prompt: polite close, outcome unresolved
+
+livekit:                      # url, api_key, api_secret come from the environment
+  room_name: emi-call
+  agent_identity: lumen-agent
+
+behavior:
+  hindi_numbers: english      # english | hindi: number words in Hindi/Hinglish calls; switches to hindi if the borrower says Hindi numbers (owner 2026-11-04)
+  max_call_secs: 300
+  filler_delay_ms: 300        # start filler if tool takes longer than this
+  tool_timeout_s: 8
+  verify_max_attempts: 3
+  lender_name: "Lumen Finance"
+  prompt_version: v10         # src/emi_agent/prompts/system_<version>.md
+  calls_log: results/calls.jsonl
+
+evals:
+  judge_model: openai/gpt-oss-120b  # NOT USED YET: no judge is wired (2026-11-04); Groq; must differ from the agent (E-08)
+  simulator_provider: sarvam  # groq | sarvam. Sarvam since 2026-11-04: Groq's free daily cap cut the v5 dev run short
+  simulator_model: glm5.3-flash  # different model family from the agent (was qwen/qwen3.8-27b on Groq)
+  simulator_temperature: 0.8
+  max_turns: 16               # borrower turns before the runner ends a call
+  secs_per_turn: 10           # simulated call clock, so rate-limit waits never trip max_call_secs
+
+faults:                       # used by eval fault injection only
+  payment_link_fail: none     # none | once | always
+  added_latency_ms: 0

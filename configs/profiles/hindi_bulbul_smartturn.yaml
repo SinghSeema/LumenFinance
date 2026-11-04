@@ -1,0 +1,19 @@
+# Profile: hindi_bulbul_smartturn (setup B for the turn-detection comparison, D-31)
+# Same as hindi_bulbul, but a VAD stop after 0.2 s of silence only triggers a Smart Turn v3
+# check; the turn ends when Smart Turn says finished, or after 2 s of silence.
+
+tts:
+  provider: sarvam
+  model: bulbul:v4-flash
+  script: devanagari
+
+stt:
+  provider: deepgram
+  model: nova-3
+  language: multi
+  language_hints: [hi, en]
+
+turn:
+  detector: smart_turn
+  vad_stop_secs: 0.2
+  smart_turn_stop_secs: 2.0

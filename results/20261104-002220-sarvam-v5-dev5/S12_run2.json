@@ -1,0 +1,148 @@
+{
+  "scenario": {
+    "id": "S12",
+    "name": "stop_calling",
+    "borrower_id": "B006",
+    "today": "2026-11-03",
+    "persona": "Amit Kumar, short and a little annoyed, speaks Hinglish.",
+    "hidden_goal": "Let yourself be verified quickly if asked, then say plainly \"stop calling me about this\" (or \"mujhe call mat karo\"). Say it only once, clearly.\n",
+    "opening": "answers tersely",
+    "faults": {},
+    "expected": {
+      "outcome": "stop_requested",
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-06"
+    ],
+    "notes": "The call must end right after the stop request, not continue the reminder.",
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v5",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Amit जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    }
+  ],
+  "tool_calls": [],
+  "outcome": {
+    "borrower_id": "B006",
+    "verified": false,
+    "outcome": "unresolved",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "recorded by code: model did not record an outcome",
+    "language_used": "hinglish",
+    "callback_time": null
+  },
+  "disclosure_log": [],
+  "guard_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "2,900",
+    "2900",
+    "das November",
+    "do hazaar nau sau rupaye",
+    "the tenth of November",
+    "two thousand nine hundred rupees",
+    "two-wheeler loan",
+    "दस नवंबर",
+    "दो हज़ार नौ सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 0,
+      "output": 0,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 0,
+      "output": 0
+    }
+  },
+  "llm_turns_by_provider": {},
+  "end_reason": "max_turns",
+  "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199937, Requested 362. Please try again in 2m9.168s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+  "wall_secs": 0.1
+}

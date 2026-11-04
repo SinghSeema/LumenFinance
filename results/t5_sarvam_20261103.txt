@@ -1,0 +1,20 @@
+run 1 greeting sarvam:sarvam-105b-conversations         first text   736 ms  total  1079 ms  out   44  tools []  | 'Theek hai Rahul ji. Aage baat karne se pehle mujhe aapki ide'
+run 1 greeting sarvam:sarvam-105b:low                   first text  3492 ms  total  3857 ms  out  303  tools []  | '\nThanks for confirming, Rahul ji. Main aapse thoda identity '
+run 1 greeting sarvam:deepseekv4.1-flash-1017           first text  1944 ms  total  2286 ms  out   91  tools []  | 'Dhanyavaad, Rahul ji. Aage badhne se pehle, kripya apni pehc'
+run 1 greeting sarvam:glm5.3-flash                      first text   532 ms  total   875 ms  out   63  tools []  | 'Dhanyavaad Rahul ji. Aapki privacy ke liye, pehle main aapki'
+run 1 last4    sarvam:sarvam-105b-conversations         first text   620 ms  total   620 ms  out   27  tools ['verify_identity']  | ''
+run 1 last4    sarvam:sarvam-105b:low                   first text  1922 ms  total  1922 ms  out  137  tools ['verify_identity']  | ''
+run 1 last4    sarvam:deepseekv4.1-flash-1017           first text  1961 ms  total  1961 ms  out   78  tools ['verify_identity']  | ''
+run 1 last4    sarvam:glm5.3-flash                      first text   752 ms  total   752 ms  out   29  tools ['verify_identity']  | ''
+run 2 greeting sarvam:sarvam-105b-conversations         first text   225 ms  total   327 ms  out   40  tools []  | 'Theek hai Rahul ji. Details discuss karne se pehle mujhe aap'
+run 2 greeting sarvam:sarvam-105b:low                   first text  1079 ms  total  1534 ms  out  136  tools []  | '\nNamaste Rahul ji. Aapki pehchaan confirm karne ke liye, kya'
+run 2 greeting sarvam:deepseekv4.1-flash-1017           first text   712 ms  total  1281 ms  out   93  tools []  | 'Namaste Rahul ji. Baat shuru karne se pehle, main aapki pehc'
+run 2 greeting sarvam:glm5.3-flash                      first text   514 ms  total   882 ms  out   63  tools []  | 'Dhanyavaad Rahul ji. Aapki privacy ke liye, pehle main aapki'
+run 2 last4    sarvam:sarvam-105b-conversations         first text   335 ms  total   335 ms  out   27  tools ['verify_identity']  | ''
+run 2 last4    sarvam:sarvam-105b:low                   first text   771 ms  total   771 ms  out   71  tools ['verify_identity']  | ''
+run 2 last4    sarvam:deepseekv4.1-flash-1017           first text  1422 ms  total  1422 ms  out   78  tools ['verify_identity']  | ''
+run 2 last4    sarvam:glm5.3-flash                      first text   728 ms  total   728 ms  out   29  tools ['verify_identity']  | ''
+sarvam:sarvam-105b-conversations         median first text   477 ms   median total   477 ms   (n=4)
+sarvam:sarvam-105b:low                   median first text  1500 ms   median total  1728 ms   (n=4)
+sarvam:deepseekv4.1-flash-1017           median first text  1683 ms   median total  1692 ms   (n=4)
+sarvam:glm5.3-flash                      median first text   630 ms   median total   814 ms   (n=4)

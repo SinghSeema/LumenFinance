@@ -1,0 +1,79 @@
+# Issues Found and Fixed
+
+A running log of real defects found in the Lumen Finance EMI voice agent: what we saw, the evidence, the root cause, the fix, and how the fix was checked. Updated every working session. Measurements come from `results/` (eval runs) and `results/LOG.md`. Anything not yet re-measured says so.
+
+How issues are found: text evals (the real agent Brain against an LLM-played borrower, every scenario 5 runs, rule-based scoring from saved artifacts) and live voice calls by the owner (Pipecat + local LiveKit, Deepgram STT, Sarvam LLM and TTS). Principle throughout: code owns the rules, the LLM owns the language, so a fix goes into code when a rule can decide.
+
+## 2026-11-04
+
+### Evaluation honesty
+
+| # | Issue | Evidence | Root cause | Fix | Checked by | Status |
+|---|---|---|---|---|---|---|
+| E1 | The LLM judge named in config was never called | `evals.judge_model` set; `score.py` had no model call | Judge planned, never wired | Config labelled "not used yet". Owner decision: rule checks first, judge plus a 20-transcript calibration later | Code read | Judge still open |
+| E2 | Runs could pass on the outcome record alone, without the behaviour the scenario exists for (AI disclosure, one clarifying question, no invented link) | Scenario notes said "primary check is process"; scorer compared outcome fields only | Scorer gap | Rule-based process checks counted in pass: AI disclosure after the first "are you a bot?", no invented link after a tool failure, a question back on a vague date (S13). New M6 language column, reported separately | Unit tests; v4 run re-scored offline (pass unchanged, 48/55) | Done; S14a read-back still has no rule |
+| E3 | Full dev run stopped at 18 of 55 conversations | Groq free-tier daily token cap hit by the borrower simulator | Simulator on a capped free tier | Simulator moved to Sarvam `glm5.3-flash`, a different model family from the agent | v7 dev run completed 55/55 | Done. Runs after this are not like-for-like with earlier ones |
+| E4 | Simulator hang-ups were recorded as infra errors | A bare `[HANGUP]` matched the "garbage line" filter | Filter too broad | Hang-up checked first | Unit test | Done |
+
+### Conversation quality
+
+| # | Issue | Evidence | Root cause | Fix | Checked by | Status |
+|---|---|---|---|---|---|---|
+| C1 | English-speaking borrowers were answered in Hindi | English sentence then English reply: 11/11 on prompt v1, 10/13 on v3, 15/54 on v4, 2/38 on v5 | Prompts v4 and v5 added Devanagari-only examples; the model followed them over "reply in English" and translated the English facts the tools gave | Prompt v6: language section first, "English means every word English", an English example next to every Hindi one | v6 targeted run: 35/35 English, 15/15 Hindi (no over-correction) | Done |
+| C2 | After verification the agent added notices nobody wrote, including "this call may be recorded for quality and training purposes" | 5 of 6 S01/S03 runs on v6 | The v6 English example line gave the model a phrase to pad with | Prompt v7: that line only before verification; the facts turn says the facts and one question, nothing else | v7 run: invented notices 0/15; English 36/36 | Done; the pre-verification line still sometimes repeats after verification (wordy, not wrong) |
+| C3 | Hindi number words are hard for many borrowers to follow | Owner feedback | Numbers followed the reply language | Owner decision: Hindi sentence with English numbers by default ("आपकी twelve thousand five hundred rupees की EMI twenty-fifth November को due है"); today and tomorrow stay Hindi; switches to Hindi numbers if the borrower uses them | Unit tests; 30 TTS clips intelligible on both engines | Done; owner's listening scores pending |
+| C4 | The model translated the English amounts back into Hindi | 14 of 16 Hindi calls since C3 | The model ignores "use the exact tool phrases" for amounts | Code swaps this borrower's exact fact phrases back to the chosen style just before TTS, and counts each swap | Unit test | Done; not yet re-measured in an eval run |
+| C5 | "I already paid" on an overdue EMI was escalated as a dispute and the call ended at once | Owner live call, B002 | No guidance for this case | Prompt v8: thank them, never argue, say gently it still shows pending, "no worries", ask when and how they paid, a colleague will check and call back. Code: `already_paid` on an overdue loan always sets the escalation; before the due date it is only noted | New scenario S15 5/5; S01 3/3 and S04 3/3 unchanged | Done |
+| C6 | Hardship calls were recorded as `unresolved` | S03: the model escalated for hardship but never recorded the outcome, 5 of 6 runs | The model skips `record_outcome` after escalating | Code records the escalation reason (hardship or dispute) as the outcome when the model records none | Unit tests; v7 dev run S03 5/5 | Done |
+| C7 | Disputes were handed to "a colleague", which is not how an Indian lender's call sounds | Owner review | Same wording for every escalation | Prompt v10 and code: disputes and unmatched payments go to "the concerned team, who will look into it and arrange a callback"; no callback time, no ticket number; hardship and requests for a person unchanged | Unit tests | Done; not yet tried in evals or live |
+
+### Verification and dates (guardrails)
+
+| # | Issue | Evidence | Root cause | Fix | Checked by | Status |
+|---|---|---|---|---|---|---|
+| V1 | A correct date of birth never verified | Owner live call: "बाइस July उन्नीस सौ चौरानवे" said twice | Deepgram wrote "बाइस" (short vowel); the number table only had "बाईस" | Devanagari number words matched in common spellings (vowel length, ँ/ं, nukta, ब/व), only where still unambiguous | Replay of the call: verifies on the first answer | Done |
+| V2 | The model's own `verify_identity` call with spoken words was "unreadable" | Same call | The tool parsed only digit formats | The tool falls back to the spoken-date and spoken-digit reader | Unit tests | Done |
+| V3 | The agent said "यह जानकारी हमारे records से मेल नहीं खा रही" when nothing had been checked | Same call | The model ignored the note "only the day is missing" | The note now says nothing was checked, never say it does not match, and gives an example question | Unit test | Superseded by V9: the model did it again on a later call, so code now enforces it |
+| V4 | A borrower with correct details was locked out after three charged attempts | S15 run 2: code read 21 July (self-correction ignored), 4 July 1900 ("last **four** digits"; a danda hid "चौरानवे") and 3 July ("मैंने **तीन** बार बता दिया") | The transcript parser took the first small number as the day | Day = the number next to the month word; "last four digits" removed first; after a correction word only the rest counts; two different dates means ask, no guess, no charge; "July ninety-four" accepted; spoken last-four digits read | Tests from the exact utterances; S15 5/5; S10 (wrong details) still fails 5/5 | Done |
+| V5 | Language flipped to English on garbled number answers | Live call: "Buys, July 19 94" (STT for "बाइस July") | Two short "English-looking" turns switch the language | Numbers and month names are ignored when detecting language | Replay test | Done |
+| V6 | "हाँ मैं pay कर दूँगा twenty fifth को" was detected as English | Code check | Devanagari judged by letters; English loanwords hold most letters | Judged by words: a third of the words in Devanagari means Hindi | Unit test | Done |
+| V7 | "Friday 13 November" was recorded as 6 November | S02 run: the borrower contradicted themselves; code checks showed the general bug | A weekday overrode an explicit date; ordinal words were not parsed | The explicit date wins; a weekday that disagrees means ask; ordinals parsed next to a month name | Unit tests | Done |
+| V8 | "22nd July 19 94" read as a date with no day | Owner live call (B002): the correct DOB given twice did not verify in code | The tokenizer split "22nd" into "22" and "nd"; the stray "nd" sat between the day and the month | Digit ordinals (1st, 22nd, 3rd) read as numbers | Tests from the exact utterances | Done |
+| V9 | The agent said "यह जानकारी भी मेल नहीं खा रही। आपके पास एक आखिरी मौका है।" with no check run and two attempts left | Same call: no `verify_identity` call that turn; code had noted "day missing, never say it does not match" | Prompt-only rule (V3); the model ignored it | Code guard: a "does not match" or "attempts left" sentence before verification is replaced by "sorry, I didn't catch all of that, once more?" unless a check failed this turn; "last chance" only with one attempt left; the rest of that reply is dropped | Unit and brain tests | Done; not yet tried live |
+| V10 | The model guessed a missing day and used up an attempt | Same call: "Date of birth, buys, July 19 94" (STT for "बाईस July"); the model called `verify_identity` itself, most likely as 19 July | Code found the day missing but the model's own call was still checked | While code has a partial date this turn, the model's DOB call returns "incomplete, not checked" and uses no attempt | Brain test | Done; not yet tried live |
+| V11 | A 2001 birth year was read as 2002 | Building the STT test set: "चौदह जून दो हज़ार एक", "14 June two thousand one" | "thousand"/"हज़ार" was not a number word, so "June two" + "one" | Thousands parsed ("दो हज़ार एक" = 2001; "बारह हज़ार पाँच सौ" = 12500) | Unit tests | Done |
+| V12 | "उन्नीस सौ सतासी" was read as the year 1900 | STT bake-off: Deepgram wrote 87 as "सतासी", a spelling we do not know | "उन्नीस सौ" alone made 1900 | Birth years before 1920 count as missing: the agent asks, no attempt used | Unit test | Done |
+
+### Voice turn-taking
+
+| # | Issue | Evidence | Root cause | Fix | Checked by | Status |
+|---|---|---|---|---|---|---|
+| T1 | The greeting stopped about 2 s in | Owner live call: barge-in with no VAD speech | Barge-in trusted Deepgram interim text alone; a single number ("2", most likely "hello" misheard) was enough | Barge-in needs VAD to agree and 2 or more words; a lone number or month only right after a DOB or last-four question; a stop request always interrupts. Each barge-in now logs its text and source | Replay tests | Done; not yet tried live |
+| T2 | 31 s of silence after that | Same call | No recovery: the silence settings in config were never implemented | Silence prompt: 4 s after a barge-in with no turn, 8 s after the agent finishes, "can you hear me?" (or the greeting again if it was cut); 10 s more, a polite close. Unused config removed | Tests | Done; not yet tried live |
+| T3 | After the cut greeting the agent skipped "are you Priya?" and asked for the date of birth | Same call | The greeting goes straight to TTS, so the model thought it had been heard | A cut greeting is reported to the Brain, which tells the model to ask the identity question again | Unit test | Done |
+| T4 | Short words and Hindi number words misheard: "Hello" as "2.", "बाईस" as "buys" | Owner live calls 2026-11-04; STT bake-off on 75 TTS clips: nova-3 multi wrote 27/75 transcripts in Telugu, Kannada, Bengali or Arabic script | Deepgram multi language ID drifts on short Indian-accented answers | Keyterms (`stt.keyterms`): DOB 15/36 -> 26/36, last four 9/18 -> 15/18, no false numbers 21/21, latency within noise; wrong-script 27 -> 12 of 75. Verification now asks last four first (D-32). Default stays none until the owner's recordings are run | TTS clips, 1 run (results/stt_keyterms/20261104-130330.txt) | Open: owner recordings next |
+
+### Text-to-speech
+
+| # | Issue | Evidence | Root cause | Fix | Checked by | Status |
+|---|---|---|---|---|---|---|
+| S1 | Is "Hindi in Devanagari, English terms in Latin" the right TTS format, as a vendor-style claim said? | 68 blind clips, Sarvam Bulbul and Cartesia Sonic 3.6, transcribed back by our STT | — | Kept as the format for both engines. The Devanagari plus romanised-Hindi mix (unsupported per Cartesia's docs) misread on both engines, so a small closed word list fixes it before TTS | Clips and STT check | Done; owner's blind scores pending |
+| S2 | Cartesia voice "Kriti" read "सात सात चार तीन" as "seven thousand seven hundred forty three" | 3 clips | Voice-dependent number handling | Not adopted; any Cartesia voice must pass a number check first | Clips | Closed |
+| S3 | No final check on text sent to TTS | Code review | Not built | Pre-TTS step after the guard: drops URLs and emoji, turns stray digits into words in the sentence's script, fixes the unsupported script mix, flags a wrong-language sentence; every fix is counted | Unit tests | Done |
+
+## Results so far (text evals)
+
+| Run | Agent prompt | Simulator | Pass | Disclosure leaks | Notes |
+|---|---|---|---|---|---|
+| v4 dev x5 | v4 | Groq qwen3.8-27b | 48/55 | 0 | English replies to English speakers 15/54 |
+| v7 dev x5 | v7 | Sarvam glm5.3-flash | 52/55 | 0 | Escalation precision 0.94, recall 1.0; the simulator changed, so not like-for-like |
+
+Latency on the owner's live calls (n=7 turns each, not the 30-turn gate): response gap median 844 ms, p90 1189 ms.
+
+## Still open
+
+- LLM judge and its calibration (tone, guardrail wording).
+- Hold-out scenarios (S06, S11, S13, S14a, S14b), to run once fixes are frozen.
+- The three v7 dev failures (S12 x2, S08 x1) and one escalation false positive, not yet reviewed.
+- 30-turn live latency gate; voice choice; Deepgram short-word misrecognition (T4).
+- Turn-taking fixes T1 to T3 need live calls.

@@ -1,0 +1,76 @@
+Correct values parsed from the transcript (none = no number heard on a line without one)
+set    voice      dob  last4   none   final_done ms (median)
+none   simran    3/12    2/6    7/7   513
+none   ishita    3/12    3/6    7/7   504
+none   arushi    9/12    4/6    7/7   539
+none   ALL      15/36   9/18  21/21   519
+
+dates  simran    7/12    4/6    7/7   505
+dates  ishita    8/12    4/6    7/7   542
+dates  arushi   11/12    5/6    7/7   533
+dates  ALL      26/36  13/18  21/21   518
+
+full   simran    7/12    4/6    7/7   548
+full   ishita    8/12    5/6    7/7   518
+full   arushi   11/12    6/6    7/7   564
+full   ALL      26/36  15/18  21/21   539
+
+Misses (set voice id: expected -> parsed | transcript)
+  none  arushi  d01: 1994-07-22 -> None | '۲۲۰ জুলাই ۱۹۴۹.'
+  none  ishita  d01: 1994-07-22 -> None | 'Bais Julai, उन्नीस సు చరాన్వే'
+  none  simran  d01: 1994-07-22 -> None | 'బైజ్ জুలై उन्नीस सौ चौरानवे.'
+  none  ishita  d03: 1988-03-15 -> None | 'Gì, పందర మార్జ్ उन्नीस सौ అట్టాసి.'
+  none  ishita  d05: 1991-08-27 -> None | 'Septais Ogos उन्नीस सौ इक्यानवे.'
+  none  simran  d05: 1991-08-27 -> None | 'సతటాయిస్ ఆగస్ట్ उन्नीस सौ ఇఖ్యాన్వే'
+  none  arushi  d06: 1990-01-26 -> None | 'చబ్బీస్ జనవరి నైన్టీన్ నైంటీ.'
+  dates ishita  d06: 1990-01-26 -> None | 'छब्बीस జన్యువరీ నైంటీ నైంటీ'
+  full  ishita  d06: 1990-01-26 -> None | 'छब्बीस జన్యువరీ నైంటీ నైంటీ'
+  none  ishita  d06: 1990-01-26 -> None | 'చబ్బీస్ జన్యువరీ నైంటీ నైంటీ'
+  dates simran  d06: 1990-01-26 -> None | 'छब्बीस जनवरी, నైంటీన్ నైంటీ'
+  full  simran  d06: 1990-01-26 -> None | 'छब्बीस जनवरी, నైంటీన్ నైంటీ'
+  none  simran  d06: 1990-01-26 -> None | 'छब्बीस జానవరి నైంటీ నైంటీ'
+  dates ishita  d07: 1994-07-22 -> None | '22nd जुलाई, నైంటీ నైంటీ ఫోర్'
+  full  ishita  d07: 1994-07-22 -> None | '22nd जुलाई, నైంటీ నైంటీ ఫోర్'
+  none  ishita  d07: 1994-07-22 -> None | 'ట్వంటీ సెకండ్ జులై, నైంటీ నైంటీ ఫోర్'
+  dates simran  d07: 1994-07-22 -> None | 'ట్వంటీ సెకండ్ జులై, నైంటీ నైంటీ ఫోర్'
+  full  simran  d07: 1994-07-22 -> None | 'ట్వంటీ సెకండ్ జులై, నైంటీ నైంటీ ఫోర్'
+  none  simran  d07: 1994-07-22 -> None | 'ట్వంటీ సెకండ్ జులై, నైంటీ నైంటీ ఫోర్'
+  none  ishita  d08: 1986-02-28 -> None | 'అట్టాయిస్ ఫర్వరి उन्नीस सौ छियासी.'
+  dates simran  d08: 1986-02-28 -> None | 'అट्ठाईस ఫర్वरी उन्नीस सौ చయాसी'
+  full  simran  d08: 1986-02-28 -> None | 'అट्ठाईस ఫర్वरी उन्नीस सौ చయాसी'
+  none  simran  d08: 1986-02-28 -> None | 'అట్టాయిస్ ఫర్వరి उन्नीस सौ చయాసి'
+  dates arushi  d09: 1999-12-21 -> None | 'इक्कीस दिसम्बर उन्नीस सौ निन्यानवे.'
+  full  arushi  d09: 1999-12-21 -> None | 'इक्कीस दिसम्बर उन्नीस सौ निन्यानवे.'
+  dates ishita  d09: 1999-12-21 -> None | 'इक्कीस డిసెంబర్ उन्नीस सौ నిన్నన్వే'
+  full  ishita  d09: 1999-12-21 -> None | 'इक्कीस డిసెంబర్ उन्नीस सौ నిన్నన్వే'
+  none  ishita  d09: 1999-12-21 -> None | 'इक्कीस డిసెంబర్ उन्नीस सौ నిన్నన్వే'
+  dates simran  d09: 1999-12-21 -> None | 'इक्कीस డిసెంబర్ उन्नीस सौ నిర్ణయన్వే'
+  full  simran  d09: 1999-12-21 -> None | 'इक्कीस డిసెంబర్ उन्नीस सौ निन्यानवे'
+  none  simran  d09: 1999-12-21 -> None | 'ఇక్కీస్ డిసెంబర్ उन्नीस सौ నిర్ణయన్వే'
+  none  simran  d10: 2001-06-14 -> None | '14 ஜூన్ 2001'
+  none  ishita  d11: 1992-10-16 -> None | 'सोलह अक्टोबर, उन्नीस सौ బన్వే'
+  none  simran  d11: 1992-10-16 -> None | '16 అక్టోబర్ 1972'
+  none  arushi  d12: 1987-09-23 -> 1900-09-23 | 'तेईस सितंबर उन्नीस सौ सतासी.'
+  dates ishita  d12: 1987-09-23 -> None | 'तेईस సిటంబర్ उन्नीस सौ సत्तासी.'
+  full  ishita  d12: 1987-09-23 -> None | 'तेईस సిటంబర్ उन्नीस सौ సत्तासी'
+  none  ishita  d12: 1987-09-23 -> None | 'తెయ్యిస్ సిటంబర్ उन्నీసో సతాసి'
+  dates simran  d12: 1987-09-23 -> None | '30 సితంబర్ उन्नीस सौ సత్తాసి'
+  full  simran  d12: 1987-09-23 -> None | 'సితంబర్ उन्नीस सौ సత్తాసి'
+  none  simran  d12: 1987-09-23 -> None | '30 సితంబర్ ఉన్నిస్తో సత్తాసి'
+  dates arushi  l01: 7743 -> None | 'साथ साथ चार तीन.'
+  none  arushi  l01: 7743 -> None | 'Sāt sāt čārtīm.'
+  dates ishita  l01: 7743 -> None | 'साथ चार తీన్'
+  none  ishita  l01: 7743 -> None | 'ساعت ساعت చార్ తీన్'
+  dates simran  l01: 7743 -> None | 'साथ साथ చార్ తీన్'
+  full  simran  l01: 7743 -> None | 'साथ साथ चार तीन'
+  none  simran  l01: 7743 -> None | 'సాద్ సాద్ చార్ తీన్'
+  dates ishita  l03: 4821 -> None | 'चार, आठ, దు, एक.'
+  full  ishita  l03: 4821 -> None | 'चार, आठ, దు, एक.'
+  none  ishita  l03: 4821 -> None | 'चार, आठ, దూ, एक.'
+  none  simran  l04: 9052 -> None | 'ನೋ ಶೂನ್ಯ ಪಾಚ ಟು'
+  dates simran  l05: 6054 -> None | 'సిక్స్ జీరో ఫైవ్ ఫోర్'
+  full  simran  l05: 6054 -> None | 'సిక్స్ జీరో ఫైవ్ ఫోర్'
+  none  simran  l05: 6054 -> None | 'సిక్స్ జీరో ఫైవ్ ఫోర్'
+  none  arushi  l06: 8819 -> None | 'Alright alright.'
+  none  ishita  l06: 8819 -> None | 'ఆట్ ఆట్ एक నో'
+  none  simran  l06: 8819 -> None | 'ఆట్ ఆట్ ఏక్ నో'

@@ -1,0 +1,10 @@
+== host US default
+ms after the last voiced chunk; Finalize sent at +500 ms
+config      n   final done  speech_final  from_finalize  connect
+multi:100   6     646         621          1406          925
+multi:300   6     850         848          1429         1202
+== host api.eu.deepgram.com
+ms after the last voiced chunk; Finalize sent at +500 ms
+config      n   final done  speech_final  from_finalize  connect
+multi:100   6     560         560             -          652
+multi:300   6     716         712           963          598

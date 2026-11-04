@@ -1,0 +1,225 @@
+{"voice": "simran", "set": "none", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "బైజ్ জুలై उन्नीस सौ चौरानवे.", "final_done_ms": 505}
+{"voice": "simran", "set": "none", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाइस July उन्नीस सौ चौरानवे है.", "final_done_ms": 523}
+{"voice": "simran", "set": "none", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": true, "parsed": "1988-03-15", "text": "पंद्रह march उन्नीस सौ अट्ठासी.", "final_done_ms": 524}
+{"voice": "simran", "set": "none", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of birth है? नौ November उन्नीस सौ पचासी.", "final_done_ms": 501}
+{"voice": "simran", "set": "none", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": false, "parsed": "None", "text": "సతటాయిస్ ఆగస్ట్ उन्नीस सौ ఇఖ్యాన్వే", "final_done_ms": 513}
+{"voice": "simran", "set": "none", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": false, "parsed": "None", "text": "छब्बीस జానవరి నైంటీ నైంటీ", "final_done_ms": 459}
+{"voice": "simran", "set": "none", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "ట్వంటీ సెకండ్ జులై, నైంటీ నైంటీ ఫోర్", "final_done_ms": 549}
+{"voice": "simran", "set": "none", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": false, "parsed": "None", "text": "అట్టాయిస్ ఫర్వరి उन्नीस सौ చయాసి", "final_done_ms": 485}
+{"voice": "simran", "set": "none", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": false, "parsed": "None", "text": "ఇక్కీస్ డిసెంబర్ उन्नीस सौ నిర్ణయన్వే", "final_done_ms": 674}
+{"voice": "simran", "set": "none", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": false, "parsed": "None", "text": "14 ஜூన్ 2001", "final_done_ms": 1428}
+{"voice": "simran", "set": "none", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": false, "parsed": "None", "text": "16 అక్టోబర్ 1972", "final_done_ms": 714}
+{"voice": "simran", "set": "none", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": false, "parsed": "None", "text": "30 సితంబర్ ఉన్నిస్తో సత్తాసి", "final_done_ms": 638}
+{"voice": "simran", "set": "none", "id": "l01", "kind": "last4", "expected": "7743", "ok": false, "parsed": "None", "text": "సాద్ సాద్ చార్ తీన్", "final_done_ms": 760}
+{"voice": "simran", "set": "none", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digit से तीन तीन छह सात.", "final_done_ms": 618}
+{"voice": "simran", "set": "none", "id": "l03", "kind": "last4", "expected": "4821", "ok": true, "parsed": "4821", "text": "चार, आठ, दो, एक.", "final_done_ms": 519}
+{"voice": "simran", "set": "none", "id": "l04", "kind": "last4", "expected": "9052", "ok": false, "parsed": "None", "text": "ನೋ ಶೂನ್ಯ ಪಾಚ ಟು", "final_done_ms": 513}
+{"voice": "simran", "set": "none", "id": "l05", "kind": "last4", "expected": "6054", "ok": false, "parsed": "None", "text": "సిక్స్ జీరో ఫైవ్ ఫోర్", "final_done_ms": 507}
+{"voice": "simran", "set": "none", "id": "l06", "kind": "last4", "expected": "8819", "ok": false, "parsed": "None", "text": "ఆట్ ఆట్ ఏక్ నో", "final_done_ms": 511}
+{"voice": "simran", "set": "none", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं प्रिया बोल रही हूं.", "final_done_ms": 470}
+{"voice": "simran", "set": "none", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "Hello हां बोलिए.", "final_done_ms": 577}
+{"voice": "simran", "set": "none", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं, बाद में call कीजिए.", "final_done_ms": 505}
+{"voice": "simran", "set": "none", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 480}
+{"voice": "simran", "set": "none", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं? Lumen Finance से.", "final_done_ms": 474}
+{"voice": "simran", "set": "none", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "תיגא זה ררוגי", "final_done_ms": 504}
+{"voice": "simran", "set": "none", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं अभी पैसे नहीं हैं salary आने दीजिए.", "final_done_ms": 1057}
+{"voice": "ishita", "set": "none", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "Bais Julai, उन्नीस సు చరాన్వే", "final_done_ms": 680}
+{"voice": "ishita", "set": "none", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाइस July, उन्नीस सौ चौरानवे है.", "final_done_ms": 602}
+{"voice": "ishita", "set": "none", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": false, "parsed": "None", "text": "Gì, పందర మార్జ్ उन्नीस सौ అట్టాసి.", "final_done_ms": 717}
+{"voice": "ishita", "set": "none", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of birth, है नौ November उन्नीस सौ पचासी.", "final_done_ms": 529}
+{"voice": "ishita", "set": "none", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": false, "parsed": "None", "text": "Septais Ogos उन्नीस सौ इक्यानवे.", "final_done_ms": 480}
+{"voice": "ishita", "set": "none", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": false, "parsed": "None", "text": "చబ్బీస్ జన్యువరీ నైంటీ నైంటీ", "final_done_ms": 493}
+{"voice": "ishita", "set": "none", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "ట్వంటీ సెకండ్ జులై, నైంటీ నైంటీ ఫోర్", "final_done_ms": 547}
+{"voice": "ishita", "set": "none", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": false, "parsed": "None", "text": "అట్టాయిస్ ఫర్వరి उन्नीस सौ छियासी.", "final_done_ms": 486}
+{"voice": "ishita", "set": "none", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": false, "parsed": "None", "text": "इक्कीस డిసెంబర్ उन्नीस सौ నిన్నన్వే", "final_done_ms": 467}
+{"voice": "ishita", "set": "none", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": true, "parsed": "2001-06-14", "text": "चौदह जून दो हज़ार एक", "final_done_ms": 422}
+{"voice": "ishita", "set": "none", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": false, "parsed": "None", "text": "सोलह अक्टोबर, उन्नीस सौ బన్వే", "final_done_ms": 506}
+{"voice": "ishita", "set": "none", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": false, "parsed": "None", "text": "తెయ్యిస్ సిటంబర్ उन्నీసో సతాసి", "final_done_ms": 477}
+{"voice": "ishita", "set": "none", "id": "l01", "kind": "last4", "expected": "7743", "ok": false, "parsed": "None", "text": "ساعت ساعت చార్ తీన్", "final_done_ms": 504}
+{"voice": "ishita", "set": "none", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digits से तीन, तीन छह, सात.", "final_done_ms": 498}
+{"voice": "ishita", "set": "none", "id": "l03", "kind": "last4", "expected": "4821", "ok": false, "parsed": "None", "text": "चार, आठ, దూ, एक.", "final_done_ms": 498}
+{"voice": "ishita", "set": "none", "id": "l04", "kind": "last4", "expected": "9052", "ok": true, "parsed": "9052", "text": "नौ शून्य पांच दो", "final_done_ms": 721}
+{"voice": "ishita", "set": "none", "id": "l05", "kind": "last4", "expected": "6054", "ok": true, "parsed": "6054", "text": "6 0 5 4.", "final_done_ms": 1232}
+{"voice": "ishita", "set": "none", "id": "l06", "kind": "last4", "expected": "8819", "ok": false, "parsed": "None", "text": "ఆట్ ఆట్ एक నో", "final_done_ms": 560}
+{"voice": "ishita", "set": "none", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं प्रिया बोल रही हूं.", "final_done_ms": 582}
+{"voice": "ishita", "set": "none", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "Halo? Ha. बोलिए.", "final_done_ms": 513}
+{"voice": "ishita", "set": "none", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं. बाद में call कीजिए.", "final_done_ms": 503}
+{"voice": "ishita", "set": "none", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 498}
+{"voice": "ishita", "set": "none", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं? Lumen Finance से?", "final_done_ms": 500}
+{"voice": "ishita", "set": "none", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "ठीक है, ज़रा रुकिए.", "final_done_ms": 529}
+{"voice": "ishita", "set": "none", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं, अभी पैसे नहीं हैं. Salary आने दीजिए.", "final_done_ms": 467}
+{"voice": "arushi", "set": "none", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "۲۲۰ জুলাই ۱۹۴۹.", "final_done_ms": 502}
+{"voice": "arushi", "set": "none", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाइस July उन्नीस सौ चौरानवे है.", "final_done_ms": 510}
+{"voice": "arushi", "set": "none", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": true, "parsed": "1988-03-15", "text": "जी, पंद्रह march उन्नीस सौ अट्ठासी.", "final_done_ms": 513}
+{"voice": "arushi", "set": "none", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of birth है नौ November उन्नीस सौ पचासी.", "final_done_ms": 513}
+{"voice": "arushi", "set": "none", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": true, "parsed": "1991-08-27", "text": "सत्ताईस August उन्नीस सौ इक्यानवे.", "final_done_ms": 533}
+{"voice": "arushi", "set": "none", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": false, "parsed": "None", "text": "చబ్బీస్ జనవరి నైన్టీన్ నైంటీ.", "final_done_ms": 695}
+{"voice": "arushi", "set": "none", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "22nd July 19 94.", "final_done_ms": 771}
+{"voice": "arushi", "set": "none", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": true, "parsed": "1986-02-28", "text": "अट्ठाईस फरवरी उन्नीस सौ छियासी.", "final_done_ms": 754}
+{"voice": "arushi", "set": "none", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": true, "parsed": "1999-12-21", "text": "इक्कीस December उन्नीस सौ निन्यानवे.", "final_done_ms": 1142}
+{"voice": "arushi", "set": "none", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": true, "parsed": "2001-06-14", "text": "चौदह जून दो हज़ार एक.", "final_done_ms": 473}
+{"voice": "arushi", "set": "none", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": true, "parsed": "1992-10-16", "text": "सोलह October उन्नीस सौ बानवे.", "final_done_ms": 496}
+{"voice": "arushi", "set": "none", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": false, "parsed": "1900-09-23", "text": "तेईस सितंबर उन्नीस सौ सतासी.", "final_done_ms": 469}
+{"voice": "arushi", "set": "none", "id": "l01", "kind": "last4", "expected": "7743", "ok": false, "parsed": "None", "text": "Sāt sāt čārtīm.", "final_done_ms": 522}
+{"voice": "arushi", "set": "none", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digits हैं तीन तीन छह सात.", "final_done_ms": 528}
+{"voice": "arushi", "set": "none", "id": "l03", "kind": "last4", "expected": "4821", "ok": true, "parsed": "4821", "text": "चार आठ दो एक.", "final_done_ms": 541}
+{"voice": "arushi", "set": "none", "id": "l04", "kind": "last4", "expected": "9052", "ok": true, "parsed": "9052", "text": "नौ शून्य पांच दो.", "final_done_ms": 546}
+{"voice": "arushi", "set": "none", "id": "l05", "kind": "last4", "expected": "6054", "ok": true, "parsed": "6054", "text": "6 0 5 4", "final_done_ms": 690}
+{"voice": "arushi", "set": "none", "id": "l06", "kind": "last4", "expected": "8819", "ok": false, "parsed": "None", "text": "Alright alright.", "final_done_ms": 506}
+{"voice": "arushi", "set": "none", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं प्रिया बोल रही हूं.", "final_done_ms": 539}
+{"voice": "arushi", "set": "none", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "Halo? हां, बोलिए.", "final_done_ms": 455}
+{"voice": "arushi", "set": "none", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं, बाद में call कीजिए.", "final_done_ms": 671}
+{"voice": "arushi", "set": "none", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 628}
+{"voice": "arushi", "set": "none", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं Lumen Finance से?", "final_done_ms": 704}
+{"voice": "arushi", "set": "none", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "ठीक है, ज़रा रुकिए.", "final_done_ms": 681}
+{"voice": "arushi", "set": "none", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं, अभी पैसे नहीं हैं. Salary आने दीजिए.", "final_done_ms": 780}
+{"voice": "simran", "set": "dates", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "बाईस जुलाई उन्नीस सौ चौरानवे.", "final_done_ms": 495}
+{"voice": "simran", "set": "dates", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाइस July उन्नीस सौ चौरानवे है.", "final_done_ms": 515}
+{"voice": "simran", "set": "dates", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": true, "parsed": "1988-03-15", "text": "पंद्रह मार्च उन्नीस सौ अट्ठासी.", "final_done_ms": 501}
+{"voice": "simran", "set": "dates", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of है? नौ November उन्नीस सौ पचासी.", "final_done_ms": 516}
+{"voice": "simran", "set": "dates", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": true, "parsed": "1991-08-27", "text": "सत्ताईस August उन्नीस सौ इक्यानवे.", "final_done_ms": 491}
+{"voice": "simran", "set": "dates", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": false, "parsed": "None", "text": "छब्बीस जनवरी, నైంటీన్ నైంటీ", "final_done_ms": 457}
+{"voice": "simran", "set": "dates", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "ట్వంటీ సెకండ్ జులై, నైంటీ నైంటీ ఫోర్", "final_done_ms": 510}
+{"voice": "simran", "set": "dates", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": false, "parsed": "None", "text": "అट्ठाईस ఫర్वरी उन्नीस सौ చయాसी", "final_done_ms": 567}
+{"voice": "simran", "set": "dates", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": false, "parsed": "None", "text": "इक्कीस డిసెంబర్ उन्नीस सौ నిర్ణయన్వే", "final_done_ms": 503}
+{"voice": "simran", "set": "dates", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": true, "parsed": "2001-06-14", "text": "चौदह जून दो हज़ार एक.", "final_done_ms": 404}
+{"voice": "simran", "set": "dates", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": true, "parsed": "1992-10-16", "text": "सोलह अक्टूबर उन्नीस सौ बानवे", "final_done_ms": 497}
+{"voice": "simran", "set": "dates", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": false, "parsed": "None", "text": "30 సితంబర్ उन्नीस सौ సత్తాసి", "final_done_ms": 540}
+{"voice": "simran", "set": "dates", "id": "l01", "kind": "last4", "expected": "7743", "ok": false, "parsed": "None", "text": "साथ साथ చార్ తీన్", "final_done_ms": 539}
+{"voice": "simran", "set": "dates", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digit से तीन तीन छह सात.", "final_done_ms": 518}
+{"voice": "simran", "set": "dates", "id": "l03", "kind": "last4", "expected": "4821", "ok": true, "parsed": "4821", "text": "चार, आठ, दो, एक.", "final_done_ms": 696}
+{"voice": "simran", "set": "dates", "id": "l04", "kind": "last4", "expected": "9052", "ok": true, "parsed": "9052", "text": "नौ शून्य पांच दो.", "final_done_ms": 1371}
+{"voice": "simran", "set": "dates", "id": "l05", "kind": "last4", "expected": "6054", "ok": false, "parsed": "None", "text": "సిక్స్ జీరో ఫైవ్ ఫోర్", "final_done_ms": 669}
+{"voice": "simran", "set": "dates", "id": "l06", "kind": "last4", "expected": "8819", "ok": true, "parsed": "8819", "text": "आठ आठ एक नौ", "final_done_ms": 472}
+{"voice": "simran", "set": "dates", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं Priya बोल रही हूं.", "final_done_ms": 443}
+{"voice": "simran", "set": "dates", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां बोलिए.", "final_done_ms": 559}
+{"voice": "simran", "set": "dates", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं, बाद में call कीजिए.", "final_done_ms": 518}
+{"voice": "simran", "set": "dates", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 505}
+{"voice": "simran", "set": "dates", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं? Lumen Finance से?", "final_done_ms": 484}
+{"voice": "simran", "set": "dates", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": ".Tybe, זה ררוגי.", "final_done_ms": 489}
+{"voice": "simran", "set": "dates", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं अभी पैसे नहीं हैं salary आने दीजिए.", "final_done_ms": 472}
+{"voice": "ishita", "set": "dates", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "बाईस जुलाई, उन्नीस सौ चौरानवे.", "final_done_ms": 476}
+{"voice": "ishita", "set": "dates", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाईस जुलाई, उन्नीस सौ चौरानवे है.", "final_done_ms": 546}
+{"voice": "ishita", "set": "dates", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": true, "parsed": "1988-03-15", "text": "जी, पंद्रह मार्च उन्नीस सौ अट्ठासी.", "final_done_ms": 574}
+{"voice": "ishita", "set": "dates", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of birth, है नौ November उन्नीस सौ पचासी.", "final_done_ms": 1064}
+{"voice": "ishita", "set": "dates", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": true, "parsed": "1991-08-27", "text": "सत्ताईस अगस्त उन्नीस सौ इक्यानवे.", "final_done_ms": 554}
+{"voice": "ishita", "set": "dates", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": false, "parsed": "None", "text": "छब्बीस జన్యువరీ నైంటీ నైంటీ", "final_done_ms": 635}
+{"voice": "ishita", "set": "dates", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "22nd जुलाई, నైంటీ నైంటీ ఫోర్", "final_done_ms": 781}
+{"voice": "ishita", "set": "dates", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": true, "parsed": "1986-02-28", "text": "अट्ठाईस फ़रवरी उन्नीस सौ छियासी.", "final_done_ms": 1036}
+{"voice": "ishita", "set": "dates", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": false, "parsed": "None", "text": "इक्कीस డిసెంబర్ उन्नीस सौ నిన్నన్వే", "final_done_ms": 469}
+{"voice": "ishita", "set": "dates", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": true, "parsed": "2001-06-14", "text": "चौदह जून दो हज़ार एक.", "final_done_ms": 390}
+{"voice": "ishita", "set": "dates", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": true, "parsed": "1992-10-16", "text": "सोलह अक्टूबर, उन्नीस सौ बानवे", "final_done_ms": 475}
+{"voice": "ishita", "set": "dates", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": false, "parsed": "None", "text": "तेईस సిటంబర్ उन्नीस सौ సत्तासी.", "final_done_ms": 452}
+{"voice": "ishita", "set": "dates", "id": "l01", "kind": "last4", "expected": "7743", "ok": false, "parsed": "None", "text": "साथ चार తీన్", "final_done_ms": 517}
+{"voice": "ishita", "set": "dates", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digits से तीन, तीन छह, सात.", "final_done_ms": 466}
+{"voice": "ishita", "set": "dates", "id": "l03", "kind": "last4", "expected": "4821", "ok": false, "parsed": "None", "text": "चार, आठ, దు, एक.", "final_done_ms": 470}
+{"voice": "ishita", "set": "dates", "id": "l04", "kind": "last4", "expected": "9052", "ok": true, "parsed": "9052", "text": "नौ शून्य पांच दो", "final_done_ms": 462}
+{"voice": "ishita", "set": "dates", "id": "l05", "kind": "last4", "expected": "6054", "ok": true, "parsed": "6054", "text": "6 0 5 4.", "final_done_ms": 705}
+{"voice": "ishita", "set": "dates", "id": "l06", "kind": "last4", "expected": "8819", "ok": true, "parsed": "8819", "text": "आठ आठ एक नौ", "final_done_ms": 494}
+{"voice": "ishita", "set": "dates", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं Priya बोल रही हूं.", "final_done_ms": 659}
+{"voice": "ishita", "set": "dates", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "Hello? हाँ. बोलिए.", "final_done_ms": 534}
+{"voice": "ishita", "set": "dates", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं. बाद में call कीजिए.", "final_done_ms": 698}
+{"voice": "ishita", "set": "dates", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 680}
+{"voice": "ishita", "set": "dates", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं? Lumen Finance से?", "final_done_ms": 878}
+{"voice": "ishita", "set": "dates", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "ठीक है, ज़रा रुकिए.", "final_done_ms": 542}
+{"voice": "ishita", "set": "dates", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं, अभी पैसे नहीं हैं. Salary आने दीजिए.", "final_done_ms": 507}
+{"voice": "arushi", "set": "dates", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "बाईस जुलाई उन्नीस सौ चौरानवे.", "final_done_ms": 511}
+{"voice": "arushi", "set": "dates", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाइस July उन्नीस सौ चौरानवे है.", "final_done_ms": 514}
+{"voice": "arushi", "set": "dates", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": true, "parsed": "1988-03-15", "text": "जी, पंद्रह मार्च उन्नीस सौ अट्ठासी.", "final_done_ms": 470}
+{"voice": "arushi", "set": "dates", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of birth है नौ November उन्नीस सौ पचासी.", "final_done_ms": 527}
+{"voice": "arushi", "set": "dates", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": true, "parsed": "1991-08-27", "text": "सत्ताईस August उन्नीस सौ इक्यानवे.", "final_done_ms": 517}
+{"voice": "arushi", "set": "dates", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": true, "parsed": "1990-01-26", "text": "छब्बीस जनवरी 19 90.", "final_done_ms": 706}
+{"voice": "arushi", "set": "dates", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "22nd July 19 94.", "final_done_ms": 723}
+{"voice": "arushi", "set": "dates", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": true, "parsed": "1986-02-28", "text": "अट्ठाईस फ़रवरी उन्नीस सौ छियासी.", "final_done_ms": 548}
+{"voice": "arushi", "set": "dates", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": false, "parsed": "None", "text": "इक्कीस दिसम्बर उन्नीस सौ निन्यानवे.", "final_done_ms": 545}
+{"voice": "arushi", "set": "dates", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": true, "parsed": "2001-06-14", "text": "चौदह जून दो हज़ार एक.", "final_done_ms": 636}
+{"voice": "arushi", "set": "dates", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": true, "parsed": "1992-10-16", "text": "सोलह अक्टूबर उन्नीस सौ बानवे.", "final_done_ms": 1262}
+{"voice": "arushi", "set": "dates", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": true, "parsed": "1987-09-23", "text": "तेईस सितंबर उन्नीस सौ सत्तासी.", "final_done_ms": 1711}
+{"voice": "arushi", "set": "dates", "id": "l01", "kind": "last4", "expected": "7743", "ok": false, "parsed": "None", "text": "साथ साथ चार तीन.", "final_done_ms": 809}
+{"voice": "arushi", "set": "dates", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digits हैं तीन तीन छह सात.", "final_done_ms": 502}
+{"voice": "arushi", "set": "dates", "id": "l03", "kind": "last4", "expected": "4821", "ok": true, "parsed": "4821", "text": "चार आठ दो एक.", "final_done_ms": 551}
+{"voice": "arushi", "set": "dates", "id": "l04", "kind": "last4", "expected": "9052", "ok": true, "parsed": "9052", "text": "नौ शून्य पांच दो.", "final_done_ms": 532}
+{"voice": "arushi", "set": "dates", "id": "l05", "kind": "last4", "expected": "6054", "ok": true, "parsed": "6054", "text": "6 0 5 4", "final_done_ms": 731}
+{"voice": "arushi", "set": "dates", "id": "l06", "kind": "last4", "expected": "8819", "ok": true, "parsed": "8819", "text": "आठ आठ एक नौ", "final_done_ms": 533}
+{"voice": "arushi", "set": "dates", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं Priya बोल रही हूं.", "final_done_ms": 528}
+{"voice": "arushi", "set": "dates", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "Hello? हां, बोलिए.", "final_done_ms": 485}
+{"voice": "arushi", "set": "dates", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं, बाद में call कीजिए.", "final_done_ms": 488}
+{"voice": "arushi", "set": "dates", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 483}
+{"voice": "arushi", "set": "dates", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं Lumen Finance से?", "final_done_ms": 501}
+{"voice": "arushi", "set": "dates", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "ठीक है, ज़रा रुकिए.", "final_done_ms": 564}
+{"voice": "arushi", "set": "dates", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं, अभी पैसे नहीं हैं. Salary आने दीजिए.", "final_done_ms": 3040}
+{"voice": "simran", "set": "full", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "बाईस जुलाई उन्नीस सौ चौरानवे.", "final_done_ms": 555}
+{"voice": "simran", "set": "full", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाइस July उन्नीस सौ चौरानवे है.", "final_done_ms": 587}
+{"voice": "simran", "set": "full", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": true, "parsed": "1988-03-15", "text": "पंद्रह मार्च उन्नीस सौ अट्ठासी.", "final_done_ms": 887}
+{"voice": "simran", "set": "full", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of है? नौ November उन्नीस सौ पचासी.", "final_done_ms": 516}
+{"voice": "simran", "set": "full", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": true, "parsed": "1991-08-27", "text": "सत्ताईस August उन्नीस सौ इक्यानवे.", "final_done_ms": 497}
+{"voice": "simran", "set": "full", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": false, "parsed": "None", "text": "छब्बीस जनवरी, నైంటీన్ నైంటీ", "final_done_ms": 504}
+{"voice": "simran", "set": "full", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "ట్వంటీ సెకండ్ జులై, నైంటీ నైంటీ ఫోర్", "final_done_ms": 548}
+{"voice": "simran", "set": "full", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": false, "parsed": "None", "text": "అट्ठाईस ఫర్वरी उन्नीस सौ చయాसी", "final_done_ms": 480}
+{"voice": "simran", "set": "full", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": false, "parsed": "None", "text": "इक्कीस డిసెంబర్ उन्नीस सौ निन्यानवे", "final_done_ms": 503}
+{"voice": "simran", "set": "full", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": true, "parsed": "2001-06-14", "text": "चौदह जून दो हज़ार एक.", "final_done_ms": 449}
+{"voice": "simran", "set": "full", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": true, "parsed": "1992-10-16", "text": "सोलह अक्टूबर उन्नीस सौ बानवे", "final_done_ms": 477}
+{"voice": "simran", "set": "full", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": false, "parsed": "None", "text": "సితంబర్ उन्नीस सौ సత్తాసి", "final_done_ms": 550}
+{"voice": "simran", "set": "full", "id": "l01", "kind": "last4", "expected": "7743", "ok": false, "parsed": "None", "text": "साथ साथ चार तीन", "final_done_ms": 432}
+{"voice": "simran", "set": "full", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digit से तीन तीन छह सात.", "final_done_ms": 662}
+{"voice": "simran", "set": "full", "id": "l03", "kind": "last4", "expected": "4821", "ok": true, "parsed": "4821", "text": "चार, आठ, दो, एक.", "final_done_ms": 632}
+{"voice": "simran", "set": "full", "id": "l04", "kind": "last4", "expected": "9052", "ok": true, "parsed": "9052", "text": "नौ शून्य पांच दो.", "final_done_ms": 2197}
+{"voice": "simran", "set": "full", "id": "l05", "kind": "last4", "expected": "6054", "ok": false, "parsed": "None", "text": "సిక్స్ జీరో ఫైవ్ ఫోర్", "final_done_ms": 687}
+{"voice": "simran", "set": "full", "id": "l06", "kind": "last4", "expected": "8819", "ok": true, "parsed": "8819", "text": "आठ आठ एक नौ", "final_done_ms": 591}
+{"voice": "simran", "set": "full", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं Priya बोल रही हूं.", "final_done_ms": 631}
+{"voice": "simran", "set": "full", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां बोलिए.", "final_done_ms": 591}
+{"voice": "simran", "set": "full", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं, बाद में call कीजिए.", "final_done_ms": 555}
+{"voice": "simran", "set": "full", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 501}
+{"voice": "simran", "set": "full", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं? Lumen Finance से?", "final_done_ms": 523}
+{"voice": "simran", "set": "full", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "תיגא, זה ררוגי.", "final_done_ms": 516}
+{"voice": "simran", "set": "full", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं अभी पैसे नहीं हैं salary आने दीजिए.", "final_done_ms": 496}
+{"voice": "ishita", "set": "full", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "बाईस जुलाई, उन्नीस सौ चौरानवे.", "final_done_ms": 496}
+{"voice": "ishita", "set": "full", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाईस जुलाई, उन्नीस सौ चौरानवे है.", "final_done_ms": 498}
+{"voice": "ishita", "set": "full", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": true, "parsed": "1988-03-15", "text": "जी, पंद्रह मार्च उन्नीस सौ अट्ठासी.", "final_done_ms": 518}
+{"voice": "ishita", "set": "full", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of birth, है नौ November उन्नीस सौ पचासी.", "final_done_ms": 679}
+{"voice": "ishita", "set": "full", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": true, "parsed": "1991-08-27", "text": "सत्ताईस अगस्त उन्नीस सौ इक्यानवे.", "final_done_ms": 598}
+{"voice": "ishita", "set": "full", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": false, "parsed": "None", "text": "छब्बीस జన్యువరీ నైంటీ నైంటీ", "final_done_ms": 535}
+{"voice": "ishita", "set": "full", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": false, "parsed": "None", "text": "22nd जुलाई, నైంటీ నైంటీ ఫోర్", "final_done_ms": 533}
+{"voice": "ishita", "set": "full", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": true, "parsed": "1986-02-28", "text": "अट्ठाईस फ़रवरी उन्नीस सौ छियासी.", "final_done_ms": 570}
+{"voice": "ishita", "set": "full", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": false, "parsed": "None", "text": "इक्कीस డిసెంబర్ उन्नीस सौ నిన్నన్వే", "final_done_ms": 680}
+{"voice": "ishita", "set": "full", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": true, "parsed": "2001-06-14", "text": "चौदह जून दो हज़ार एक.", "final_done_ms": 593}
+{"voice": "ishita", "set": "full", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": true, "parsed": "1992-10-16", "text": "सोलह अक्टूबर, उन्नीस सौ बानवे", "final_done_ms": 476}
+{"voice": "ishita", "set": "full", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": false, "parsed": "None", "text": "तेईस సిటంబర్ उन्नीस सौ సत्तासी", "final_done_ms": 469}
+{"voice": "ishita", "set": "full", "id": "l01", "kind": "last4", "expected": "7743", "ok": true, "parsed": "7743", "text": "सात सात चार तीन", "final_done_ms": 480}
+{"voice": "ishita", "set": "full", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digits से तीन, तीन छह, सात.", "final_done_ms": 513}
+{"voice": "ishita", "set": "full", "id": "l03", "kind": "last4", "expected": "4821", "ok": false, "parsed": "None", "text": "चार, आठ, దు, एक.", "final_done_ms": 495}
+{"voice": "ishita", "set": "full", "id": "l04", "kind": "last4", "expected": "9052", "ok": true, "parsed": "9052", "text": "नौ शून्य पांच दो", "final_done_ms": 476}
+{"voice": "ishita", "set": "full", "id": "l05", "kind": "last4", "expected": "6054", "ok": true, "parsed": "6054", "text": "6 0 5 4.", "final_done_ms": 711}
+{"voice": "ishita", "set": "full", "id": "l06", "kind": "last4", "expected": "8819", "ok": true, "parsed": "8819", "text": "आठ आठ एक नौ", "final_done_ms": 511}
+{"voice": "ishita", "set": "full", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं Priya बोल रही हूं.", "final_done_ms": 475}
+{"voice": "ishita", "set": "full", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "Hello? हाँ. बोलिए.", "final_done_ms": 491}
+{"voice": "ishita", "set": "full", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं. बाद में call कीजिए.", "final_done_ms": 587}
+{"voice": "ishita", "set": "full", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 716}
+{"voice": "ishita", "set": "full", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं? Lumen Finance से?", "final_done_ms": 503}
+{"voice": "ishita", "set": "full", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "ठीक है, ज़रा रुकिए.", "final_done_ms": 568}
+{"voice": "ishita", "set": "full", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं, अभी पैसे नहीं हैं. Salary आने दीजिए.", "final_done_ms": 800}
+{"voice": "arushi", "set": "full", "id": "d01", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "बाईस जुलाई उन्नीस सौ चौरानवे.", "final_done_ms": 631}
+{"voice": "arushi", "set": "full", "id": "d02", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "मेरी date of birth बाइस July उन्नीस सौ चौरानवे है.", "final_done_ms": 461}
+{"voice": "arushi", "set": "full", "id": "d03", "kind": "dob", "expected": "1988-03-15", "ok": true, "parsed": "1988-03-15", "text": "जी, पंद्रह march उन्नीस सौ अट्ठासी.", "final_done_ms": 524}
+{"voice": "arushi", "set": "full", "id": "d04", "kind": "dob", "expected": "1985-11-09", "ok": true, "parsed": "1985-11-09", "text": "Date of birth है नौ November उन्नीस सौ पचासी.", "final_done_ms": 492}
+{"voice": "arushi", "set": "full", "id": "d05", "kind": "dob", "expected": "1991-08-27", "ok": true, "parsed": "1991-08-27", "text": "सत्ताईस August उन्नीस सौ इक्यानवे.", "final_done_ms": 511}
+{"voice": "arushi", "set": "full", "id": "d06", "kind": "dob", "expected": "1990-01-26", "ok": true, "parsed": "1990-01-26", "text": "छब्बीस जनवरी 19 90.", "final_done_ms": 715}
+{"voice": "arushi", "set": "full", "id": "d07", "kind": "dob", "expected": "1994-07-22", "ok": true, "parsed": "1994-07-22", "text": "22nd July 19 94.", "final_done_ms": 709}
+{"voice": "arushi", "set": "full", "id": "d08", "kind": "dob", "expected": "1986-02-28", "ok": true, "parsed": "1986-02-28", "text": "अट्ठाईस फ़रवरी उन्नीस सौ छियासी.", "final_done_ms": 539}
+{"voice": "arushi", "set": "full", "id": "d09", "kind": "dob", "expected": "1999-12-21", "ok": false, "parsed": "None", "text": "इक्कीस दिसम्बर उन्नीस सौ निन्यानवे.", "final_done_ms": 518}
+{"voice": "arushi", "set": "full", "id": "d10", "kind": "dob", "expected": "2001-06-14", "ok": true, "parsed": "2001-06-14", "text": "चौदह जून दो हज़ार एक.", "final_done_ms": 1475}
+{"voice": "arushi", "set": "full", "id": "d11", "kind": "dob", "expected": "1992-10-16", "ok": true, "parsed": "1992-10-16", "text": "सोलह अक्टूबर उन्नीस सौ बानवे.", "final_done_ms": 1235}
+{"voice": "arushi", "set": "full", "id": "d12", "kind": "dob", "expected": "1987-09-23", "ok": true, "parsed": "1987-09-23", "text": "तेईस सितंबर उन्नीस सौ सत्तासी.", "final_done_ms": 570}
+{"voice": "arushi", "set": "full", "id": "l01", "kind": "last4", "expected": "7743", "ok": true, "parsed": "7743", "text": "सात सात चार तीन.", "final_done_ms": 1279}
+{"voice": "arushi", "set": "full", "id": "l02", "kind": "last4", "expected": "3367", "ok": true, "parsed": "3367", "text": "Last 4 digits हैं तीन तीन छह सात.", "final_done_ms": 699}
+{"voice": "arushi", "set": "full", "id": "l03", "kind": "last4", "expected": "4821", "ok": true, "parsed": "4821", "text": "चार आठ दो एक.", "final_done_ms": 846}
+{"voice": "arushi", "set": "full", "id": "l04", "kind": "last4", "expected": "9052", "ok": true, "parsed": "9052", "text": "नौ शून्य पांच दो.", "final_done_ms": 1614}
+{"voice": "arushi", "set": "full", "id": "l05", "kind": "last4", "expected": "6054", "ok": true, "parsed": "6054", "text": "6 0 5 4", "final_done_ms": 703}
+{"voice": "arushi", "set": "full", "id": "l06", "kind": "last4", "expected": "8819", "ok": true, "parsed": "8819", "text": "आठ आठ एक नौ", "final_done_ms": 511}
+{"voice": "arushi", "set": "full", "id": "n01", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "हां जी, मैं Priya बोल रही हूं.", "final_done_ms": 583}
+{"voice": "arushi", "set": "full", "id": "n02", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "Hello? हां, बोलिए.", "final_done_ms": 466}
+{"voice": "arushi", "set": "full", "id": "n03", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "अभी मैं busy हूं, बाद में call कीजिए.", "final_done_ms": 522}
+{"voice": "arushi", "set": "full", "id": "n04", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "मैंने तो already pay कर दिया था UPI से.", "final_done_ms": 485}
+{"voice": "arushi", "set": "full", "id": "n05", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "आप कौन बोल रहे हैं Lumen Finance से?", "final_done_ms": 564}
+{"voice": "arushi", "set": "full", "id": "n06", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "ठीक है, ज़रा रुकिए.", "final_done_ms": 545}
+{"voice": "arushi", "set": "full", "id": "n07", "kind": "none", "expected": "", "ok": true, "parsed": "-", "text": "नहीं, अभी पैसे नहीं हैं. Salary आने दीजिए.", "final_done_ms": 511}

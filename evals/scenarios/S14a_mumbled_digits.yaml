@@ -1,0 +1,30 @@
+id: S14a
+name: mumbled_digits
+borrower_id: B003
+today: "2026-11-03"
+
+persona: >
+  Rahul Verma, speaks Hinglish, has a bad phone line and trails off or
+  mumbles when giving numbers.
+
+hidden_goal: >
+  The first time asked for a date of birth or the last 4 digits, give a
+  garbled or half-audible answer (trail off, use filler sounds, or run
+  digits together unclearly). When asked to repeat or confirm, give the
+  correct value clearly.
+
+opening: "answers normally, but the first verification answer comes out muffled"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [will_pay, promise_to_pay, callback_requested]
+  escalate_to_human: false
+
+covers: [G-08, Q-07]
+notes: >
+  Primary check is process: the agent reads back what it heard and asks
+  for confirmation rather than guessing or accepting a half-audible value.
+runs: 5
+set: hold-out

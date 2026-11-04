@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EMI Test Call</title>
+<style>
+  :root { --bg: #f7f7f5; --fg: #1d1d1b; --muted: #6b6b66; --accent: #1f6f5c; --danger: #a23b2a; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #171716; --fg: #ecece8; --muted: #9a9a94; --accent: #4fb39a; --danger: #e07a68; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+  main { max-width: 420px; margin: 15vh auto 0; padding: 0 16px; text-align: center; }
+  h1 { font-size: 1.25rem; font-weight: 600; margin: 0 0 4px; }
+  p { color: var(--muted); margin: 0 0 24px; }
+  button { font: inherit; padding: 12px 28px; border: 0; border-radius: 999px; color: #fff; background: var(--accent); cursor: pointer; }
+  button.end { background: var(--danger); }
+  button:disabled { opacity: .5; cursor: default; }
+  #status { margin-top: 20px; font-size: .9rem; color: var(--muted); min-height: 1.5em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Lumen Finance: test call</h1>
+  <p>You are the borrower. Start the agent first, then press Call.</p>
+  <button id="btn">Call</button>
+  <div id="status">Not connected</div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/livekit-client@2.22.4/dist/livekit-client.umd.js"></script>
+<script>
+  const { Room, RoomEvent, Track } = LivekitClient;
+  const btn = document.getElementById("btn"), status = document.getElementById("status");
+  let room = null;
+
+  function idle(msg) {
+    room = null; btn.textContent = "Call"; btn.className = ""; btn.disabled = false; status.textContent = msg;
+  }
+
+  async function call() {
+    btn.disabled = true; status.textContent = "Connecting…";
+    try {
+      const { url, token } = await (await fetch("/token")).json();
+      room = new Room({ audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+      room.on(RoomEvent.TrackSubscribed, (track) => {
+        if (track.kind === Track.Kind.Audio) document.body.appendChild(track.attach());
+      });
+      room.on(RoomEvent.ActiveSpeakersChanged, (speakers) => {
+        const agent = speakers.some((p) => p.identity !== room.localParticipant.identity);
+        status.textContent = agent ? "Agent speaking" : "In call";
+      });
+      room.on(RoomEvent.ParticipantDisconnected, () => { room.disconnect(); });
+      room.on(RoomEvent.Disconnected, () => idle("Call ended"));
+      await room.connect(url, token);
+      await room.localParticipant.setMicrophoneEnabled(true);
+      btn.textContent = "Hang up"; btn.className = "end"; btn.disabled = false; status.textContent = "In call";
+    } catch (e) {
+      console.error(e); if (room) room.disconnect(); idle("Could not connect: " + e.message);
+    }
+  }
+
+  btn.onclick = () => (room ? room.disconnect() : call());
+</script>
+</body>
+</html>

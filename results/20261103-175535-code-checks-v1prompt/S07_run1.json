@@ -1,0 +1,201 @@
+{
+  "scenario": {
+    "id": "S07",
+    "name": "callback_requested",
+    "borrower_id": "B008",
+    "today": "2026-11-03",
+    "persona": "Vikram Singh, 29, in a meeting, speaks Hindi.",
+    "hidden_goal": "Verify correctly, quickly, then say you don't have time to talk now and ask the agent to call back tomorrow morning. Use exactly that phrase (\"tomorrow morning\" / \"kal subah\") if asked when.\n",
+    "opening": "answers quickly, sounds rushed",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "callback_requested",
+      "escalate_to_human": false,
+      "callback_date": "2026-11-04"
+    },
+    "covers": [
+      "R6"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "groq:openai/gpt-oss-20b",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 300,
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v3",
+      "script": "roman",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-20b",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "max_retries": 8,
+      "fallback": [
+        {
+          "provider": "groq",
+          "model": "openai/gpt-oss-120b"
+        }
+      ],
+      "groq_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v1",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    },
+    "livekit": {
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Namaste, main Lumen Finance ki virtual assistant bol rahi hoon. Kya meri baat Vikram ji se ho rahi hai?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, main Vikram Singh. Par abhi meeting mein hoon, isliye baad mein call karna."
+    },
+    {
+      "role": "agent",
+      "text": "Aapko kab call karna theek rahega?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Kal subah call karna."
+    },
+    {
+      "role": "agent",
+      "text": "Kya aap apni date of birth ya apne registered mobile number ke aakhri chaar ank de sakte hain, taaki main aapki pehchaan confirm kar sakun?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Main abhi meeting mein hoon, isliye verification nahi kar sakta. Kal subah call karna."
+    },
+    {
+      "role": "agent",
+      "text": "Theek hai, kal **************************  ​​",
+      "verified": false,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "schedule_callback",
+      "args": {
+        "when_text": "kal subah"
+      },
+      "result": {
+        "status": "scheduled",
+        "when_spoken": "tomorrow"
+      },
+      "attempts": 1,
+      "ms": 0.17,
+      "stage": "greeting"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "notes": "Borrower requested callback tomorrow morning",
+        "outcome": "callback_requested",
+        "promise_to_pay_date": null
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.11,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B008",
+    "verified": false,
+    "outcome": "callback_requested",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower requested callback tomorrow morning",
+    "language_used": "hi+hinglish",
+    "callback_time": "2026-11-04 (kal subah)"
+  },
+  "disclosure_log": [],
+  "guard_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "5,600",
+    "5600",
+    "aaj",
+    "consumer durable loan",
+    "five thousand six hundred rupees",
+    "paanch hazaar chhah sau rupaye",
+    "today",
+    "आज",
+    "पाँच हज़ार छह सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 6778,
+      "output": 624,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1136,
+      "output": 61
+    }
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 46.4
+}

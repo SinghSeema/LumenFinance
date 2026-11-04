@@ -1,0 +1,278 @@
+{
+  "scenario": {
+    "id": "S09",
+    "name": "language_switch_mid_call",
+    "borrower_id": "B001",
+    "today": "2026-11-03",
+    "persona": "Arjun Mehta, speaks English at first, then switches to Hindi mid-call because he finds it easier to explain his situation in Hindi.\n",
+    "hidden_goal": "Start the call in English and verify identity in English. Partway through — once the agent starts talking about the EMI — switch to replying only in Hindi for the rest of the call. End by agreeing to pay by the due date.\n",
+    "opening": "answers in English, cooperative, switches language naturally after a couple of turns",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "will_pay",
+      "escalate_to_human": false,
+      "language_used": "en+hi"
+    },
+    "covers": [
+      "Q-08",
+      "R8"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "groq:openai/gpt-oss-20b",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 300,
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v3",
+      "script": "roman",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-20b",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "max_retries": 8,
+      "fallback": [
+        {
+          "provider": "groq",
+          "model": "openai/gpt-oss-120b"
+        }
+      ],
+      "groq_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v1",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    },
+    "livekit": {
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, this is the virtual assistant from Lumen Finance. Am I speaking with Arjun?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, this is Arjun. Who is calling?"
+    },
+    {
+      "role": "agent",
+      "text": "Great, thank you. Could you please tell me your date of birth, in the format year dash month dash day?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Sure, my date of birth is 1988-03-15."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you, Arjun. Your EMI of twelve thousand five hundred rupees is due the day after tomorrow. Would you like to make a payment now?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, मुझे थोड़ा açıklığa kavuşturmak है कि इस EMI के बारे में क्या हो रहा है।"
+    },
+    {
+      "role": "agent",
+      "text": "Ji, yeh aapka regular EMI hai jo aapke personal loan ke liye har mahine dena hota hai. Agar aap is din ke baad bhi pay nahi karte, to yeh overdue ho jayega. Kya aap abhi payment karna chahenge?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, मैं चुका दूँगा, लेकिन अभी नहीं। वह due date तक हो जाएगा, टेंशन मत लीजिए।"
+    },
+    {
+      "role": "agent",
+      "text": "Sure, I can send you a payment link for convenience. Which channel would you prefer – SMS, WhatsApp, or email?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "WhatsApp ही बस, कोई और नहीं।"
+    },
+    {
+      "role": "agent",
+      "text": "Payment link bhej bheja hai, link ke liye         \n\n\n\n```\n\n\n\n```\n\n\n\nको \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n... ... ... ... ... ... ... \n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n... We have a problem: The assistant's final output is garbled. Need to correct. Should respond with a short polite goodbye, as the call is concluded after sending payment link. Should not include code blocks. Should just say something like \"Payment link sent via WhatsApp. Let us know if you need anything else. Have a great day.\" Also record outcome already done. So final answer should be a spoken line.Payment link WhatsApp par bhej diya hai. Agar aapko koi aur madad chahiye to batayein, warna aapka din shubh ho. Alvida.",
+      "verified": true,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "1988-03-15"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "twelve thousand five hundred rupees",
+          "due_date_spoken": "the day after tomorrow",
+          "loan_type": "personal loan"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.73,
+      "stage": "reminding"
+    },
+    {
+      "name": "send_payment_link",
+      "args": {
+        "channel": "whatsapp"
+      },
+      "result": {
+        "sent": true,
+        "channel": "whatsapp",
+        "url": "https://pay.lumenfinance.example/l/B001-****"
+      },
+      "attempts": 1,
+      "ms": 0.01,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "notes": "Will pay by due date",
+        "outcome": "will_pay",
+        "promise_to_pay_date": null
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.08,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B001",
+    "verified": true,
+    "outcome": "will_pay",
+    "promise_to_pay_date": null,
+    "payment_link_sent": true,
+    "escalate_to_human": false,
+    "notes": "Will pay by due date",
+    "language_used": "en+hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793709137.0842552,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793709137.0842552,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793709137.0842552,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793709172.349585,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793709172.349585,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793709172.349585,
+      "stage": "intent",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "12,500",
+    "12500",
+    "barah hazaar paanch sau rupaye",
+    "parson",
+    "personal loan",
+    "the day after tomorrow",
+    "twelve thousand five hundred rupees",
+    "परसों",
+    "बारह हज़ार पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 11622,
+      "output": 1139,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 2366,
+      "output": 100
+    }
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 85.0
+}

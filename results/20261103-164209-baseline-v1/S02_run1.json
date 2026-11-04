@@ -1,0 +1,251 @@
+{
+  "scenario": {
+    "id": "S02",
+    "name": "promise_next_friday",
+    "borrower_id": "B005",
+    "today": "2026-11-03",
+    "persona": "Kiran Desai, mid-30s, busy, polite, speaks English with some Hindi.",
+    "hidden_goal": "Verify correctly, then promise to pay next Friday.",
+    "opening": "answers the call, confirms identity",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "promise_to_pay",
+      "promise_to_pay_date": "2026-11-13",
+      "escalate_to_human": false
+    },
+    "covers": [
+      "F-04",
+      "G-08",
+      "R2"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "groq:openai/gpt-oss-20b",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 300,
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v3",
+      "script": "roman",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "groq",
+      "model": "openai/gpt-oss-20b",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "max_retries": 8,
+      "fallback": [
+        {
+          "provider": "groq",
+          "model": "openai/gpt-oss-120b"
+        }
+      ],
+      "groq_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v1",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    },
+    "livekit": {
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, this is the virtual assistant from Lumen Finance. Am I speaking with Kiran?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Hello, haan, I am Kiran Desai. Kaise hain aap?"
+    },
+    {
+      "role": "agent",
+      "text": "Hi Kiran, could you please tell me your date of birth?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Mera date of birth 14 February 1979 hai."
+    },
+    {
+      "role": "agent",
+      "text": "Your EMI of twenty-five thousand rupees was due on the twenty-fifth of October, and it is nine days overdue. How would you like to proceed?",
+      "verified": true,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, main jaanta hoon. Main next Friday ko payment kar dunga."
+    },
+    {
+      "role": "agent",
+      "text": "Got it, you plan to pay on the thirteenth of November. I’ve noted that. If you need anything else, just let me know. Thank you for calling Lumen Finance, and have a great day.",
+      "verified": true,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "?"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 3,
+        "error": "unreadable_value"
+      },
+      "attempts": 1,
+      "ms": 0.47,
+      "stage": "verifying"
+    },
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "1979-02-14"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "twenty-five thousand rupees",
+          "due_date_spoken": "the twenty-fifth of October",
+          "loan_type": "home improvement loan",
+          "overdue_spoken": "nine days"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.35,
+      "stage": "reminding"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "notes": "Kiran said next Friday",
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "next Friday"
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the thirteenth of November"
+      },
+      "attempts": 1,
+      "ms": 21.24,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B005",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-13",
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Kiran said next Friday",
+    "language_used": "en+hinglish",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793704392.2248628,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793704392.2248628,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793704392.2248628,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793704392.2248628,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "home improvement loan",
+    "nau din",
+    "nine days",
+    "pachchees October",
+    "pachchees hazaar rupaye",
+    "the twenty-fifth of October",
+    "twenty-five thousand rupees",
+    "नौ दिन",
+    "पच्चीस अक्टूबर",
+    "पच्चीस हज़ार रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 8262,
+      "output": 451,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1009,
+      "output": 56
+    }
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 56.8
+}

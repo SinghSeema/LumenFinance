@@ -1,0 +1,32 @@
+id: S09
+name: language_switch_mid_call
+borrower_id: B001
+today: "2026-11-03"
+
+persona: >
+  Arjun Mehta, speaks English at first, then switches to Hindi mid-call
+  because he finds it easier to explain his situation in Hindi.
+
+hidden_goal: >
+  Start the call in English and verify identity in English. As soon as
+  the agent tells you about the EMI, switch to Hindi and speak only Hindi
+  from then on. Before agreeing to anything, ask the agent two or three
+  things in Hindi (for example how you can pay, or to repeat the due
+  date). End by agreeing to pay by the due date.
+
+opening: "answers in English, cooperative, switches to Hindi right after hearing about the EMI"
+
+faults: {}
+
+expected:
+  verified: true
+  # "I'll pay by the due date": will_pay if no date was named, promise_to_pay if the borrower
+  # names one, including the due date itself (LLD 5, defined 2026-11-03 after the smoke run).
+  accepted_outcomes: [will_pay, promise_to_pay]
+  escalate_to_human: false
+  # Devanagari Hindi or Roman Hinglish both count, in either order if both appear.
+  language_used: ["en+hi", "en+hinglish", "en+hi+hinglish", "en+hinglish+hi"]
+
+covers: [Q-08, R8]
+runs: 5
+set: dev

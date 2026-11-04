@@ -1,0 +1,31 @@
+clip,line,form,engine,model,voice,request_ms,error,text
+c001,N1_amount,hi_numbers,sarvam,bulbul:v4-flash,ishita,1592,,आपकी personal loan की बारह हज़ार पाँच सौ रुपये की EMI पच्चीस नवंबर को due है।
+c002,N1_amount,en_numbers,sarvam,bulbul:v4-flash,simran,1301,,आपकी personal loan की twelve thousand five hundred rupees की EMI twenty-fifth November को due है।
+c003,N1_amount,hi_numbers,cartesia,sonic-3.6,arushi,1034,,आपकी personal loan की बारह हज़ार पाँच सौ रुपये की EMI पच्चीस नवंबर को due है।
+c004,N1_amount,hi_numbers,sarvam,bulbul:v4-flash,simran,1538,,आपकी personal loan की बारह हज़ार पाँच सौ रुपये की EMI पच्चीस नवंबर को due है।
+c005,N1_amount,en_numbers,sarvam,bulbul:v4-flash,ishita,3825,,आपकी personal loan की twelve thousand five hundred rupees की EMI twenty-fifth November को due है।
+c006,N1_amount,en_numbers,cartesia,sonic-3.6,arushi,1200,,आपकी personal loan की twelve thousand five hundred rupees की EMI twenty-fifth November को due है।
+c007,N2_overdue,en_numbers,cartesia,sonic-3.6,arushi,961,,"आपकी EMI twentieth October को due थी, और अब fourteen days हो गए हैं।"
+c008,N2_overdue,hi_numbers,sarvam,bulbul:v4-flash,simran,1023,,"आपकी EMI बीस अक्टूबर को due थी, और अब चौदह दिन हो गए हैं।"
+c009,N2_overdue,en_numbers,sarvam,bulbul:v4-flash,ishita,1220,,"आपकी EMI twentieth October को due थी, और अब fourteen days हो गए हैं।"
+c010,N2_overdue,hi_numbers,cartesia,sonic-3.6,arushi,919,,"आपकी EMI बीस अक्टूबर को due थी, और अब चौदह दिन हो गए हैं।"
+c011,N2_overdue,hi_numbers,sarvam,bulbul:v4-flash,ishita,1105,,"आपकी EMI बीस अक्टूबर को due थी, और अब चौदह दिन हो गए हैं।"
+c012,N2_overdue,en_numbers,sarvam,bulbul:v4-flash,simran,1046,,"आपकी EMI twentieth October को due थी, और अब fourteen days हो गए हैं।"
+c013,N3_readback,en_numbers,cartesia,sonic-3.6,arushi,728,,"मैंने seven, seven, four, three सुना, क्या ये सही है?"
+c014,N3_readback,hi_numbers,cartesia,sonic-3.6,arushi,747,,"मैंने सात, सात, चार, तीन सुना, क्या ये सही है?"
+c015,N3_readback,hi_numbers,sarvam,bulbul:v4-flash,simran,1037,,"मैंने सात, सात, चार, तीन सुना, क्या ये सही है?"
+c016,N3_readback,en_numbers,sarvam,bulbul:v4-flash,simran,877,,"मैंने seven, seven, four, three सुना, क्या ये सही है?"
+c017,N3_readback,en_numbers,sarvam,bulbul:v4-flash,ishita,6180,,"मैंने seven, seven, four, three सुना, क्या ये सही है?"
+c018,N3_readback,hi_numbers,sarvam,bulbul:v4-flash,ishita,1577,,"मैंने सात, सात, चार, तीन सुना, क्या ये सही है?"
+c019,N4_dob,en_numbers,cartesia,sonic-3.6,arushi,817,,"आपकी date of birth fifteen March nineteen eighty-eight है, सही?"
+c020,N4_dob,hi_numbers,cartesia,sonic-3.6,arushi,684,,"आपकी date of birth पंद्रह मार्च उन्नीस सौ अट्ठासी है, सही?"
+c021,N4_dob,hi_numbers,sarvam,bulbul:v4-flash,ishita,1592,,"आपकी date of birth पंद्रह मार्च उन्नीस सौ अट्ठासी है, सही?"
+c022,N4_dob,en_numbers,sarvam,bulbul:v4-flash,ishita,1396,,"आपकी date of birth fifteen March nineteen eighty-eight है, सही?"
+c023,N4_dob,en_numbers,sarvam,bulbul:v4-flash,simran,1219,,"आपकी date of birth fifteen March nineteen eighty-eight है, सही?"
+c024,N4_dob,hi_numbers,sarvam,bulbul:v4-flash,simran,1106,,"आपकी date of birth पंद्रह मार्च उन्नीस सौ अट्ठासी है, सही?"
+c025,N5_hinglish,en_numbers,sarvam,bulbul:v4-flash,ishita,1130,,Aapki twelve thousand five hundred rupees ki EMI parson due hai.
+c026,N5_hinglish,en_numbers,cartesia,sonic-3.6,arushi,1006,,Aapki twelve thousand five hundred rupees ki EMI parson due hai.
+c027,N5_hinglish,hi_numbers,sarvam,bulbul:v4-flash,simran,1059,,Aapki barah hazaar paanch sau rupaye ki EMI parson due hai.
+c028,N5_hinglish,hi_numbers,cartesia,sonic-3.6,arushi,780,,Aapki barah hazaar paanch sau rupaye ki EMI parson due hai.
+c029,N5_hinglish,hi_numbers,sarvam,bulbul:v4-flash,ishita,1071,,Aapki barah hazaar paanch sau rupaye ki EMI parson due hai.
+c030,N5_hinglish,en_numbers,sarvam,bulbul:v4-flash,simran,984,,Aapki twelve thousand five hundred rupees ki EMI parson due hai.

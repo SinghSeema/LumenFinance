@@ -1,0 +1,417 @@
+"""Tool gating (G-01, G-02, G-11) and tool behaviour (LLD section 4)."""
+import json
+from datetime import date
+
+import pytest
+
+from emi_agent import context
+
+from emi_agent.config import load
+from emi_agent.data import load_borrowers
+from emi_agent.state import CallState, Stage
+from emi_agent.tools import NOT_VERIFIED, TOOL_SCHEMAS, Tools, asked_for_human, protected_phrases
+
+LOAN_STRINGS = ["twelve thousand", "12500", "personal loan", "fifth of November", "November"]
+
+
+@pytest.fixture
+def borrower():
+    return load_borrowers()["B001"]  # Arjun, dob 1988-03-15, last4 4821, 12500 due 2026-11-05
+
+
+def make_tools(borrower, today, heard=(), **faults):
+    """`heard` is what the borrower has said so far; verify_identity values must come from it."""
+    cfg = load()
+    cfg["faults"].update(faults)
+    state = CallState(borrower_id=borrower.borrower_id, reply_language="en")
+    state.heard.extend(heard)
+    return Tools(state, borrower, today, cfg), state
+
+
+def no_loan_data(result: dict) -> bool:
+    text = json.dumps(result).lower()
+    return not any(s.lower() in text for s in LOAN_STRINGS)
+
+
+@pytest.mark.parametrize("name,args", [
+    ("get_loan_details", {}),
+    ("send_payment_link", {"channel": "sms"}),
+])
+def test_gated_tools_refuse_before_verification(borrower, today, name, args):
+    tools, state = make_tools(borrower, today)
+    result = tools.call(name, args)
+    assert result == NOT_VERIFIED
+    assert not state.payment_link_sent
+    assert state.disclosure_log == []
+
+
+def test_refusal_is_identical_for_every_gated_tool(borrower, today):
+    tools, _ = make_tools(borrower, today)
+    assert tools.call("get_loan_details", {}) == tools.call("send_payment_link", {"channel": "sms"})
+
+
+def test_ungated_tools_reveal_no_loan_data_before_verification(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["it's 0000"])
+    results = [
+        tools.call("verify_identity", {"factor": "last4", "value": "0000"}),
+        tools.call("schedule_callback", {"when_text": "tomorrow evening"}),
+        tools.call("escalate_to_human", {"reason": "requested"}),
+        tools.call("record_outcome", {"outcome": "third_party", "promise_to_pay_date": None,
+                                      "notes": "brother answered"}),
+    ]
+    assert all(no_loan_data(r) for r in results)
+    assert not state.verified and state.disclosure_log == []
+
+
+@pytest.mark.parametrize("factor,value", [
+    ("dob", "1988-03-15"), ("dob", "15/03/1988"), ("dob", "15 March 1988"),
+    ("last4", "4821"), ("last4", "48 21"),
+])
+def test_verify_success(borrower, today, factor, value):
+    tools, state = make_tools(borrower, today, heard=[value])
+    result = tools.call("verify_identity", {"factor": factor, "value": value})
+    assert result["verified"] is True
+    assert state.verified and state.stage is Stage.REMINDING
+    assert result["loan_facts"]["amount_spoken"] == "twelve thousand five hundred rupees"
+    assert result["loan_facts"]["due_date_spoken"] == "the day after tomorrow"
+    assert {d.field for d in state.disclosure_log} >= {"amount_spoken", "due_date_spoken"}
+    assert all(d.verified for d in state.disclosure_log)
+
+
+def test_verify_failures_give_no_hints_and_close_after_three(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["16 March 1988", "4822", "1111", "4821"])
+    r1 = tools.call("verify_identity", {"factor": "dob", "value": "1988-03-16"})
+    r2 = tools.call("verify_identity", {"factor": "last4", "value": "4822"})
+    # ask_next names what to ask next (last four first, then the date of birth), never what was wrong.
+    assert r1 == {"verified": False, "attempts_left": 2, "ask_next": context.next_ask("dob")}
+    assert r2 == {"verified": False, "attempts_left": 1, "ask_next": context.next_ask("last4")}
+    assert "date of birth instead" in r2["ask_next"]
+    r3 = tools.call("verify_identity", {"factor": "last4", "value": "1111"})
+    assert r3 == {"verified": False, "attempts_left": 0}
+    assert state.stage is Stage.CLOSING
+    assert state.outcome.outcome.value == "verification_failed"
+    # Attempts are exhausted: even the right answer no longer verifies.
+    r4 = tools.call("verify_identity", {"factor": "last4", "value": "4821"})
+    assert r4["verified"] is False and not state.verified
+    assert all(no_loan_data(r) for r in (r1, r2, r3, r4))
+
+
+def test_unreadable_value_does_not_use_an_attempt(borrower, today):
+    tools, state = make_tools(borrower, today)
+    r = tools.call("verify_identity", {"factor": "dob", "value": "sometime in March"})
+    assert r["verified"] is False and r["attempts_left"] == 3
+    assert state.verify_attempts == 0
+
+
+def test_verify_moves_greeting_to_verifying_then_reminding(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["0000", "4821"])
+    tools.call("verify_identity", {"factor": "last4", "value": "0000"})
+    assert state.stage is Stage.VERIFYING
+    tools.call("verify_identity", {"factor": "last4", "value": "4821"})
+    assert state.stage is Stage.REMINDING
+
+
+def verified_tools(borrower, today, **faults):
+    tools, state = make_tools(borrower, today, heard=["it's 4821"], **faults)
+    tools.call("verify_identity", {"factor": "last4", "value": "4821"})
+    return tools, state
+
+
+def test_get_loan_details_after_verification(borrower, today):
+    tools, _ = verified_tools(borrower, today)
+    assert tools.call("get_loan_details", {})["loan_type"] == "personal loan"
+
+
+def test_payment_link(borrower, today):
+    tools, state = verified_tools(borrower, today)
+    r = tools.call("send_payment_link", {"channel": "whatsapp"})
+    assert r["sent"] is True and r["url"].endswith("****") and ".example/" in r["url"]
+    assert state.payment_link_sent and state.stage is Stage.ACTION
+
+
+def test_payment_link_fails_once_then_retry_succeeds(borrower, today):
+    tools, state = verified_tools(borrower, today, payment_link_fail="once")
+    assert tools.call("send_payment_link", {"channel": "sms"})["sent"] is True
+    assert [c["attempts"] for c in state.tool_calls if c["name"] == "send_payment_link"] == [2]
+
+
+def test_payment_link_fails_always(borrower, today):
+    tools, state = verified_tools(borrower, today, payment_link_fail="always")
+    r = tools.call("send_payment_link", {"channel": "sms"})
+    assert r["error"] == "tool_failed" and not state.payment_link_sent
+
+
+def test_schedule_callback(borrower, today):
+    tools, state = make_tools(borrower, today)
+    r = tools.call("schedule_callback", {"when_text": "tomorrow evening"})
+    assert r == {"status": "scheduled", "when_spoken": "tomorrow"}
+    assert state.callback_time == "2026-11-04 (tomorrow evening)"
+
+
+def test_schedule_callback_ambiguous(borrower, today):
+    tools, state = make_tools(borrower, today)
+    r = tools.call("schedule_callback", {"when_text": "when my salary comes"})
+    assert r["status"] == "ambiguous" and state.callback_time is None
+
+
+def test_escalate(borrower, today):
+    tools, state = make_tools(borrower, today)
+    assert tools.call("escalate_to_human", {"reason": "hardship"})["escalated"] is True
+    assert state.escalate_to_human
+    assert tools.call("escalate_to_human", {"reason": "bribe"})["error"] == "invalid_arguments"
+
+
+def test_record_promise_normalizes_spoken_date(borrower, today):
+    tools, state = verified_tools(borrower, today)
+    r = tools.call("record_outcome", {"outcome": "promise_to_pay",
+                                      "promise_to_pay_date": "next Friday", "notes": ""})
+    assert r["recorded"] is True and r["promise_date_spoken"] == "the thirteenth of November"
+    assert state.outcome.promise_to_pay_date == date(2026, 11, 13)
+    assert state.stage is Stage.CLOSING
+
+
+def test_record_promise_ambiguous_date_asks_again(borrower, today):
+    tools, state = verified_tools(borrower, today)
+    r = tools.call("record_outcome", {"outcome": "promise_to_pay",
+                                      "promise_to_pay_date": "month end", "notes": ""})
+    assert r["error"] == "date_unclear" and state.outcome is None
+
+
+def test_record_rejects_payment_outcome_when_unverified(borrower, today):
+    tools, state = make_tools(borrower, today)
+    r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None,
+                                      "notes": ""})
+    assert r["error"] == "invalid_outcome" and state.outcome is None
+
+
+def test_record_merges_state(borrower, today):
+    tools, state = verified_tools(borrower, today)
+    tools.call("send_payment_link", {"channel": "sms"})
+    tools.call("record_outcome", {"outcome": "hardship", "promise_to_pay_date": None,
+                                  "notes": "lost job"})
+    rec = state.outcome
+    assert rec.verified and rec.payment_link_sent and rec.escalate_to_human
+    assert rec.borrower_id == "B001" and rec.language_used == "en"
+
+
+def test_verification_failed_outcome_cannot_be_overwritten(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["1111", "2222", "3333"])
+    for v in ("1", "2", "3"):
+        tools.call("verify_identity", {"factor": "last4", "value": v * 4})
+    r = tools.call("record_outcome", {"outcome": "unresolved", "promise_to_pay_date": None,
+                                      "notes": ""})
+    assert "error" in r and state.outcome.outcome.value == "verification_failed"
+
+
+def test_unknown_tool_and_bad_args(borrower, today):
+    tools, _ = make_tools(borrower, today)
+    assert tools.call("waive_fees", {})["error"] == "unknown_tool"
+    assert tools.call("verify_identity", {"factor": "pan"})["error"] == "invalid_arguments"
+
+
+def test_schemas_are_strict_and_cover_all_tools():
+    names = {t["name"] for t in TOOL_SCHEMAS}
+    assert names == {"verify_identity", "get_loan_details", "send_payment_link",
+                     "schedule_callback", "escalate_to_human", "record_outcome"}
+    for t in TOOL_SCHEMAS:
+        assert t["strict"] is True
+        assert t["input_schema"]["additionalProperties"] is False
+        assert set(t["input_schema"]["required"]) == set(t["input_schema"]["properties"])
+
+
+def test_protected_phrases_include_the_raw_amount(today):
+    phrases = protected_phrases(load_borrowers()["B001"], today)
+    assert {"12500", "12,500"} <= set(phrases)
+
+
+# --- verify_identity takes only values the borrower said (baseline-v1: invented "1234", "1990-05-15")
+
+@pytest.mark.parametrize("factor, value, heard", [
+    ("last4", "1234", ["yes, this is Arjun"]),
+    ("last4", "4821", []),
+    ("dob", "1990-05-15", ["Theek hai, aap mujhse kya puchna chahti hain?"]),
+    ("dob", "1988-03-15", ["My date of birth is 16 March 1988"]),   # no silent correction
+    ("last4", "4821", ["it's 48"]),
+])
+def test_verify_rejects_a_value_the_borrower_did_not_say(borrower, today, factor, value, heard):
+    tools, state = make_tools(borrower, today, heard=heard)
+    r = tools.call("verify_identity", {"factor": factor, "value": value})
+    assert r["verified"] is False and r["error"] == "not_heard"
+    assert r["attempts_left"] == 3 and state.verify_attempts == 0
+    assert not state.verified and state.disclosure_log == [] and no_loan_data(r)
+
+
+def test_not_heard_reply_is_identical_for_right_and_wrong_values(borrower, today):
+    """G-11: the refusal must not reveal whether the unheard value was correct."""
+    tools, _ = make_tools(borrower, today, heard=["hello"])
+    right = tools.call("verify_identity", {"factor": "last4", "value": "4821"})
+    wrong = tools.call("verify_identity", {"factor": "last4", "value": "9999"})
+    assert right == wrong
+
+
+@pytest.mark.parametrize("value", ["?", "????", "", "unknown"])
+def test_placeholder_value_uses_no_attempt(borrower, today, value):
+    tools, state = make_tools(borrower, today, heard=["it's 4821"])
+    r = tools.call("verify_identity", {"factor": "last4", "value": value})
+    assert r["verified"] is False and "error" in r and state.verify_attempts == 0
+    assert "message" in r
+
+
+def test_verify_accepts_words_and_hindi(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["haan ji, chaar aath do ek"])
+    assert tools.call("verify_identity", {"factor": "last4", "value": "4821"})["verified"] is True
+
+
+# --- record_outcome: outcomes the model may not set on its own
+
+def test_model_cannot_record_verification_failed(borrower, today):
+    tools, state = make_tools(borrower, today)
+    r = tools.call("record_outcome", {"outcome": "verification_failed",
+                                      "promise_to_pay_date": None, "notes": ""})
+    assert r["error"] == "code_only_outcome" and state.outcome is None
+
+
+def test_stop_requested_needs_a_detected_stop(borrower, today):
+    tools, state = verified_tools(borrower, today)
+    r = tools.call("record_outcome", {"outcome": "stop_requested", "promise_to_pay_date": None,
+                                      "notes": "borrower said goodbye"})
+    assert r["error"] == "no_stop_request" and state.outcome is None
+    state.flags.add("stop_requested")
+    r = tools.call("record_outcome", {"outcome": "stop_requested", "promise_to_pay_date": None,
+                                      "notes": "asked not to be called"})
+    assert r["recorded"] is True and state.outcome.outcome.value == "stop_requested"
+
+
+@pytest.mark.parametrize("outcome", ["wrong_number", "third_party"])
+def test_verified_borrower_cannot_be_wrong_number_or_third_party(borrower, today, outcome):
+    tools, state = verified_tools(borrower, today)
+    r = tools.call("record_outcome", {"outcome": outcome, "promise_to_pay_date": None, "notes": ""})
+    assert r["error"] == "invalid_outcome" and state.outcome is None
+
+
+def test_callback_requested_needs_a_scheduled_callback(borrower, today):
+    tools, state = make_tools(borrower, today)
+    args = {"outcome": "callback_requested", "promise_to_pay_date": None, "notes": ""}
+    assert tools.call("record_outcome", args)["error"] == "invalid_outcome"
+    tools.call("schedule_callback", {"when_text": "kal subah"})
+    assert tools.call("record_outcome", args)["recorded"] is True
+    assert state.outcome.callback_time == "2026-11-04 (kal subah)"
+
+
+@pytest.mark.parametrize("said, agent, ok", [
+    ("Human finance.", "", False),                       # STT mishearing, live call 2026-11-03
+    ("Are you a human?", "", False),                     # the AI question, not a request
+    ("I want to talk to a real person.", "", True),
+    ("Connect me to your manager.", "", True),
+    ("kisi insaan se baat karao", "", True),
+    ("मुझे किसी से बात करनी है", "", True),
+    ("Haan ji, please.", "Would you like a colleague to call you?", True),
+    ("Haan ji.", "Aapki EMI 5 November ko due hai.", False),
+])
+def test_asked_for_human(said, agent, ok):
+    assert asked_for_human(said, agent) is ok
+
+
+def test_requested_escalation_needs_a_clear_request(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["Human finance."])
+    r = tools.call("escalate_to_human", {"reason": "requested"})
+    assert r["error"] == "not_requested" and not state.escalate_to_human
+    state.heard.append("Can I speak to a human, please?")
+    assert tools.call("escalate_to_human", {"reason": "requested"})["escalated"] is True
+    assert state.escalate_to_human
+
+
+def test_hardship_escalation_is_not_gated_by_wording(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["Human finance."])
+    assert tools.call("escalate_to_human", {"reason": "hardship"})["escalated"] is True
+
+
+WRONG = {"outcome": "wrong_number", "promise_to_pay_date": None, "notes": "new owner of the number"}
+
+
+def test_no_escalation_after_wrong_number(borrower, today):
+    """Dev eval S05 2026-11-04: escalate_to_human(other) after recording wrong_number."""
+    tools, state = make_tools(borrower, today, heard=["ye galat number hai"])
+    assert tools.call("record_outcome", WRONG) == {"recorded": True}
+    assert tools.call("escalate_to_human", {"reason": "other"})["error"] == "not_the_borrower"
+    assert not state.escalate_to_human
+
+
+def test_escalation_before_wrong_number_is_undone(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["ye galat number hai"])
+    tools.call("escalate_to_human", {"reason": "other"})
+    tools.call("record_outcome", WRONG)
+    assert not state.escalate_to_human and state.outcome.escalate_to_human is False
+
+
+def test_requested_escalation_survives_wrong_number(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["mujhe kisi insaan se baat karni hai"])
+    tools.call("escalate_to_human", {"reason": "requested"})
+    tools.call("record_outcome", WRONG)
+    assert state.escalate_to_human
+
+
+def test_verify_identity_reads_a_spoken_dob(today):
+    """Live call 2026-11-04: the model passed the words as heard; the tool only took digit formats."""
+    from emi_agent.config import load
+    from emi_agent.data import load_borrowers
+    from emi_agent.state import CallState
+    from emi_agent.tools import Tools
+    s = CallState(borrower_id="B002", reply_language="hi")
+    s.heard.append("बाइस July उन्नीस सौ चौरानवे.")
+    t = Tools(s, load_borrowers()["B002"], today, load())
+    assert t.call("verify_identity", {"factor": "dob", "value": "बाइस July उन्नीस सौ चौरानवे"})["verified"]
+
+
+def _verified_tools(borrower_id, today):
+    from emi_agent.config import load
+    from emi_agent.data import load_borrowers
+    from emi_agent.state import CallState
+    from emi_agent.tools import Tools
+    s = CallState(borrower_id=borrower_id, reply_language="hi")
+    s.verified = True
+    return s, Tools(s, load_borrowers()[borrower_id], today, load())
+
+
+def test_already_paid_on_an_overdue_emi_goes_to_a_colleague(today):
+    """Owner 2026-11-04: records disagree, so a colleague checks and calls back (code-owned)."""
+    s, t = _verified_tools("B002", today)  # 6 days overdue
+    r = t.call("record_outcome", {"outcome": "already_paid", "promise_to_pay_date": None,
+                                  "notes": "Paid 2 Nov by UPI"})
+    assert r["recorded"] and r["team_will_check"] and "concerned team" in r["message"]
+    assert s.escalate_to_human and "escalate:payment_check" in s.flags
+    assert t.build_record(s.outcome.outcome, None, "x").escalate_to_human
+
+
+def test_already_paid_before_the_due_date_is_just_noted(today):
+    s, t = _verified_tools("B001", today)  # due 5 Nov, not overdue
+    r = t.call("record_outcome", {"outcome": "already_paid", "promise_to_pay_date": None, "notes": "x"})
+    assert r == {"recorded": True} and not s.escalate_to_human
+
+
+def test_verify_identity_reads_spoken_last4(today):
+    from emi_agent.config import load
+    from emi_agent.data import load_borrowers
+    from emi_agent.state import CallState
+    from emi_agent.tools import Tools
+    s = CallState(borrower_id="B002", reply_language="hi")
+    s.heard.append("last four digits three three six seven हैं")
+    t = Tools(s, load_borrowers()["B002"], today, load())
+    assert t.call("verify_identity", {"factor": "last4", "value": "three three six seven"})["verified"]
+
+
+# Owner, 2026-11-04: a dispute goes to "the concerned team" with a callback; never a time or ticket.
+def test_dispute_escalation_says_concerned_team(borrower, today):
+    tools, state = make_tools(borrower, today)
+    state.verified = True
+    r = tools.call("escalate_to_human", {"reason": "dispute"})
+    assert r["escalated"] and "concerned team" in r["message"] and "callback" in r["message"]
+    assert "no reference number" in r["message"]
+
+
+@pytest.mark.parametrize("reason", ["hardship", "requested"])
+def test_person_escalations_still_say_colleague(borrower, today, reason):
+    tools, state = make_tools(borrower, today, heard=["I want to talk to a manager"])
+    state.verified = True
+    r = tools.call("escalate_to_human", {"reason": reason})
+    assert r["escalated"] and "colleague" in r["message"]

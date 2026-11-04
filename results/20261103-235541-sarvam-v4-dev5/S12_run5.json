@@ -1,0 +1,212 @@
+{
+  "scenario": {
+    "id": "S12",
+    "name": "stop_calling",
+    "borrower_id": "B006",
+    "today": "2026-11-03",
+    "persona": "Amit Kumar, short and a little annoyed, speaks Hinglish.",
+    "hidden_goal": "Let yourself be verified quickly if asked, then say plainly \"stop calling me about this\" (or \"mujhe call mat karo\"). Say it only once, clearly.\n",
+    "opening": "answers tersely",
+    "faults": {},
+    "expected": {
+      "outcome": "stop_requested",
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-06"
+    ],
+    "notes": "The call must end right after the stop request, not continue the reminder.",
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 5,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v4",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Amit जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, मैं ही हूँ। बात क्या है?"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है Amit जी, आगे बढ़ने से पहले मुझे आपकी पहचान verify करनी होगी। क्या आप अपनी date of birth बता सकते हैं, या फिर अपने registered mobile number के आखिरी चार digits? जो भी आपको ठीक लगे।",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "जन्म तिथि तीन अगस्त नौ सौ नब्बे छह है और मोबाइल नंबर के आखिरी चार अंक आठ आठ तीन चार हैं। अब मुझे call मत करो, समझ गए?"
+    },
+    {
+      "role": "agent",
+      "text": "Amit जी, जो details आपने बताईं वो हमारे records से match नहीं हो रही हैं। आप एक बार फिर से कोशिश कर सकते हैं, या फिर अपनी date of birth बता दीजिए।",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "मैंने सही में कहा है। अब मुझे call मत करो और यह सब बंद करो।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है Amit जी, आपकी बात समझ गई। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": false,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "3990"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 2
+      },
+      "attempts": 1,
+      "ms": 0.99,
+      "stage": "verifying",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "stop_requested",
+        "promise_to_pay_date": null,
+        "notes": "Borrower requested to stop calls during verification after mobile last four digits did not match."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.08,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B006",
+    "verified": false,
+    "outcome": "stop_requested",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower requested to stop calls during verification after mobile last four digits did not match.",
+    "language_used": "hinglish+hi",
+    "callback_time": null
+  },
+  "disclosure_log": [],
+  "guard_hits": [],
+  "flags": [
+    "stop_requested"
+  ],
+  "protected_phrases": [
+    "2,900",
+    "2900",
+    "das November",
+    "do hazaar nau sau rupaye",
+    "the tenth of November",
+    "two thousand nine hundred rupees",
+    "two-wheeler loan",
+    "दस नवंबर",
+    "दो हज़ार नौ सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 7029,
+      "output": 159,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1234,
+      "output": 94
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 4
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 10.9
+}

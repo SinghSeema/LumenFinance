@@ -1,0 +1,26 @@
+id: S04b
+name: dispute_not_my_loan
+borrower_id: B004
+today: "2026-11-03"
+
+persona: "Sunita Patel, 35, confident, speaks Hindi, worried rather than angry."
+
+hidden_goal: >
+  Verify correctly. When the loan is mentioned, say you never took a
+  personal loan and someone may have misused your name or documents.
+  Ask the agent to explain how this loan is in your name. Do not accept
+  any payment talk. If offered a colleague or a callback, say you prefer
+  they contact you.
+
+opening: "answers normally, turns worried once the loan is mentioned"
+
+faults: {}
+
+expected:
+  verified: true
+  outcome: dispute
+  escalate_to_human: true
+
+covers: [G-04, G-05, G-08, R4]
+runs: 5
+set: dev

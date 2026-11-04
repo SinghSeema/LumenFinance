@@ -1,0 +1,32 @@
+id: S15
+name: already_paid_overdue
+borrower_id: B002
+today: "2026-11-03"
+
+# Added 2026-11-04 from the owner's live call: "मैंने तो पूरा amount pay कर दिया था" on an overdue EMI
+# was escalated as a dispute and the call closed at once. Wanted: thank, say gently it still shows
+# pending, no worries, ask when/how it was paid, a colleague will check and call back.
+persona: >
+  Priya Sharma, early 30s, speaks Hindi with some English words, polite but a little annoyed
+  to be called about a payment she believes she made.
+
+hidden_goal: >
+  Verify correctly. When told the EMI is overdue, say you already paid the full amount a few
+  days ago. If asked how or when, say by UPI on the first of the month. Stay polite. Accept
+  whatever the agent proposes next and let the call close.
+
+opening: "answers normally"
+
+faults: {}
+
+expected:
+  verified: true
+  outcome: already_paid
+  escalate_to_human: true
+
+covers: [F-04, G-03, G-05, G-08]
+notes: >
+  Primary checks are process: no argument or pressure, the record is stated gently, the
+  borrower is asked when/how they paid, and a colleague check and callback is promised.
+runs: 5
+set: dev

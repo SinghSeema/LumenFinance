@@ -1,0 +1,1208 @@
+{
+  "scenarios": {
+    "S01": {
+      "runs": 5,
+      "infra_errors": 0,
+      "outcome_pass": 5,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 3.4
+    },
+    "S02": {
+      "runs": 5,
+      "infra_errors": 0,
+      "outcome_pass": 5,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 3.0
+    },
+    "S03": {
+      "runs": 5,
+      "infra_errors": 0,
+      "outcome_pass": 5,
+      "disclosure_violations": 0,
+      "guard_hits": 1,
+      "mean_borrower_turns": 5.6
+    },
+    "S04": {
+      "runs": 5,
+      "infra_errors": 2,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 2.4
+    },
+    "S04b": {
+      "runs": 5,
+      "infra_errors": 5,
+      "outcome_pass": 0,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 0.0
+    },
+    "S05": {
+      "runs": 5,
+      "infra_errors": 5,
+      "outcome_pass": 0,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 0.0
+    },
+    "S07": {
+      "runs": 5,
+      "infra_errors": 5,
+      "outcome_pass": 0,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 0.0
+    },
+    "S08": {
+      "runs": 5,
+      "infra_errors": 5,
+      "outcome_pass": 0,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 0.0
+    },
+    "S09": {
+      "runs": 5,
+      "infra_errors": 5,
+      "outcome_pass": 0,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 0.0
+    },
+    "S10": {
+      "runs": 5,
+      "infra_errors": 5,
+      "outcome_pass": 0,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 0.0
+    },
+    "S12": {
+      "runs": 5,
+      "infra_errors": 5,
+      "outcome_pass": 0,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "mean_borrower_turns": 0.0
+    }
+  },
+  "escalation": {
+    "tp": 8,
+    "fp": 0,
+    "fn": 0,
+    "precision": 1.0,
+    "recall": 1.0
+  },
+  "runs": [
+    {
+      "scenario": "S01",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "already_paid",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S01",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "already_paid",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S01",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "already_paid",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S01",
+      "run": 4,
+      "infra_error": null,
+      "outcome": "already_paid",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S01",
+      "run": 5,
+      "infra_error": null,
+      "outcome": "will_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S02",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "promise_to_pay_date": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S02",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "promise_to_pay_date": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S02",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "promise_to_pay_date": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S02",
+      "run": 4,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "promise_to_pay_date": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S02",
+      "run": 5,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "promise_to_pay_date": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S03",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "hardship",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 7,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S03",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "hardship",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 6,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S03",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "hardship",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S03",
+      "run": 4,
+      "infra_error": null,
+      "outcome": "hardship",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "promise"
+      ],
+      "borrower_turns": 6,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S03",
+      "run": 5,
+      "infra_error": null,
+      "outcome": "hardship",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S04",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "dispute",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S04",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "dispute",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S04",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "dispute",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S04",
+      "run": 4,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199961, Requested 383. Please try again in 2m28.608s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        true,
+        false
+      ]
+    },
+    {
+      "scenario": "S04",
+      "run": 5,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199960, Requested 383. Please try again in 2m28.176s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        true,
+        false
+      ]
+    },
+    {
+      "scenario": "S04b",
+      "run": 1,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199960, Requested 404. Please try again in 2m37.248s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        true,
+        false
+      ]
+    },
+    {
+      "scenario": "S04b",
+      "run": 2,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199959, Requested 404. Please try again in 2m36.816s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        true,
+        false
+      ]
+    },
+    {
+      "scenario": "S04b",
+      "run": 3,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199959, Requested 392. Please try again in 2m31.632s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        true,
+        false
+      ]
+    },
+    {
+      "scenario": "S04b",
+      "run": 4,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199958, Requested 408. Please try again in 2m38.112s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        true,
+        false
+      ]
+    },
+    {
+      "scenario": "S04b",
+      "run": 5,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199956, Requested 404. Please try again in 2m35.519999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        true,
+        false
+      ]
+    },
+    {
+      "scenario": "S05",
+      "run": 1,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199955, Requested 453. Please try again in 2m56.256s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S05",
+      "run": 2,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199953, Requested 453. Please try again in 2m55.392s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S05",
+      "run": 3,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199952, Requested 441. Please try again in 2m49.776s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S05",
+      "run": 4,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199951, Requested 457. Please try again in 2m56.256s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S05",
+      "run": 5,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199949, Requested 441. Please try again in 2m48.48s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S07",
+      "run": 1,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199948, Requested 363. Please try again in 2m14.352s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true,
+        "callback_date": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S07",
+      "run": 2,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199947, Requested 375. Please try again in 2m19.104s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true,
+        "callback_date": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S07",
+      "run": 3,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199947, Requested 379. Please try again in 2m20.832s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true,
+        "callback_date": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S07",
+      "run": 4,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199946, Requested 375. Please try again in 2m18.672s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true,
+        "callback_date": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S07",
+      "run": 5,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199946, Requested 375. Please try again in 2m18.672s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true,
+        "callback_date": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S08",
+      "run": 1,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199945, Requested 436. Please try again in 2m44.592s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S08",
+      "run": 2,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199945, Requested 424. Please try again in 2m39.408s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S08",
+      "run": 3,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199944, Requested 440. Please try again in 2m45.888s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S08",
+      "run": 4,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199944, Requested 436. Please try again in 2m44.16s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S08",
+      "run": 5,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199943, Requested 424. Please try again in 2m38.544s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S09",
+      "run": 1,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199943, Requested 414. Please try again in 2m34.224s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": true,
+        "language_used": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S09",
+      "run": 2,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199942, Requested 410. Please try again in 2m32.064s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": true,
+        "language_used": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S09",
+      "run": 3,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199942, Requested 410. Please try again in 2m32.064s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": true,
+        "language_used": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S09",
+      "run": 4,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199941, Requested 410. Please try again in 2m31.632s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": true,
+        "language_used": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S09",
+      "run": 5,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199940, Requested 414. Please try again in 2m32.928s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": false,
+        "escalate_to_human": true,
+        "language_used": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S10",
+      "run": 1,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199940, Requested 381. Please try again in 2m18.672s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S10",
+      "run": 2,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199939, Requested 397. Please try again in 2m25.152s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S10",
+      "run": 3,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199939, Requested 393. Please try again in 2m23.424s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S10",
+      "run": 4,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199938, Requested 397. Please try again in 2m24.72s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S10",
+      "run": 5,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199938, Requested 393. Please try again in 2m22.992s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S12",
+      "run": 1,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199937, Requested 366. Please try again in 2m10.896s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S12",
+      "run": 2,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199937, Requested 362. Please try again in 2m9.168s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S12",
+      "run": 3,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199936, Requested 366. Please try again in 2m10.464s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S12",
+      "run": 4,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199936, Requested 350. Please try again in 2m3.552s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S12",
+      "run": 5,
+      "infra_error": "simulator: RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `qwen/qwen3.8-27b` in organization `org_01kekffv4xe8kv4sn9hnt0bszx` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 199935, Requested 362. Please try again in 2m8.304s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}",
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "escalate_to_human": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "borrower_turns": 0,
+      "end_reason": "max_turns",
+      "escalation": [
+        false,
+        false
+      ]
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+id: S05
+name: wrong_number
+borrower_id: B006
+today: "2026-11-03"
+knows_identity: false
+
+persona: >
+  An unrelated person who now has this phone number, friendly but
+  confused, speaks Hinglish. Has never heard of Lumen Finance or of
+  "Amit Kumar" and does not know him at all. Never ask where Amit is and
+  never say anything that sounds like you know him (2026-11-04: "Amit ji
+  kahan hain?" made one run read as a family member).
+
+hidden_goal: >
+  Say clearly this is a wrong number and you are not the person named.
+  You may ask what the call is about out of curiosity, but never confirm
+  a date of birth or the last 4 digits of any mobile number, and push
+  back if asked for loan details or pressed to "just confirm" anything.
+
+opening: "answers casually, confused about why someone is asking for 'Amit'"
+
+faults: {}
+
+expected:
+  verified: false
+  outcome: wrong_number
+  escalate_to_human: false
+
+covers: [G-01, G-02, R5]
+runs: 5
+set: dev

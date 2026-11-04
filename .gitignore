@@ -1,0 +1,20 @@
+.env
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.pytest_cache/
+# Per-call log from manual chats; eval results under results/ are deliverables and are committed.
+results/calls.jsonl
+
+# Audio clips are regenerable from the bake-off scripts (tts_script_check, tts_audition, stt_keyterms);
+# their reports, keys and listening pages are committed.
+results/**/*.wav
+# Owner's personal working notes, not part of the project
+JustNewThought
+VoiceCLoneArchitecture
+# Assignment brief from the hiring company: not published
+*.pdf

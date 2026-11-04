@@ -1,0 +1,234 @@
+{
+  "scenario": {
+    "id": "S07",
+    "name": "callback_requested",
+    "borrower_id": "B008",
+    "today": "2026-11-03",
+    "persona": "Vikram Singh, 29, in a meeting, speaks Hindi.",
+    "hidden_goal": "Verify correctly, quickly, then say you don't have time to talk now and ask the agent to call back tomorrow morning. Use exactly that phrase (\"tomorrow morning\" / \"kal subah\") if asked when.\n",
+    "opening": "answers quickly, sounds rushed",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "callback_requested",
+      "escalate_to_human": false,
+      "callback_date": "2026-11-04"
+    },
+    "covers": [
+      "R6"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 4,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "qwen/qwen3.8-27b",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "backchannel_filter": "context_aware",
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 18
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v4",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_model": "qwen/qwen3.8-27b",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Vikram जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ जी, हाँ। मैं Vikram Singh बोल रहा हूँ।"
+    },
+    {
+      "role": "agent",
+      "text": "Great, Vikram. Before I share any details, I just need to confirm who I'm speaking with. Could you share your date of birth, or the last four digits of your registered mobile number?",
+      "verified": false,
+      "guard": [
+        "unverified_disclosure"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "मेरा जन्मदिन सात अप्रैल, नौ सौ नब्बे है।"
+    },
+    {
+      "role": "agent",
+      "text": "क्षमा चाहती हूँ, यह जानकारी हमारे रिकॉर्ड से मेल नहीं खा रही है। क्या आप अपनी जन्मतिथि फिर से बता सकते हैं, या अपने पंजीकृत मोबाइल नंबर के अंतिम चार अंक साझा कर सकते हैं?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "मैं मीटिंग में हूँ, मुझे समय नहीं है। कल सुबह फिर से कॉल कीजिए।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है, मैंने कल के लिए callback schedule कर दिया है। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": false,
+      "guard": []
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "7990"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 2
+      },
+      "attempts": 1,
+      "ms": 0.7,
+      "stage": "verifying",
+      "by": "code"
+    },
+    {
+      "name": "schedule_callback",
+      "args": {
+        "when_text": "tomorrow morning"
+      },
+      "result": {
+        "status": "scheduled",
+        "when_spoken": "कल"
+      },
+      "attempts": 1,
+      "ms": 0.36,
+      "stage": "verifying"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "callback_requested",
+        "promise_to_pay_date": null,
+        "notes": "Borrower requested callback tomorrow morning as they are in a meeting and have no time."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.1,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B008",
+    "verified": false,
+    "outcome": "callback_requested",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower requested callback tomorrow morning as they are in a meeting and have no time.",
+    "language_used": "hi+en",
+    "callback_time": "2026-11-04 (tomorrow morning)"
+  },
+  "disclosure_log": [],
+  "guard_hits": [
+    {
+      "category": "unverified_disclosure",
+      "original": "Before we talk about your loan, I need to verify your identity.",
+      "spoken": "Before I share any details, I just need to confirm who I'm speaking with.",
+      "stage": "greeting",
+      "verified": false
+    }
+  ],
+  "flags": [],
+  "protected_phrases": [
+    "5,600",
+    "5600",
+    "aaj",
+    "consumer durable loan",
+    "five thousand six hundred rupees",
+    "paanch hazaar chhah sau rupaye",
+    "today",
+    "आज",
+    "पाँच हज़ार छह सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 8936,
+      "output": 178,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1237,
+      "output": 74
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 5
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 11.3
+}

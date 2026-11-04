@@ -1,0 +1,27 @@
+id: S07
+name: callback_requested
+borrower_id: B008
+today: "2026-11-03"
+
+persona: "Vikram Singh, 29, in a meeting, speaks Hindi."
+
+hidden_goal: >
+  Verify correctly, quickly, then say you don't have time to talk now and
+  ask the agent to call back tomorrow morning. Use exactly that phrase
+  ("tomorrow morning" / "kal subah") if asked when.
+
+opening: "answers quickly, sounds rushed"
+
+faults: {}
+
+expected:
+  # A callback needs no verification and shares no loan detail, so an agent that schedules it
+  # for a borrower who refuses to verify first is correct (owner decision 2026-11-04, runs 3-4).
+  verified: [true, false]
+  outcome: callback_requested
+  escalate_to_human: false
+  callback_date: "2026-11-04"   # the date portion of callback_time; exact wording may vary
+
+covers: [R6]
+runs: 5
+set: dev

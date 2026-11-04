@@ -1,0 +1,14 @@
+# Profile: hindi_bulbul
+# Sarvam Bulbul TTS with Deepgram STT; LLM from defaults (Groq).
+# Default profile for Hindi and Hinglish conversations.
+
+tts:
+  provider: sarvam
+  model: bulbul:v4-flash
+  script: devanagari
+
+stt:
+  provider: deepgram
+  model: nova-3
+  language: multi
+  language_hints: [hi, en]

@@ -13,19 +13,24 @@ The model writes the words, handles empathy and follows the borrower's language.
 | No loan detail before identity is verified (G-01, G-02) | The model sees no loan data before verification; loan tools refuse; a per-sentence output guard; a disclosure log the evals check |
 | Identity check and attempt counting | Code reads the last four digits or the date of birth from the transcript and checks it; at most 3 attempts; no hints |
 | No made-up verification result | Code replaces "that doesn't match" or "last chance" when no check has failed in that turn |
-| No threats, shaming, waivers or discounts (G-03, G-04) | Output guard in English and Hindi (Devanagari and romanised) replaces the sentence with a safe line |
-| Escalation for dispute, hardship, explicit request (G-05) | Tool flag set by code; a dispute or unmatched payment goes to "the concerned team, who will arrange a callback" |
-| Stop means stop (G-06) | Code detects stop requests and closes the call |
+| No threats, shaming, waivers or discounts (G-03, G-04) | Output guard in English and Hindi (Devanagari and romanised) replaces the sentence with a safe line; reading back the borrower's own request ("you'd like a waiver") is allowed, any commitment is not |
+| Never an invented amount or fee (G-08) | Every rupee amount spoken must be the borrower's EMI, a charge already applied, the repayment policy, or a figure the borrower said; "a late charge has been added" on a loan with none is replaced by the true policy line |
+| Escalation for dispute, hardship, explicit request (G-05) | Tool flag set by code. Hardship, wrong amount, "not my loan" and waiver demands then follow a **code-owned flow**, one step per turn (acknowledge and ask one question; read back and hand off to "our internal team, who will check and arrange a call back"; close). A step moves on only when the borrower heard it. Code checks once that a hardship or dispute is real before escalating |
+| Stop means stop (G-06) | Code detects stop requests (English, Hindi, mixed script) and closes in one turn: an apology, and only if verified one gentle line that it was just a reminder so no late fee is added |
+| Answers to questions about paying | A generic repayment policy (`data/policy.yaml`): late fee, grace period, part payment, how to pay, credit score only if asked; short version in the prompt, detail through a tool |
 | Amounts and dates said aloud correctly | Code formats them ("twelve thousand five hundred rupees", "the twenty-eighth of October") and resolves "next Friday" or "parso" against a fixed today |
-| A valid outcome record | Pydantic schema; code fills in the outcome if the model forgets |
+| A valid outcome record | Pydantic schema; code fills in the outcome if the model forgets; "already paid" needs the borrower to have said so; "I'll pay by the due date" is recorded as a promise for the due date |
+| No hidden reasoning spoken | Code drops any `<think>` text the model leaks into its reply, before speech and from history |
 
 ## How a call goes
 
-1. Greeting: confirms it is speaking to the borrower. Wrong number or a family member: polite close, nothing disclosed.
-2. Verification: asks for the **last four digits of the registered mobile number**; if they do not match, asks for the **date of birth**. A date of birth offered first is accepted too. Three attempts at most.
-3. Reminder: the EMI amount and due date, or how many days it is overdue.
-4. Intent: payment link (mock SMS or WhatsApp), promise-to-pay date, callback time, "already paid" (the concerned team checks it), dispute or hardship (escalated), stop.
-5. Close: thanks the borrower and writes the outcome to `results/calls.jsonl`.
+1. Greeting: says once that it is an AI assistant from Lumen Finance and confirms it is speaking to the borrower. Wrong number or a family member: polite close, nothing disclosed.
+2. Verification, "for account verification": asks for the **last four digits of the registered mobile number**; if they do not match, the **date of birth**. A date of birth offered first is accepted too. Three attempts at most.
+3. Reminder: the EMI amount and due date. Code tells the model whether it is not yet due (no charge, offer the link before the due date) or overdue (the late charge once, can it be cleared today).
+4. Intent and questions: payment link (mock SMS or WhatsApp), promise-to-pay date, callback time, "already paid" (our internal team checks it), answers about the late fee or part payment from the policy, hardship or dispute (the code-owned flow), stop.
+5. Close: thanks the borrower ("आपका दिन शुभ हो") and writes the outcome to `results/calls.jsonl`.
+
+The agent follows the borrower's language at runtime (English, Hindi, Hinglish; the start language comes from the borrower's record). In Hindi it uses everyday words, and its questions to the borrower fit a man or a woman.
 
 Example outcome record from a live call:
 
@@ -47,7 +52,7 @@ flowchart LR
     STT --> BR[Brain: LLM plus rules]
     BR --> G[Output guard and pre-TTS fixes]
     G --> TTS[Sarvam Bulbul TTS]
-    BR <--> TL[Tools: verify, loan facts, payment link, callback, escalate, outcome]
+    BR <--> TL[Tools: verify, loan facts, policy, payment link, callback, escalate, outcome]
   end
   TL --> OUT[results/calls.jsonl]
   EV[Text eval harness] -->|same Brain| BR
@@ -62,8 +67,8 @@ The Brain (`src/emi_agent/brain.py`) is plain Python with no audio code. The voi
 |---|---|---|
 | STT | Deepgram Nova-3, `language=multi`, EU host, endpointing 100 ms | Handles Hindi-English code-switching in one stream; EU host measured ~150 ms closer than the US default from here |
 | LLM | Sarvam `sarvam-105b-conversations`; Groq `gpt-oss` as fallback | Fastest first text measured for Hinglish replies; billed in rupees |
-| TTS | Sarvam Bulbul v4-flash (Hindi in Devanagari, English terms in Latin) | Reads Hinglish and spoken numbers correctly in clip checks; the voice is a placeholder until blind listening scores are in; Cartesia Sonic is a config option |
-| Turn detection | Silero VAD (0.5 s stop) plus an "unfinished sentence" wait | Smart Turn v3 was tried and is kept as an option, not the default |
+| TTS | Sarvam Bulbul v4-flash (Hindi in Devanagari, English terms in Latin); pace 0.9 once hardship is heard | Reads Hinglish and spoken numbers correctly in clip checks; pace measured to lengthen speech ~10-15% (3 renders); the voice is a placeholder until blind listening scores are in; Cartesia Sonic is a config option |
+| Turn detection | Silero VAD (0.5 s stop) plus an "unfinished sentence" wait (0.7 s, 1.2 s once hardship is heard) | Smart Turn v3 was tried and is kept as an option, not the default |
 | Transport | Pipecat LiveKit transport, local `livekit-server --dev` | Local only, no cloud deployment |
 
 Providers are chosen by config profile (`configs/`), not code. Every decision and its alternatives are in [`docs/design.md`](docs/design.md).
@@ -78,7 +83,7 @@ git clone https://github.com/SinghSeema/LumenFinance.git && cd LumenFinance
 ./run.sh call B002      # starts LiveKit, the browser client and the agent; open http://localhost:8080 and press call
 ```
 
-Ctrl-C ends the call and stops all three processes. Logs go to `logs/` (LiveKit, client, and `bot-<borrower>.log`). `./run.sh` with no argument lists the other commands (`test`, `evals`, `judge`, `report`).
+Ctrl-C ends the call and stops all three processes. Logs go to `logs/` (LiveKit, client, and one `bot-<borrower>-<time>.log` per call; `bot-<borrower>.log` links to the latest). `./run.sh` with no argument lists the other commands (`test`, `evals`, `judge`, `report`).
 
 The same steps by hand, in three terminals:
 
@@ -96,7 +101,7 @@ After each call the agent prints the outcome record, token usage and a latency t
 
 The brief asks how we know the agent is good, and where it is not. The answer has four parts.
 
-**1. Scenarios.** 17 YAML files in [`evals/scenarios/`](evals/scenarios/), one per borrower type the brief lists plus tricky cases (wrong verification three times, waiver demand, "stop calling", vague dates, mumbled digits, a payment-link tool that fails, "already paid" while overdue). Each states the borrower **persona**, a **hidden goal** the simulated borrower follows, and the **expected outcome record**. 12 are dev scenarios used while building; 5 are hold-out scenarios kept unseen until the baseline run.
+**1. Scenarios.** 20 YAML files in [`evals/scenarios/`](evals/scenarios/), one per borrower type the brief lists plus tricky cases (wrong verification three times, waiver demand, "stop calling", vague dates, mumbled digits, a payment-link tool that fails, "already paid" while overdue, and borrowers who ask about the late fee, grace period, auto-debit, CIBIL or paying cash). Each states the borrower **persona**, a **hidden goal** the simulated borrower follows, and the **expected outcome record**. 15 are dev scenarios used while building; 5 are hold-out. Honest note: hold-out S11 was used while tuning (E12), so the clean hold-out is S06, S13, S14a, S14b.
 
 **2. Automated runs with a simulated borrower.** `evals/run.py` runs the real agent (the same Brain, tools, guards and prompt as the voice bot; only audio is skipped) against an LLM playing the borrower (`evals/simulator.py`, `glm5.3-flash`, a different model family from the agent's `sarvam-105b`). The simulator sees the persona, the hidden goal and today's date, never the expected outcome. Every scenario runs 5 times because conversations vary. Each conversation is saved in full: turns, tool calls and results, the outcome record, guard hits and a log of every loan fact the model was shown.
 
@@ -106,18 +111,20 @@ The brief asks how we know the agent is good, and where it is not. The answer ha
 |---|---|---|
 | Rules (`evals/score.py`) | Outcome record vs expected (M1); loan detail before verification, from the disclosure log plus a scan of every unverified turn (M2, zero tolerance); promise date (M3); escalation precision and recall (M4); reply language (M6); process checks: says it is an AI when asked, no invented payment link after a tool failure, asks one clear question on a vague date (M11); turns per call (M8) | High |
 | Code guard, counted per run | Sentences replaced before speech for threats, waiver promises or early disclosure (M5) | High |
-| LLM judge (`evals/judge.py`) | Tone (M7): politeness, empathy, firmness without pressure, clarity of the reminder, natural phrasing, each 1 to 5, plus guardrail flags. `glm5.3-flash`, temperature 0, one call per conversation. A flag must quote the agent's exact words; a quote not found in the transcript is dropped | **Low**: a spot check found it marking correct refusals down (not telling a family member the amount; ending the call after "stop calling me"). Not calibrated against hand labels yet, so its scores are shown but never decide a pass |
+| LLM judge (`evals/judge.py`) | Tone (M7): politeness, empathy, firmness without pressure, clarity of the reminder, natural phrasing, each 1 to 5, plus guardrail flags. `glm5.3-flash`, temperature 0, rubric v3 (the agent's real rules stated, so correct refusals are not marked down). A flag must quote the agent's exact words; a quote not found in the transcript is dropped | **Medium**: calibrated against the owner's hand labels on 9 v17 conversations (`./run.sh calibrate`): within one point 78% of the time (Groq gpt-oss-120b 73%). It is about one point too generous on clarity and naturalness and agrees on empathy. Its scores are shown with that offset and never decide a pass |
 | Hand review (`evals/failure_review.yaml`) | Every failed conversation is read in full and marked as an agent defect, a code bug, or a test-side error (simulator off script, scorer wrong) | The final word on what a failure means |
 | Live-call timestamps (`results/latency/`) | Latency per turn (M9): VAD stop, final transcript, first sentence, first audio | High for what was measured |
 
 **4. Report and dashboard.** [`docs/eval-report.md`](docs/eval-report.md) is the write-up the brief asks for: results, real failures, what changed, what to fix next. `results/dashboard.html` shows the same evidence visually: pass rate per borrower type before and after fixes, metrics with trust, a latency histogram against the targets, the reviewed failures, and every conversation readable with its tool calls and outcome record. Open it in a browser; it needs no network.
 
 ```bash
-./run.sh test                                    # 706 unit and replay tests, no network
-./run.sh evals --scenarios all --runs 5          # all 17 scenarios x5 (paid; prints a cost estimate and asks first)
+./run.sh test                                    # 937 unit and replay tests, no network
+./run.sh evals --scenarios all --runs 5          # all 20 scenarios x5 (paid; prints a cost estimate and asks first)
 ./run.sh evals --scenarios S13,S14a --runs 5     # chosen scenarios
 ./run.sh evals --scenarios all --runs 5 --resume results/<run>   # finish a run that was cut short
 ./run.sh judge results/<run>                     # tone judge on a finished run (paid; asks first)
+./run.sh label                                   # hand-labelling page for judge calibration
+./run.sh calibrate                               # judges vs the owner's labels
 ./run.sh report results/<run>                    # markdown tables for the report
 ./run.sh dashboard results/<baseline> results/<after-fix>   # writes results/dashboard.html
 ```
@@ -133,11 +140,12 @@ Measured figures only. Full write-up: [`docs/eval-report.md`](docs/eval-report.m
 | Text evals, prompt v10, all 17 scenarios x5 (baseline) | 76/85 pass (dev 59/60, hold-out 17/25); 0 leaks before verification; escalation precision 0.93, recall 1.0 | `results/20261104-133125-v10-all5/` |
 | After two rounds of fixes (re-run scenarios x5) | Round 1: 36/40. Round 2: 28/30; S13 vague dates 0/5 to 5/5; the 2 remaining failures are the simulator going off script | `results/20261104-135904-v10-fixes/`, `...-140824-v10-fixes2/`, `...-141354-v10-fixes3/` |
 | Leaks before verification | 0 in all 155 conversations | same runs |
-| Tone (LLM judge, uncalibrated, low trust) | politeness 4.93, empathy 3.06, firmness 4.55, clarity 4.27, naturalness 4.19 (baseline) | `judge.json` in the baseline run |
-| Live call latency, current stack (9 calls, 46 turns) | Median 1020 ms (target 1.2 s met), p90 2393 ms (target 1.8 s missed), plus the 0.5 s VAD stop | `results/latency/` |
+| Text evals, prompt v17, the 15 dev scenarios x2 | 26/29 pass + 1 provider timeout; 0 leaks; escalation precision 1.0, recall 1.0. Failures: S10 x2 (a borrower who corrects every verification answer loops; open, C34), S12 x1 (stop request missed; fixed, C37, then S12 3/3) | `results/20261104-181142-v17-dev3/` |
+| Tone (LLM judge, rubric v3, calibrated as above) | v17 dev run: politeness 4.93, empathy 3.63, firmness 4.58, clarity 4.88, naturalness 3.79; no guardrail flags. Read clarity and naturalness about one point lower (calibration). Empathy is the weakest area | `judge.json` in the v17 run; `results/judge_calibration/` |
+| Live call latency, all live calls on 4 Nov (15 calls, 78 turns) | Median 1120 ms (target 1.2 s met), p90 2433 ms (target 1.8 s missed), plus the 0.5 s VAD stop. The slow tail is tool turns, the first model request of a call, and turns after a barge-in | `results/latency/` |
 | Deepgram keyterms (75 synthetic clips) | Date of birth read correctly 15/36 without, 26/36 with; last four digits 9/18 without, 15/18 with; no false numbers | `results/stt_keyterms/20261104-130330.txt` |
 
-**Not yet done:** the tone judge has not been calibrated against hand labels; the hold-out scenarios have now been fixed against, so a fresh unseen set is needed; the keyterm gain is from synthetic voices.
+**Not yet done:** the latency p90 target; a fresh unseen hold-out set (the old one has been fixed against); the verification loop in S10 (C34); stronger empathy; the keyterm gain is from synthetic voices; prompt v17 has had only a few live voice calls.
 
 Every defect found so far, with evidence, root cause, fix and how it was checked, is in [`docs/issues-and-fixes.md`](docs/issues-and-fixes.md); the day-by-day measurement log is [`results/LOG.md`](results/LOG.md).
 
@@ -152,9 +160,10 @@ Every defect found so far, with evidence, root cause, fix and how it was checked
 
 ```
 src/emi_agent/   agent code: bot (Pipecat pipeline), brain, tools, guard, heard (number and date reading),
-                 speech_format, dates, language, outcome, providers, keyterms, prompts/ (versioned v1 to v10)
+                 speech_format, dates, language, outcome, providers, keyterms, special (hardship and
+                 dispute flow), policy, prompts/ (versioned v1 to v17)
 configs/         defaults.yaml and provider profiles
-data/            mock borrowers
+data/            mock borrowers and the generic repayment policy
 evals/           runner, LLM borrower simulator, rule-based scorer, scenarios
 bakeoff/         provider and tuning experiments (STT latency and keyterms, TTS checks, LLM speed)
 scripts/         browser client and its server, issues page renderer
@@ -170,7 +179,7 @@ results/         eval runs, latency logs, bake-off reports, LOG.md
 | [`docs/requirements.md`](docs/requirements.md) | Functional and quality requirements, guardrail IDs (G-01 to G-11) |
 | [`docs/HLD.md`](docs/HLD.md) | Architecture, the hybrid split, where each guardrail is enforced |
 | [`docs/LLD.md`](docs/LLD.md) | State machine, tools, gating, formatter, dates, schema, config |
-| [`docs/design.md`](docs/design.md) | Decision log (D-01 to D-35) with alternatives and reasons |
+| [`docs/design.md`](docs/design.md) | Decision log (D-01 to D-44) with alternatives and reasons |
 | [`docs/evals.md`](docs/evals.md) | Scenarios, metrics, judge calibration plan |
 | [`docs/issues-and-fixes.md`](docs/issues-and-fixes.md) | Every defect found and how it was fixed and checked |
 | [`docs/tuning-playbook.md`](docs/tuning-playbook.md) | Latency and voice tuning experiments |

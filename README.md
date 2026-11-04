@@ -4,6 +4,29 @@ An outbound voice agent that calls a borrower about an upcoming or overdue EMI, 
 
 Lumen Finance is fictional and all borrower data is mock data. Everything runs on a laptop: [Pipecat](https://github.com/pipecat-ai/pipecat) for the voice pipeline, a local [LiveKit](https://livekit.io) server for audio, and a small browser page as the phone.
 
+## Deliverables at a glance
+
+| Brief | Where |
+|---|---|
+| 1. Code, README: how to run the agent and the evals, how a call is structured, key design decisions | This README: [Run it locally](#run-it-locally), [Evals](#evals-how-they-work), [How a call goes](#how-a-call-goes), [Key design decisions](#key-design-decisions); code in [`src/emi_agent/`](src/emi_agent/) |
+| 2. Demo recording, 2 or 3 calls, one difficult borrower | [`DemoRecordings/`](DemoRecordings/): three live calls, audio only (the picture is blank), 5 min in total. See [Demo recordings](#demo-recordings) |
+| 3. Eval suite and results: scenarios, runner, report | Scenarios [`evals/scenarios/`](evals/scenarios/) (31), runner [`evals/run.py`](evals/run.py), scorer [`evals/score.py`](evals/score.py), report [`docs/eval-report.md`](docs/eval-report.md) |
+| 4. Mock data and mock tools (payment link, outcome logging) | [`data/borrowers.json`](data/borrowers.json), [`data/policy.yaml`](data/policy.yaml), [`src/emi_agent/tools.py`](src/emi_agent/tools.py); see [Mock data and tools](#mock-data-and-tools) |
+
+Every defect found and fixed, with evidence: [`docs/issues-and-fixes.md`](docs/issues-and-fixes.md).
+
+## Demo recordings
+
+Three live voice calls through the full stack (browser phone, local LiveKit, Pipecat, Deepgram, Sarvam), recorded on 4 Nov 2026. The owner plays each borrower. The files are MP4 with sound only. Each call's page (outcome record, transcript, latency per turn, tool calls, guard events) is in `results/calls/`; open it in a browser after cloning.
+
+| File | Call | What it shows | Call page |
+|---|---|---|---|
+| [`21-37-48_Normal.mp4`](DemoRecordings/) | B001, English, EMI due tomorrow | AI disclosure, verification by the last four digits, "give me a moment" handled, link sent on WhatsApp, promise date asked once and recorded for 5 Nov | `results/calls/20261104-213709-B001.html` |
+| [`22-11-30_hardship.mp4`](DemoRecordings/) | B007, overdue 14 days, **difficult: lost her job** | Wrong last four, recovery through the date of birth; English and Hindi mixed; the practical hardship reply (one-time charge that will not grow, part payment, team call back, one choice); no waiver or date promised; escalated as hardship | `results/calls/20261104-221126-B007.html` |
+| [`22-21-26_dispute.mp4`](DemoRecordings/) | B002, Hindi, overdue 6 days, says she already paid | Does not argue; says the internal team will check the payment; asks how she paid; outcome already_paid, escalated for a payment check | `results/calls/20261104-222132-B002.html` |
+
+The plan for the recordings, and an optional fourth call where no word list matches and the LLM intent check decides, is [`docs/demo-script.md`](docs/demo-script.md).
+
 ## Core idea: code owns the rules, the LLM owns the language
 
 The model writes the words, handles empathy and follows the borrower's language. Anything that must never go wrong is decided in code, with the prompt as a second line of defence:
@@ -15,7 +38,7 @@ The model writes the words, handles empathy and follows the borrower's language.
 | No made-up verification result | Code replaces "that doesn't match" or "last chance" when no check has failed in that turn |
 | No threats, shaming, waivers or discounts (G-03, G-04) | Output guard in English and Hindi (Devanagari and romanised) replaces the sentence with a safe line; reading back the borrower's own request ("you'd like a waiver") is allowed, any commitment is not |
 | Never an invented amount or fee (G-08) | Every rupee amount spoken must be the borrower's EMI, a charge already applied, the repayment policy, or a figure the borrower said; "a late charge has been added" on a loan with none is replaced by the true policy line |
-| Escalation for dispute, hardship, explicit request (G-05) | Tool flag set by code. Hardship, wrong amount, "not my loan" and waiver demands then follow a **code-owned flow**, one step per turn (acknowledge and ask one question; read back and hand off to "our internal team, who will check and arrange a call back"; close). A step moves on only when the borrower heard it. Code checks once that a hardship or dispute is real before escalating |
+| Escalation for dispute, hardship, explicit request (G-05) | Tool flag set by code. Hardship, wrong amount, "not my loan" and waiver demands then follow a **code-owned flow**, one step per turn; for hardship: one plain line, the true facts (the late charge is one-time and will not grow, any part payment goes towards the EMI, the team can check options), one choice; then read back and hand off to "our internal team, who will check and arrange a call back"; close. A step moves on only when the borrower heard it (a reply cut while playing is given again). Code checks that a hardship or dispute is real: word lists first, and when none match, an LLM intent check that sees only the borrower's lines with digits hidden |
 | Stop means stop (G-06) | Code detects stop requests (English, Hindi, mixed script) and closes in one turn: an apology, and only if verified one gentle line that it was just a reminder so no late fee is added |
 | Answers to questions about paying | A generic repayment policy (`data/policy.yaml`): late fee, grace period, part payment, how to pay, credit score only if asked; short version in the prompt, detail through a tool |
 | Amounts and dates said aloud correctly | Code formats them ("twelve thousand five hundred rupees", "the twenty-eighth of October") and resolves "next Friday" or "parso" against a fixed today |
@@ -43,7 +66,7 @@ Example outcome record from a live call:
 
 ## Key design decisions
 
-The full log, with the alternatives and reasons, is [`docs/design.md`](docs/design.md) (D-01 to D-46). These are the ones that shape the agent most:
+The full log, with the alternatives and reasons, is [`docs/design.md`](docs/design.md) (D-01 to D-48). These are the ones that shape the agent most:
 
 1. **Code owns the rules; the LLM owns the language (D-01).** Verification, what the model may see, tool permissions, amounts and dates, stop, escalation and the outcome record are decided in code. The prompt is the second line of defence. The model cannot leak a loan detail it has never been shown.
 2. **The text Brain first, voice around it (D-03).** The voice bot and the eval harness call the same `Brain`, so the evals test what is shipped. Iterating on guardrails costs text tokens, not phone calls.
@@ -52,7 +75,9 @@ The full log, with the alternatives and reasons, is [`docs/design.md`](docs/desi
 5. **Append-only context (D-18).** The system prompt and the tool list stay fixed for the whole call; changes mid-call arrive as notes. This keeps the provider's prompt cache warm and the behaviour predictable.
 6. **No dead air (D-36, D-46).** A short bridge line plays while a tool runs. A filler plays if the model is slow past 1.2 s. After 2.5 s the call falls back to a second LLM.
 7. **Providers by config, chosen by measurement (D-04 to D-09, D-31).** STT, TTS and the LLM come from a config profile. The choices come from bake-offs on a Hinglish test set (`bakeoff/`, `results/`). Smart Turn v3 was measured and not adopted.
-8. **Evals: rules first, a calibrated judge only for tone.** See [Evals](#evals-how-they-work).
+8. **Rules with an LLM fallback for understanding (D-47).** Word lists cannot cover every way a borrower names money trouble ("ghar mein haath tang hai"). When the agent escalates and no list matches, a short LLM check reads only the borrower's last lines, digits hidden, and returns an intent label (code decides from it), a one-line reason (for the outcome notes) and a warm opening line (guidance for the agent, which stays the one voice behind the guards). A failed or slow check lets the escalation through.
+9. **Practical sympathy, the banking way (D-48).** Hardship gets one plain line and then facts that help, never pressure: the charge is one-time and will not keep increasing, any part payment goes towards the EMI, the team can check options. No "don't worry", no promises.
+10. **Evals: rules first, a calibrated judge only for tone.** See [Evals](#evals-how-they-work).
 
 ## Architecture
 
@@ -121,7 +146,7 @@ python3 scripts/serve_client.py                                   # 3: open http
 
 After each call the agent prints the outcome record, token usage and a latency table (VAD stop to transcript, transcript to first sentence, first sentence to audio). It also writes one page per call, `results/calls/<time>-<borrower>.html`, with the outcome record, transcript, latency per turn (median and p90), tool calls and any sentence the code guards changed; the log prints its `file://` link.
 
-**Demo.** [`docs/demo-script.md`](docs/demo-script.md) is the plan for the recording: three calls (an easy call with a language switch, hardship, a family member who asks for the amount and then says stop).
+**Demo.** The recorded calls are in [`DemoRecordings/`](DemoRecordings/) (see [Demo recordings](#demo-recordings)); [`docs/demo-script.md`](docs/demo-script.md) has the lines used and more calls to try.
 
 **Borrower on a video call.** To let someone in a meeting (Meet, Zoom) play the borrower, `./scripts/meeting_audio.sh up` (Linux, PulseAudio) routes the meeting's audio into the call page's microphone and the agent's voice back into the meeting, all on this laptop. In the meeting app choose Speaker "Lumen_from_meeting" and Microphone "Lumen_meeting_mic", wear headphones, and run `./scripts/meeting_audio.sh down` afterwards. `mic off` / `mic on` mutes you towards the meeting; the agent never hears you.
 
@@ -129,7 +154,7 @@ After each call the agent prints the outcome record, token usage and a latency t
 
 The brief asks how we know the agent is good, and where it is not. The answer has four parts.
 
-**1. Scenarios.** 30 YAML files in [`evals/scenarios/`](evals/scenarios/), one per borrower type the brief lists plus tricky cases (wrong verification three times, waiver demand, "stop calling", vague dates, mumbled digits, a payment-link tool that fails, "already paid" while overdue, and borrowers who ask about the late fee, grace period, auto-debit, CIBIL or paying cash). Each states the borrower **persona**, a **hidden goal** the simulated borrower follows, and the **expected outcome record**. 15 are dev scenarios used while building, and 5 are the original hold-out. 10 are stress scenarios (S21 to S30: part payment, the borrower has died, change the EMI date, driving, foreclosure amount, an unsupported language, a child answers, wants a cash agent, suspects fraud, abusive). They were written after the last fixes and never run or tuned against before the v17 hold-out run, so they are the unseen hold-out. Honest note: original hold-out S11 was used while tuning (E12).
+**1. Scenarios.** 31 YAML files in [`evals/scenarios/`](evals/scenarios/), one per borrower type the brief lists plus tricky cases (wrong verification three times, waiver demand, "stop calling", vague dates, mumbled digits, a payment-link tool that fails, "already paid" while overdue, and borrowers who ask about the late fee, grace period, auto-debit, CIBIL or paying cash). Each states the borrower **persona**, a **hidden goal** the simulated borrower follows, and the **expected outcome record**. 16 are dev scenarios used while building (S31, a hardship in words no list knows, added after the demo calls), and 5 are the original hold-out. 10 are stress scenarios (S21 to S30: part payment, the borrower has died, change the EMI date, driving, foreclosure amount, an unsupported language, a child answers, wants a cash agent, suspects fraud, abusive). They were written after the last fixes and never run or tuned against before the v17 hold-out run, so they are the unseen hold-out. Honest note: original hold-out S11 was used while tuning (E12).
 
 **2. Automated runs with a simulated borrower.** `evals/run.py` runs the real agent (the same Brain, tools, guards and prompt as the voice bot; only audio is skipped) against an LLM playing the borrower (`evals/simulator.py`, `glm5.3-flash`, a different model family from the agent's `sarvam-105b`). The simulator sees the persona, the hidden goal and today's date, never the expected outcome. Every scenario runs 5 times because conversations vary. Each conversation is saved in full: turns, tool calls and results, the outcome record, guard hits and a log of every loan fact the model was shown.
 
@@ -146,8 +171,8 @@ The brief asks how we know the agent is good, and where it is not. The answer ha
 **4. Report and dashboard.** [`docs/eval-report.md`](docs/eval-report.md) is the write-up the brief asks for: results, real failures, what changed, what to fix next. `results/dashboard.html` shows the same evidence visually: pass rate per borrower type before and after fixes, metrics with trust, a latency histogram against the targets, the reviewed failures, and every conversation readable with its tool calls and outcome record. Open it in a browser; it needs no network.
 
 ```bash
-./run.sh test                                    # 1017 unit and replay tests, no network
-./run.sh evals --scenarios all --runs 5          # all 30 scenarios x5 (paid; prints a cost estimate and asks first)
+./run.sh test                                    # 1068 unit and replay tests, no network
+./run.sh evals --scenarios all --runs 5          # all 31 scenarios x5 (paid; prints a cost estimate and asks first)
 ./run.sh evals --scenarios S13,S14a --runs 5     # chosen scenarios
 ./run.sh evals --scenarios all --runs 5 --resume results/<run>   # finish a run that was cut short
 ./run.sh judge results/<run>                     # tone judge on a finished run (paid; asks first)
@@ -166,6 +191,7 @@ Measured figures only. Full write-up: [`docs/eval-report.md`](docs/eval-report.m
 | What | Result | Source |
 |---|---|---|
 | **Unseen stress scenarios S21 to S30, prompt v17, ×3** | **24/30 pass**; 0 leaks before verification. 4 real agent defects found (a callback promised in words but not recorded, a conditional "stop" taken as a stop, a child thanked by the borrower's name, a silent failed link retry) | `results/20261104-204947-v17-holdout-stress/` |
+| Fixes from the owner's demo calls (C60 to C72): practical hardship, LLM intent check, a cut flow step given again | Hardship S03 ×2: 2/2 before and after; S31 (no word list matches) ×2: the intent check fired 2/2, labelled hardship, 476 to 870 ms; S08 ×2 no false escalation. Intent check model chosen by measurement: sarvam-105b-conversations 9/9 labels, median 393 ms, against glm5.3-flash 9/9, median 1072 ms (it timed out in a live call) | `results/20261104-222941-v17-intent-105b/`, `results/LOG.md` |
 | Original hold-out, v17, ×3 | 14/15 (no longer clean: fixed against since v10, S11 used in tuning) | same run |
 | After fixing the 4 defects (re-run S14b, S24, S27, S30 ×3) | 10/12; both failures are the simulator saying "stop" in its first turn, against its script | `results/20261104-210209-v17-holdout-fix/` |
 | Dev scenarios, v17, ×2 | 26/29 + 1 provider timeout; escalation precision and recall 1.0. Open: S10 verification loop (C34) | `results/20261104-181142-v17-dev3/` |
@@ -175,7 +201,7 @@ Measured figures only. Full write-up: [`docs/eval-report.md`](docs/eval-report.m
 | v10 baseline (history) | 76/85; dev 59/60 vs hold-out 17/25, the gap that showed tuning to the dev set; fixed to 28/30 over two rounds | `results/20261104-133125-v10-all5/` and fix runs |
 | Deepgram keyterms (75 synthetic clips) | Date of birth read correctly 15/36 without, 26/36 with; last four digits 9/18 without, 15/18 with; no false numbers | `results/stt_keyterms/20261104-130330.txt` |
 
-**Not yet done:** the latency p90 target; empathy; the over-strict disclosure guard (C59); the S10 verification loop (C34); a callback offered without asking when after a failed link (C58); a fresh hold-out now that the stress set has been fixed against; voice-level evals (all scenario runs are text-level); the keyterm gain is from synthetic voices.
+**Not yet done:** the latency p90 target; Sarvam LLM timeouts in live calls (about one per call on 4 Nov evening, covered by a filler and the Groq fallback, but the caller can wait 5 to 6 s, C69); empathy; the over-strict disclosure guard (C59); the S10 verification loop (C34); a callback offered without asking when after a failed link (C58); a fresh hold-out now that the stress set has been fixed against; voice-level evals (all scenario runs are text-level); the keyterm gain is from synthetic voices.
 
 Every defect found so far, with evidence, root cause, fix and how it was checked, is in [`docs/issues-and-fixes.md`](docs/issues-and-fixes.md); the day-by-day measurement log is [`results/LOG.md`](results/LOG.md).
 
@@ -209,7 +235,7 @@ results/         eval runs, latency logs, bake-off reports, LOG.md
 | [`docs/requirements.md`](docs/requirements.md) | Functional and quality requirements, guardrail IDs (G-01 to G-11) |
 | [`docs/HLD.md`](docs/HLD.md) | Architecture, the hybrid split, where each guardrail is enforced |
 | [`docs/LLD.md`](docs/LLD.md) | State machine, tools, gating, formatter, dates, schema, config |
-| [`docs/design.md`](docs/design.md) | Decision log (D-01 to D-46) with alternatives and reasons |
+| [`docs/design.md`](docs/design.md) | Decision log (D-01 to D-48) with alternatives and reasons |
 | [`docs/evals.md`](docs/evals.md) | Scenarios, metrics, judge calibration plan |
 | [`docs/issues-and-fixes.md`](docs/issues-and-fixes.md) | Every defect found and how it was fixed and checked |
 | [`docs/eval-report.md`](docs/eval-report.md) | Eval results, real failures, what changed, what next |

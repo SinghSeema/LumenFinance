@@ -111,6 +111,17 @@ Before verification, the code guard replaces any sentence that touches loan word
 
 Smaller real defects found in the same run: after a failed payment link, the agent's retry was announced and then followed by the closing line, without saying it had failed (C57, fixed). The agent then offered a callback without asking when (C58, open).
 
+## After the report: fixes from the owner's live demo calls (4 Nov, evening)
+
+Recording the demo found more real defects than the text runs did, because a person talks over the agent, pauses and words things freely. Each is in `docs/issues-and-fixes.md` (C60 to C72) with a test from the exact words.
+
+- **"I'm going through some financial issues" was not taken as hardship** (call B007 21:42): the hardship word list knew only job loss, illness, emergency and no income, so the agent pushed for a payment date and closed coldly. Fixed in two layers: plainly named money trouble added to the list (C62), and, because no list covers every phrasing, an **LLM intent check** when none matches (D-47, C64). It sees only the borrower's last lines with digits hidden and returns a label that code decides from. Scenario S31 (a hardship in words no list knows) checks it: the check fired 2/2 and labelled hardship in 476 to 870 ms.
+- **The intent check timed out live** (call B003 22:25, glm5.3-flash, 1.5 s limit), so the escalation went through by the fail-open rule, not the check. Measured on 9 sentences: sarvam-105b-conversations 9/9, median 393 ms; glm5.3-flash 9/9, median 1072 ms. Switched (C71). With the first prompt the faster model called anger at a correct fee a dispute 2/2; sharper label definitions fixed it.
+- **Hardship sympathy was emotional, not useful** (owner review). Now the practical banking version (D-48): one plain line, then the true facts once (the late charge is one-time and will not keep increasing, any part payment goes towards the EMI, the team can check options), then one choice. S03 2/2 before and after.
+- **A cut hardship reply still moved the flow on** (calls B007 22:03, B003 22:25): the borrower spoke over the key facts, but the flow skipped ahead. The first fix (C67) covered a reply cut while being written; the live call showed the audio being cut after writing (C72). Both now give the step again, briefly.
+- Smaller: a garbled model goodbye ("Time given for your time") replaced by the fixed line (C60); "clear this before tomorrow" when the due date was tomorrow (C61); the payment link sent on "Please ask the team to call me" (C65) and on "shayad... pakka nahi" (C70); a read-back "your request to waive" replaced as a promise (C66).
+- **Still open:** Sarvam LLM timeouts in live calls (C69): about one per call that evening; a filler covers 1.2 s and the Groq fallback answers, but the caller can wait 5 to 6 s.
+
 ## Test-side errors (not the agent)
 
 | What | Where | Handling |
@@ -130,7 +141,7 @@ Earlier rounds found 6 more scorer errors and several simulator departures. All 
 | v14 to v17 (owner's live calls) | Live-call defects C13 to C53 | Prompt patches for hardship kept failing live, so hardship and disputes became a code-owned flow (D-40); repayment policy added (D-41); stop closes like a person (D-44) |
 | **v17 unseen stress** | **24/30**, 0 leaks | This report |
 
-The lesson that repeats: **a rule only in the prompt eventually fails, and a rule in code holds.** Each defect above now has a test built from the exact words that broke it (1034 tests).
+The lesson that repeats: **a rule only in the prompt eventually fails, and a rule in code holds.** Each defect above now has a test built from the exact words that broke it (1068 tests).
 
 ## What I would fix next
 

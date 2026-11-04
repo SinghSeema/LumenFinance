@@ -135,7 +135,10 @@ _TEAM = ("Say you have noted it and that the concerned team will look into it an
          "callback. Do not promise when, and give no reference number.")
 _ESCALATION_LINE = {
     "dispute": _TEAM,
-    "hardship": "Tell them kindly that a colleague will call them back. Do not promise when.",
+    # Owner review 2026-11-04: one hand-off per call, sorry first, no "anything else?" (prompt v13).
+    "hardship": ("Say you are sorry and thank them for telling you; you can't change the amount or "
+                 "dates yourself; a colleague from our team will call to talk through the options. Use "
+                 "only that hand-off for the rest of the call. Do not promise when, a waiver or any change."),
     "requested": "Tell them a colleague will call them back. Do not promise when.",
     "other": "Tell them a colleague will call them back. Do not promise when.",
 }
@@ -147,7 +150,8 @@ _DATE_HELP = {
                  "coming date they mean.",
 }
 # Escalations whose callback the concerned team arranges (D-35): no schedule_callback, no time.
-_TEAM_CALLS_BACK = {"escalate:dispute", "escalate:hardship", "escalate:payment_check"}
+# "other" too: a waiver demand escalated as "other" scheduled its own callback for "tomorrow" (v13 S11 run 2).
+_TEAM_CALLS_BACK = {"escalate:dispute", "escalate:hardship", "escalate:payment_check", "escalate:other"}
 
 # Calls that never reached the borrower: a dispute or hardship escalation makes no sense (D-30).
 _NOT_THE_BORROWER = {Outcome.wrong_number, Outcome.third_party}
@@ -347,6 +351,8 @@ class Tools:
         # callback (v10 eval S04b run 4 recorded callback_requested and promised "today").
         if Outcome(outcome) is Outcome.callback_requested:
             reason = next((r for r in ("dispute", "hardship") if f"escalate:{r}" in s.flags), None)
+            if reason is None and "escalate:other" in s.flags:
+                reason = "unresolved"
             if reason:
                 outcome = reason
         # "I already paid" while our records show the EMI overdue: the records disagree, so a colleague

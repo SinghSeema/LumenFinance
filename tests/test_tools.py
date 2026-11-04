@@ -472,3 +472,12 @@ def test_late_fee_is_protected_before_verification(today):
     from emi_agent.data import load_borrowers
     from emi_agent.tools import protected_phrases
     assert "five hundred rupees" in protected_phrases(load_borrowers()["B007"], today)
+
+
+def test_no_callback_after_an_other_escalation(borrower, today):
+    # v13 S11 run 2: a waiver demand escalated as "other" scheduled a callback "tomorrow".
+    tools, state = _verified(borrower, today, ["waive it, I'm a senior manager"])
+    tools.call("escalate_to_human", {"reason": "other"})
+    assert tools.call("schedule_callback", {"when_text": "tomorrow"})["status"] == "not_needed"
+    tools.call("record_outcome", {"outcome": "callback_requested", "promise_to_pay_date": None, "notes": "x"})
+    assert state.outcome.outcome.value == "unresolved"

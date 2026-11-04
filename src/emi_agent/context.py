@@ -104,6 +104,9 @@ _BRIDGE = {
                         "devanagari": "एक second, मैं check कर लेती हूँ।"},
     "send_payment_link": {"en": "Sure, I'm sending the link now.", "roman": "Theek hai, main link bhej rahi hoon.",
                           "devanagari": "ठीक है, मैं link भेज रही हूँ।"},
+    # Before "I'm really sorry to hear about your job": "Okay." was jarring (v13 S03).
+    "escalate_to_human": {"en": "I hear you.", "roman": "Ji, main samajh rahi hoon.",
+                          "devanagari": "जी, मैं समझ रही हूँ।"},
     # Short on purpose: "जी, समझ गई।" was followed by the model's own "ठीक है, मैं समझ गई।" (v11 S06).
     "_ack": {"en": "Okay.", "roman": "Ji.", "devanagari": "जी।"},
 }

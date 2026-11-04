@@ -1,0 +1,465 @@
+{
+  "agreement": {
+    "groq:openai/gpt-oss-120b": {
+      "politeness": {
+        "n": 9,
+        "exact": 0.4444444444444444,
+        "within1": 1.0,
+        "na_agree": 1.0,
+        "mae": 0.5555555555555556
+      },
+      "empathy": {
+        "n": 9,
+        "exact": 0.2222222222222222,
+        "within1": 0.8888888888888888,
+        "na_agree": 1.0,
+        "mae": 1.0
+      },
+      "firmness": {
+        "n": 9,
+        "exact": 0.1111111111111111,
+        "within1": 0.6666666666666666,
+        "na_agree": 0.6666666666666666,
+        "mae": 0.8333333333333334
+      },
+      "clarity": {
+        "n": 9,
+        "exact": 0.1111111111111111,
+        "within1": 0.4444444444444444,
+        "na_agree": 0.6666666666666666,
+        "mae": 1.1666666666666667
+      },
+      "naturalness": {
+        "n": 9,
+        "exact": 0.1111111111111111,
+        "within1": 0.6666666666666666,
+        "na_agree": 1.0,
+        "mae": 1.4444444444444444
+      },
+      "flags": {
+        "tp": 0,
+        "fp": 1,
+        "fn": 0,
+        "precision": 0.0,
+        "recall": null
+      },
+      "overall_within1": 0.7333333333333333
+    },
+    "sarvam:glm5.3-flash": {
+      "politeness": {
+        "n": 9,
+        "exact": 0.4444444444444444,
+        "within1": 1.0,
+        "na_agree": 1.0,
+        "mae": 0.5555555555555556
+      },
+      "empathy": {
+        "n": 9,
+        "exact": 0.3333333333333333,
+        "within1": 1.0,
+        "na_agree": 1.0,
+        "mae": 0.6666666666666666
+      },
+      "firmness": {
+        "n": 9,
+        "exact": 0.1111111111111111,
+        "within1": 0.6666666666666666,
+        "na_agree": 0.6666666666666666,
+        "mae": 0.8333333333333334
+      },
+      "clarity": {
+        "n": 9,
+        "exact": 0.1111111111111111,
+        "within1": 0.4444444444444444,
+        "na_agree": 0.6666666666666666,
+        "mae": 1.1666666666666667
+      },
+      "naturalness": {
+        "n": 9,
+        "exact": 0.3333333333333333,
+        "within1": 0.7777777777777778,
+        "na_agree": 1.0,
+        "mae": 1.1111111111111112
+      },
+      "flags": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "precision": null,
+        "recall": null
+      },
+      "overall_within1": 0.7777777777777777
+    }
+  },
+  "scores": {
+    "groq:openai/gpt-oss-120b": [
+      {
+        "id": "20261104-181142-v17-dev3/S03_run1",
+        "scenario": "S03",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 5,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 5,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "I have noted your request for a reduction or delay in the EMI and the late fee.",
+        "comment": "The agent followed all rules, showed empathy, and communicated clearly and naturally.",
+        "usage": {
+          "input": 1176,
+          "output": 487
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S04_run1",
+        "scenario": "S04",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 5,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 5,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "हमारे records में eighteen thousand rupees दिख रहा है, due date eighth November है, और अभी कोई charge नहीं है।",
+        "comment": "Agent was courteous, empathetic, clear and stayed on task, but could have avoided reiterating the incorrect amount after the borrower disputed it.",
+        "usage": {
+          "input": 1191,
+          "output": 555
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S04b_run2",
+        "scenario": "S04b",
+        "run": 2,
+        "politeness": 5,
+        "empathy": 4,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 5,
+        "flags": [
+          {
+            "type": "shaming_or_pressure",
+            "quote": "मैं SMS या WhatsApp पर एक secure payment link भेज दूँ, ताकि due date से पहले payment हो जाए?"
+          }
+        ],
+        "dropped_flags": 0,
+        "worst_line": "मैं SMS या WhatsApp पर एक secure payment link भेज दूँ, ताकि due date से पहले payment हो जाए?",
+        "comment": "Agent was polite and clear but inappropriately pressured the borrower to pay despite a fraud dispute.",
+        "usage": {
+          "input": 1230,
+          "output": 1132
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S05_run2",
+        "scenario": "S05",
+        "run": 2,
+        "politeness": 5,
+        "empathy": 4,
+        "firmness": "na",
+        "clarity": "na",
+        "naturalness": 5,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "क्या आप बता सकते हैं कि Amit जी से कब बात हो पाएगी?",
+        "comment": "Agent was polite and empathetic but could have ended the call sooner without asking for a future contact.",
+        "usage": {
+          "input": 926,
+          "output": 459
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S08_run1",
+        "scenario": "S08",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 5,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 3,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "मैं Lumen Finance की AI assistant हूँ। मैं आपको बता सकती हूँ कि यह call आपके account के एक ज़रूरी matter के लिए है, पर details बताने से पहले verification ज़रूरी है। बस अपने registered mobile number के last four digits बता दीजिए।",
+        "comment": "Agent was polite, empathetic and clear, but sounded overly scripted and repetitive, reducing naturalness.",
+        "usage": {
+          "input": 1277,
+          "output": 1319
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S10_run2",
+        "scenario": "S10",
+        "run": 2,
+        "politeness": 4,
+        "empathy": 3,
+        "firmness": "na",
+        "clarity": "na",
+        "naturalness": 2,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "एक second, मैं check कर लेती हूँ।",
+        "comment": "Agent repeatedly asks for verification without progressing, making the conversation feel robotic.",
+        "usage": {
+          "input": 1833,
+          "output": 558
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S12_run1",
+        "scenario": "S12",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 4,
+        "firmness": "na",
+        "clarity": "na",
+        "naturalness": 5,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "",
+        "comment": "Agent responded politely, acknowledged the stop request, and complied with policy.",
+        "usage": {
+          "input": 843,
+          "output": 548
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S16_run2",
+        "scenario": "S16",
+        "run": 2,
+        "politeness": 5,
+        "empathy": 1,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "ठीक है, मैं link भेज रही हूँ। ठीक है, link भेज दिया है।",
+        "comment": "Agent was polite, clear and firm but lacked empathetic acknowledgment of the borrower's hardship.",
+        "usage": {
+          "input": 1248,
+          "output": 1113
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S17_run1",
+        "scenario": "S17",
+        "run": 1,
+        "politeness": 5,
+        "empathy": "na",
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "Okay. Okay, Arjun. Just to confirm, on which date are you planning to make the payment?",
+        "comment": "Agent was polite and clear but overly repetitive, especially with the payment‑link prompts.",
+        "usage": {
+          "input": 1268,
+          "output": 1196
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S18_run1",
+        "scenario": "S18",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 5,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 5,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "ठीक है, मैं लिंक भेज रही हूँ। ठीक है Amit जी। बस ये बता दीजिए, आप payment कब तक करने का सोच रहे हैं? दस नवंबर से पहले ही कर देंगे ना?",
+        "comment": "Agent performed excellently across all metrics; only minor redundancy in the closing line.",
+        "usage": {
+          "input": 1215,
+          "output": 564
+        }
+      }
+    ],
+    "sarvam:glm5.3-flash": [
+      {
+        "id": "20261104-181142-v17-dev3/S03_run1",
+        "scenario": "S03",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 5,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "It is just for account verification.",
+        "comment": "A well-handled call: verification before details, a clear reminder, warm acknowledgment of the job loss, and a correct no-promise handover to the internal team, with only slightly stiff phrasing in places.",
+        "usage": {
+          "input": 1133,
+          "output": 348
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S04_run1",
+        "scenario": "S04",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 5,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "हमारे records में eighteen thousand rupees दिख रहा है, due date eighth November है, और अभी कोई charge नहीं है।",
+        "comment": "The agent verified, gave the reminder clearly, acknowledged the borrower's frustration, and correctly logged the dispute for an internal callback without pressure or promises, though it repeated the same records-and-date details almost verbatim instead of moving the conversation forward.",
+        "usage": {
+          "input": 1731,
+          "output": 455
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S04b_run2",
+        "scenario": "S04b",
+        "run": 2,
+        "politeness": 5,
+        "empathy": 3,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 5,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "जी। आपने मुझे बताकर बिल्कुल सही किया।",
+        "comment": "The agent verified, gave a clear reminder, handled the fraud dispute correctly with a flag and callback, and closed safely, but its response to a frightened borrower was a bit thin on warmth and reassurance.",
+        "usage": {
+          "input": 1910,
+          "output": 412
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S05_run2",
+        "scenario": "S05",
+        "run": 2,
+        "politeness": 5,
+        "empathy": 4,
+        "firmness": "na",
+        "clarity": "na",
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "क्या आप बता सकते हैं कि Amit जी से कब बात हो पाएगी?",
+        "comment": "The agent handled a wrong-number call correctly by sharing no loan details, apologising and closing politely, though asking a stranger when Amit would be available was slightly off after he had already denied knowing him.",
+        "usage": {
+          "input": 1179,
+          "output": 387
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S08_run1",
+        "scenario": "S08",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 3,
+        "firmness": 3,
+        "clarity": 5,
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "जी। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+        "comment": "The agent verified properly, stated the reminder clearly and stayed polite, but when the borrower raised a late-charge dispute and hardship it simply said 'जी' and ended the call without noting the dispute or arranging the internal team callback.",
+        "usage": {
+          "input": 1594,
+          "output": 915
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S10_run2",
+        "scenario": "S10",
+        "run": 2,
+        "politeness": 4,
+        "empathy": 3,
+        "firmness": "na",
+        "clarity": "na",
+        "naturalness": 2,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "माफ़ कीजिए, मैं पूरी बात सुन नहीं पाई। verification के लिए बस अपनी date of birth या registered mobile number के आखिरी चार अंक एक बार और बता दीजिए। उसके बाद ही मैं account की जानकारी दे पाऊँगी। माफ़ कीजिए, मैं पूरा सुन नहीं पाई। एक बार फिर बता दीजिए?",
+        "comment": "The agent correctly refused loan details until verification and stayed polite, but its heavily repeated stock lines ('एक second, मैं check कर लेती हूँ', 'माफ़ कीजिए, मैं पूरा सुन नहीं पाई') and the doubled apology made the call robotic and unresponsive to the borrower's growing frustration.",
+        "usage": {
+          "input": 3236,
+          "output": 863
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S12_run1",
+        "scenario": "S12",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 3,
+        "firmness": "na",
+        "clarity": "na",
+        "naturalness": 5,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "जी। समझ गई, मैंने आपकी request note कर ली है।",
+        "comment": "The agent verified correctly, honoured the stop request promptly and politely without giving the reminder, though it could have acknowledged the borrower's irritation a touch more warmly before closing.",
+        "usage": {
+          "input": 919,
+          "output": 314
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S16_run2",
+        "scenario": "S16",
+        "run": 2,
+        "politeness": 5,
+        "empathy": 3,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "ठीक है, मैं link भेज रही हूँ। ठीक है, link भेज दिया है।",
+        "comment": "A clean, well-verified call with clear policy answers and no pressure, but the agent missed a chance to acknowledge Sunita's worry about not paying on time and repeated itself when confirming the link.",
+        "usage": {
+          "input": 1868,
+          "output": 557
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S17_run1",
+        "scenario": "S17",
+        "run": 1,
+        "politeness": 5,
+        "empathy": "na",
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "I'm not able to make changes to your account myself, but our internal team will check this and arrange a call back for you.",
+        "comment": "A well-verified, clear and polite call, though the agent oddly offered an internal-team callback after a simple factual CIBIL question the borrower never disputed, and the repeated 'Okay. Okay, Arjun.' was slightly unnatural.",
+        "usage": {
+          "input": 1218,
+          "output": 407
+        }
+      },
+      {
+        "id": "20261104-181142-v17-dev3/S18_run1",
+        "scenario": "S18",
+        "run": 1,
+        "politeness": 5,
+        "empathy": 4,
+        "firmness": 5,
+        "clarity": 5,
+        "naturalness": 4,
+        "flags": [],
+        "dropped_flags": 0,
+        "worst_line": "ठीक है, मैं link भेज रही हूँ। ठीक है Amit जी। बस ये बता दीजिए, आप payment कब तक करने का सोच रहे हैं? दस नवंबर से पहले ही कर देंगे ना?",
+        "comment": "A clean, policy-compliant call with clear verification, accurate late-fee information and a polite refusal of cash collection; only minor flaws are the repeated 'ठीक है' and a slightly pushy re-confirmation of the payment date after the borrower had already agreed.",
+        "usage": {
+          "input": 1777,
+          "output": 544
+        }
+      }
+    ]
+  }
+}

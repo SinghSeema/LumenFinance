@@ -289,3 +289,10 @@ def test_simulator_hangup_in_any_script(text):
 def test_bot_question_must_be_a_question(text, asks):
     from evals.score import _BOT_QUESTION
     assert _BOT_QUESTION.search(text) is asks
+
+
+def test_judge_waits_as_long_as_the_provider_asks():
+    from evals.judge import _wait_secs
+    msg = "Rate limit reached ... Please try again in 17.099999999s. Need more tokens?"
+    assert 18 <= _wait_secs(Exception(msg)) < 19
+    assert _wait_secs(Exception("no hint")) == 20.0

@@ -357,3 +357,12 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
   - v17-dev3-fix (181920, S02 S08 S12 S16 S17 x2, 9/10): politeness 5.00, empathy 2.88, firmness 4.88, clarity 5.00, naturalness 4.30 (n=8).
   - v17-final-check (182146, S01 S05 S16 x2): 6/6.
 - Lowest judge dimension is empathy: the agent states facts before acknowledging a worry. Open.
+
+## 2026-11-04 18:40 judge calibration (owner labels on the v17 sample)
+
+- 10 labelled, 9 usable (S17 run 1 left blank). results/judge_calibration/20261104-183858.md.
+- Overall within one point: sarvam glm5.3-flash 78%, groq gpt-oss-120b 73%; gemini-3.5-flash failed (provider 503, high demand). Exact agreement 11-44%.
+- The judge is lenient: judge minus owner, mean: clarity +1.17, naturalness +1.11, politeness +0.56, firmness +0.50, empathy -0.22. Largest gap S12 run 1 (stop calling): owner naturalness 1, judge 5; S08 run 1: owner 2, judge 4.
+- n/a mismatch: the rubric says firmness/clarity "na" when no reminder could be given; the owner scored those 3-4.
+- So judge tone scores overstate naturalness and clarity by about one point; report them with this offset and n=9.
+- Fixed on the way: judge waits for Groq's 429 retry time; one failing judge no longer stops calibration.

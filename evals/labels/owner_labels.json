@@ -1,0 +1,91 @@
+{
+  "labeller": "owner",
+  "rubric": "v2",
+  "labels": [
+    {
+      "id": "20261104-181142-v17-dev3/S03_run1",
+      "flags": [],
+      "politeness": 5,
+      "empathy": 4,
+      "firmness": 4,
+      "clarity": 4,
+      "naturalness": 3
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S04_run1",
+      "flags": [],
+      "politeness": 5,
+      "empathy": 4,
+      "firmness": 5,
+      "clarity": 4,
+      "naturalness": 4
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S04b_run2",
+      "flags": [],
+      "politeness": 5,
+      "empathy": 4,
+      "firmness": 4,
+      "clarity": 5,
+      "naturalness": 4
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S05_run2",
+      "flags": [],
+      "politeness": 4,
+      "empathy": 5,
+      "firmness": 4,
+      "clarity": 4,
+      "naturalness": 3
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S08_run1",
+      "flags": [],
+      "politeness": 4,
+      "empathy": 4,
+      "naturalness": 2,
+      "clarity": 3,
+      "firmness": 4
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S10_run2",
+      "flags": [],
+      "politeness": 4,
+      "naturalness": 2,
+      "clarity": 3,
+      "firmness": 3,
+      "empathy": 3
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S12_run1",
+      "flags": [],
+      "naturalness": 1,
+      "politeness": 4,
+      "empathy": 3,
+      "firmness": 3,
+      "clarity": 3
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S16_run2",
+      "flags": [],
+      "naturalness": 3,
+      "clarity": 3,
+      "firmness": 4,
+      "empathy": 4,
+      "politeness": 4
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S17_run1",
+      "flags": []
+    },
+    {
+      "id": "20261104-181142-v17-dev3/S18_run1",
+      "flags": [],
+      "naturalness": 4,
+      "clarity": 4,
+      "firmness": 4,
+      "empathy": 4,
+      "politeness": 4
+    }
+  ]
+}

@@ -55,7 +55,7 @@ def _pct(x) -> str:
 
 def render(results: dict[str, dict], n: int) -> str:
     lines = [f"# Judge calibration ({datetime.now():%Y-%m-%d %H:%M})", "",
-             f"{n} conversations hand-labelled by the owner (rubric v2). Agreement of each candidate judge "
+             f"{n} conversations hand-labelled by the owner (rubric v3). Agreement of each candidate judge "
              "with the owner: within one point / exact / n/a agreement / mean absolute difference.", "",
              "| Judge | " + " | ".join(RUBRIC) + " | Overall within 1 | Flags precision / recall |",
              "|---|" + "---|" * (len(RUBRIC) + 2)]
@@ -90,7 +90,13 @@ async def main() -> None:
     results, raw = {}, {}
     for spec in args.judges:
         provider, model = spec.split(":", 1)
-        scores = await judge_all(provider, model, [s["art"] for s in sample], concurrency=2)
+        try:  # one judge failing (rate limit, bad key) must not lose the others' results
+            # Groq free tier: 8,000 tokens a minute, so one call at a time (429 on 2026-11-04).
+            scores = await judge_all(provider, model, [s["art"] for s in sample],
+                                     concurrency=1 if provider == "groq" else 2)
+        except Exception as e:
+            print(f"  {spec}: FAILED, {type(e).__name__}: {str(e)[:200]}")
+            continue
         raw[spec] = [{"id": s["id"], **j} for s, j in zip(sample, scores)]
         errors = sum("error" in j for j in scores)
         results[spec] = agreement(owner, scores)

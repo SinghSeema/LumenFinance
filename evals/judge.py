@@ -98,12 +98,40 @@ def client_for(provider: str, cfg: dict):
     return openai.AsyncOpenAI(api_key=cfg[section][key], base_url=URLS[provider], max_retries=4)
 
 
+RATE_LIMIT_TRIES = 8
+
+
+def _wait_secs(err) -> float:
+    """Seconds the provider asks us to wait: retry-after header, else "try again in 17.09s", else 20."""
+    headers = getattr(getattr(err, "response", None), "headers", {}) or {}
+    if headers.get("retry-after"):
+        try:
+            return float(headers["retry-after"]) + 1
+        except ValueError:
+            pass
+    m = re.search(r"try again in ([\d.]+)s", str(err))
+    return float(m.group(1)) + 1 if m else 20.0
+
+
+async def _create(client, **kwargs):
+    """Groq's free tier allows 8,000 tokens a minute and one judged call is ~3,000 (calibration
+    2026-11-04 died on a 429): wait as long as the provider asks, then try again."""
+    import openai
+    for attempt in range(RATE_LIMIT_TRIES):
+        try:
+            return await client.chat.completions.create(**kwargs)
+        except openai.RateLimitError as e:
+            if attempt == RATE_LIMIT_TRIES - 1:
+                raise
+            await asyncio.sleep(_wait_secs(e))
+
+
 async def judge_one(client, model: str, a: dict, sem) -> dict:
     raw, usage = None, {"input": 0, "output": 0}
     async with sem:
         for _ in (1, 2):
-            r = await client.chat.completions.create(
-                model=model, temperature=0, max_tokens=4000,
+            r = await _create(
+                client, model=model, temperature=0, max_tokens=4000,
                 messages=[{"role": "user", "content": _PROMPT.format(transcript=transcript(a))}])
             usage["input"] += r.usage.prompt_tokens if r.usage else 0
             usage["output"] += r.usage.completion_tokens if r.usage else 0

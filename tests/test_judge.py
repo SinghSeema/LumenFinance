@@ -23,3 +23,13 @@ def test_out_of_range_scores_and_unknown_flag_types_are_dropped():
 
 def test_transcript_labels_speakers():
     assert transcript(A).splitlines()[1].startswith("BORROWER: Haan")
+
+
+def test_na_is_kept_and_other_words_dropped():
+    out = clean({"politeness": 5, "empathy": "na", "firmness": "N/A", "clarity": "high", "naturalness": "4"}, A)
+    assert out["empathy"] == "na" and out["firmness"] == "na" and "clarity" not in out and out["naturalness"] == 4
+
+
+def test_rubric_states_that_correct_refusals_are_not_penalised():
+    from evals.judge import _PROMPT
+    assert "Refusing details to a family member" in _PROMPT and '"na"' in _PROMPT

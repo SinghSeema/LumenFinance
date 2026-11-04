@@ -8,6 +8,8 @@
 #   ./run.sh judge results/<run>    LLM tone judge on a finished eval run (paid; asks first)
 #   ./run.sh report results/<run>   results tables for the eval report (free)
 #   ./run.sh dashboard <base> [<after>]  results/dashboard.html from eval runs (free)
+#   ./run.sh label                  results/labelling.html: hand-label 20 calls for judge calibration
+#   ./run.sh calibrate              compare judges with evals/labels/owner_labels.json (free tiers)
 #
 # Keys live in .env (gitignored). Nothing here prints a key.
 set -euo pipefail
@@ -121,5 +123,7 @@ case "${1:-help}" in
   judge)  shift; "$PY" -m evals.judge "$@" ;;
   report) shift; "$PY" -m evals.report "$@" ;;
   dashboard) shift; "$PY" -m evals.dashboard "$@" ;;
-  *)      sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
+  label)  "$PY" -m evals.label_page ;;
+  calibrate) shift; "$PY" -m evals.calibrate "$@" ;;
+  *)      sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

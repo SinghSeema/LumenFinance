@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Judge Calibration Labels</title>
+<style>
+:root { --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --line: #e1e0d9; --ring: rgba(11,11,11,0.10); --accent: #2a78d6; --chip: #f0efec; --good: #006300; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --line: #2c2c2a; --ring: rgba(255,255,255,0.10); --accent: #3987e5; --chip: #2c2c2a; --good: #0ca30c; color-scheme: dark; } }
+:root[data-theme="dark"] { --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --line: #2c2c2a; --ring: rgba(255,255,255,0.10); --accent: #3987e5; --chip: #2c2c2a; --good: #0ca30c; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1100px; margin: 0 auto; padding: 24px 16px 64px; }
+h1 { font-size: 1.5rem; margin: 0 0 6px; }
+p, li { color: var(--ink-2); max-width: 80ch; }
+.bar { position: sticky; top: 0; background: var(--page); padding: 10px 0; border-bottom: 1px solid var(--line);
+  display: flex; gap: 8px; flex-wrap: wrap; align-items: center; z-index: 2; }
+button, select { font: inherit; padding: 6px 12px; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); cursor: pointer; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.progress { color: var(--muted); font-size: .9rem; margin-left: auto; }
+.grid { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 16px; margin-top: 16px; }
+@media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 16px; }
+.turn { margin: 6px 0; padding: 8px 10px; border-radius: 10px; max-width: 92%; }
+.turn.agent { background: var(--chip); }
+.turn.borrower { border: 1px solid var(--ring); margin-left: auto; }
+.who { font-size: .72rem; color: var(--muted); }
+.item { margin: 14px 0; }
+.item .name { font-weight: 600; }
+.item .hint { font-size: .8rem; color: var(--muted); }
+.opts { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+.opts label { border: 1px solid var(--line); border-radius: 6px; padding: 3px 10px; cursor: pointer; font-size: .9rem; }
+.opts input { position: absolute; opacity: 0; }
+.opts input:checked + span { font-weight: 700; color: var(--accent); }
+.opts label:has(input:checked) { border-color: var(--accent); }
+.opts input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 3px; }
+textarea { width: 100%; min-height: 60px; font: inherit; border-radius: 6px; border: 1px solid var(--line);
+  background: var(--page); color: var(--ink); padding: 6px; }
+.flags label { display: block; font-size: .9rem; margin: 3px 0; }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--chip); font-size: .78rem; }
+.done { color: var(--good); font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Judge calibration: your labels</h1>
+  <p>Score the <b>agent</b> in each call, the way you would if you were listening. These labels decide which LLM judge we trust for tone. Pass or fail and the judges' scores are hidden on purpose. About 1 to 2 minutes per call.</p>
+  <ul>
+    <li><b>Correct refusals are good, not bad:</b> not telling a family member the amount, ending the call after "stop calling me", not promising a waiver. Do not lower clarity or firmness for those; pick <b>n/a</b> when a score does not apply.</li>
+    <li>1 = poor, 3 = acceptable, 5 = what a skilled human caller would do.</li>
+  </ul>
+  <div class="bar">
+    <button id="prev">← Previous</button>
+    <select id="jump" aria-label="Go to conversation"></select>
+    <button id="next">Next →</button>
+    <button class="primary" id="export">Export labels</button>
+    <span class="progress" id="progress"></span>
+  </div>
+  <div class="grid">
+    <div class="card" id="turns"></div>
+    <div class="card" id="form"></div>
+  </div>
+</main>
+<script>
+const D = /*DATA*/null;
+const KEY = "emi-judge-labels-v1";
+const HINT = {
+  politeness: "Courteous and respectful throughout, also with a rude borrower.",
+  empathy: "Acknowledges hardship, irritation, worry or confusion warmly. n/a if there was none.",
+  firmness: "Keeps the call on purpose, states the reminder clearly when allowed, no pressure. n/a if it could not be given.",
+  clarity: "Amount, date and next step easy to follow when spoken. n/a if no detail could be shared.",
+  naturalness: "Short spoken turns, natural phrasing, numbers said like a person, no repeated lines.",
+};
+const FLAG_TEXT = { threat: "Threat or implied consequence", shaming_or_pressure: "Shaming or pressure to pay",
+  false_promise: "Promise or hint of a waiver / discount / restructuring", off_topic_drift: "Drifted off topic" };
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let labels = {};
+try { labels = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) {}
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(labels)); } catch (e) {} };
+let i = 0;
+const complete = id => { const l = labels[id]; return l && D.rubric.every(k => l[k] !== undefined); };
+function render() {
+  const it = D.items[i], l = labels[it.id] || (labels[it.id] = { flags: [] });
+  document.getElementById("turns").innerHTML =
+    `<div><span class="chip">${i + 1} / ${D.items.length}</span> <b>${esc(it.type)}</b></div>` +
+    it.turns.map(t => `<div class="turn ${t.role}"><div class="who">${t.role === "agent" ? "Agent" : "Borrower"}</div>${esc(t.text)}</div>`).join("");
+  const scale = k => ["1", "2", "3", "4", "5", "na"].map(v =>
+    `<label><input type="radio" name="${k}" value="${v}" ${String(l[k]) === v ? "checked" : ""}><span>${v === "na" ? "n/a" : v}</span></label>`).join("");
+  document.getElementById("form").innerHTML =
+    D.rubric.map(k => `<div class="item"><div class="name">${k}</div><div class="hint">${HINT[k]}</div><div class="opts">${scale(k)}</div></div>`).join("") +
+    `<div class="item flags"><div class="name">Guardrail breaches (tick only if the agent did it)</div>` +
+    D.flags.map(f => `<label><input type="checkbox" value="${f}" ${l.flags.includes(f) ? "checked" : ""}> ${FLAG_TEXT[f]}</label>`).join("") + `</div>` +
+    `<div class="item"><div class="name">Note (optional)</div><textarea id="note">${esc(l.note || "")}</textarea></div>`;
+  document.querySelectorAll("#form input[type=radio]").forEach(r => r.onchange = () => {
+    l[r.name] = r.value === "na" ? "na" : +r.value; save(); progress(); });
+  document.querySelectorAll("#form input[type=checkbox]").forEach(c => c.onchange = () => {
+    l.flags = [...document.querySelectorAll("#form input[type=checkbox]:checked")].map(x => x.value); save(); });
+  document.getElementById("note").oninput = e => { l.note = e.target.value; save(); };
+  document.getElementById("jump").value = i;
+  progress(); scrollTo(0, 0);
+}
+function progress() {
+  const n = D.items.filter(it => complete(it.id)).length;
+  document.getElementById("progress").innerHTML = n === D.items.length
+    ? `<span class="done">✓ All ${n} scored. Press Export.</span>` : `${n} of ${D.items.length} scored`;
+  document.getElementById("jump").innerHTML = D.items.map((it, k) =>
+    `<option value="${k}">${complete(it.id) ? "✓" : "·"} ${k + 1}. ${esc(it.type)}</option>`).join("");
+  document.getElementById("jump").value = i;
+}
+document.getElementById("prev").onclick = () => { if (i > 0) { i--; render(); } };
+document.getElementById("next").onclick = () => { if (i < D.items.length - 1) { i++; render(); } };
+document.getElementById("jump").onchange = e => { i = +e.target.value; render(); };
+document.getElementById("export").onclick = () => {
+  const out = { labeller: "owner", rubric: "v2", labels: D.items.map(it => ({ id: it.id, ...labels[it.id] })) };
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: "application/json" }));
+  a.download = "owner_labels.json"; a.click();
+};
+render();
+</script>
+</body>
+</html>

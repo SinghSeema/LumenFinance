@@ -82,8 +82,8 @@ def build(runs: list[dict]) -> dict:
             continue
         bw = borrowers[sc["borrower_id"]]
         brs = [(x, s) for x, s in zip(base["arts"], base["scores"]) if x["scenario"]["id"] == sc["id"]]
-        tones = [statistics.mean(j[k] for k in RUBRIC if k in j)
-                 for j in (base["judge"].get((sc["id"], x["run"])) for x, _ in brs) if j and "politeness" in j]
+        tones = [statistics.mean(j[k] for k in RUBRIC if isinstance(j.get(k), int))
+                 for j in (base["judge"].get((sc["id"], x["run"])) for x, _ in brs) if j and isinstance(j.get("politeness"), int)]
         want = sc["expected"].get("escalate_to_human")
         scenarios.append({
             "id": sc["id"], "type": _btype(sc), "set": sc["set"], "expected": sc["expected"],

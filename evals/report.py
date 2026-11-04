@@ -52,7 +52,7 @@ def scenario_table(arts: list[dict], scores: list[dict], judge: dict) -> list[st
         want = sc["expected"].get("escalate_to_human")
         esc = (f"{sum(s['escalation'][1] == want for _, s in valid)}/{len(valid)}"
                if want is not None else "-")
-        tones = [statistics.mean(j[k] for k in RUBRIC if k in j) for j in
+        tones = [statistics.mean(j[k] for k in RUBRIC if isinstance(j.get(k), int)) for j in
                  (judge.get((sid, a["run"])) for a, _ in valid) if j and any(k in j for k in RUBRIC)]
         common = Counter(s["outcome"] for _, s in valid).most_common(1)
         out.append(
@@ -80,7 +80,7 @@ def metrics_rows(arts: list[dict], scores: list[dict], judge: dict) -> list[tupl
     guard = Counter(g for _, s in valid for g in s["guard_hits"])
     proc = [(k, v) for _, s in valid for k, v in s["checks"].items() if k.startswith("process:")]
     jflags = Counter(f["type"] for j in judge.values() for f in j.get("flags", []))
-    tone = {k: [j[k] for j in judge.values() if k in j] for k in RUBRIC}
+    tone = {k: [j[k] for j in judge.values() if isinstance(j.get(k), int)] for k in RUBRIC}
     lang = sum(bool(s["language_mismatch_turns"]) for _, s in valid)
     turns = [s["borrower_turns"] for _, s in valid]
     secs = [a["wall_secs"] for a, _ in valid]

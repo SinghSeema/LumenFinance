@@ -186,3 +186,19 @@ def test_ordinary_lines_are_not_verify_claims(s):
                                "अब आपके पास verification का कोई मौका नहीं बचा है।", "You have no more attempts."])
 def test_mixed_script_verify_claims_need_a_check(s):
     assert invented_verify_result(s, checked_now=False, attempts_left=1)
+
+
+from emi_agent.guard import invented_notice  # noqa: E402
+
+
+@pytest.mark.parametrize("s", ["Just a reminder, this call is being recorded.", "This call may be recorded.",
+                               "For your privacy, please do not share this payment link with anyone.",
+                               "यह call record की जा रही है।"])
+def test_invented_notices_are_caught(s):
+    assert invented_notice(s)
+
+
+@pytest.mark.parametrize("s", ["I've recorded that you'll pay on the thirteenth of November.",
+                               "मैंने आपकी बात record कर ली है।", "I've sent the payment link on WhatsApp."])
+def test_real_lines_are_not_notices(s):
+    assert not invented_notice(s)

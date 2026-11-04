@@ -8,7 +8,8 @@
     "emi_amount": 12500,
     "due_date": "2026-11-05",
     "days_overdue": 0,
-    "preferred_language": "en"
+    "preferred_language": "en",
+    "late_fee": 0
   },
   {
     "borrower_id": "B002",
@@ -19,7 +20,8 @@
     "emi_amount": 4200,
     "due_date": "2026-10-28",
     "days_overdue": 6,
-    "preferred_language": "hi"
+    "preferred_language": "hi",
+    "late_fee": 500
   },
   {
     "borrower_id": "B003",
@@ -30,7 +32,8 @@
     "emi_amount": 3800,
     "due_date": "2026-11-01",
     "days_overdue": 2,
-    "preferred_language": "hinglish"
+    "preferred_language": "hinglish",
+    "late_fee": 500
   },
   {
     "borrower_id": "B004",
@@ -41,7 +44,8 @@
     "emi_amount": 18000,
     "due_date": "2026-11-08",
     "days_overdue": 0,
-    "preferred_language": "hi"
+    "preferred_language": "hi",
+    "late_fee": 0
   },
   {
     "borrower_id": "B005",
@@ -52,7 +56,8 @@
     "emi_amount": 25000,
     "due_date": "2026-10-25",
     "days_overdue": 9,
-    "preferred_language": "en"
+    "preferred_language": "en",
+    "late_fee": 500
   },
   {
     "borrower_id": "B006",
@@ -63,7 +68,8 @@
     "emi_amount": 2900,
     "due_date": "2026-11-10",
     "days_overdue": 0,
-    "preferred_language": "hinglish"
+    "preferred_language": "hinglish",
+    "late_fee": 0
   },
   {
     "borrower_id": "B007",
@@ -74,7 +80,8 @@
     "emi_amount": 9500,
     "due_date": "2026-10-20",
     "days_overdue": 14,
-    "preferred_language": "en"
+    "preferred_language": "en",
+    "late_fee": 500
   },
   {
     "borrower_id": "B008",
@@ -85,6 +92,7 @@
     "emi_amount": 5600,
     "due_date": "2026-11-03",
     "days_overdue": 0,
-    "preferred_language": "hi"
+    "preferred_language": "hi",
+    "late_fee": 0
   }
 ]

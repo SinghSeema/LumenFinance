@@ -343,6 +343,10 @@ class Brain:
         s = self.state
         if self._muted:
             return None
+        if guard.invented_notice(sentence):
+            s.guard_hits.append({"category": "invented_notice", "original": sentence, "spoken": "",
+                                 "stage": s.stage.value, "verified": s.verified})
+            return None
         left = self.tools.max_attempts - s.verify_attempts
         if not s.verified and guard.invented_verify_result(
                 sentence, checked_now=s.verify_attempts > self._attempts_at_turn_start,

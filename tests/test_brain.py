@@ -23,7 +23,8 @@ def secrets(b, today):
     out = {str(b.emi_amount), b.loan_type, b.due_date.isoformat(), b.dob.isoformat(), b.last4,
            amount_to_words(b.emi_amount, "en"), amount_to_words(b.emi_amount, "hi"),
            date_to_words(b.due_date, today, "en"), b.dob.strftime("%d/%m/%Y")}
-    return {s for s in out if len(s) > 3}
+    # "today"/"tomorrow" are everyday words (prompt v12: "clear it today"), as in evals/score.py.
+    return {s for s in out if len(s) > 3 and s not in {"today", "tomorrow"}}
 
 
 def dump(messages):
@@ -38,7 +39,7 @@ async def run(brain, text, lang_hint=None):
     return [s async for s in brain.respond(text, lang_hint)]
 
 
-@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11"])
+@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12"])
 @pytest.mark.parametrize("bid", sorted(BORROWERS))
 def test_system_prompt_has_no_loan_or_verification_data(bid, version, today, tmp_path):
     b = BORROWERS[bid]
@@ -547,7 +548,7 @@ async def test_code_wrong_last4_asks_for_dob_next(today, tmp_path):
 def test_v9_prompt_asks_last4_first():
     from emi_agent.context import system_prompt
     cfg = load()
-    assert cfg["behavior"]["prompt_version"] in ("v9", "v10", "v11")
+    assert cfg["behavior"]["prompt_version"] in ("v9", "v10", "v11", "v12")
     text = system_prompt(BORROWERS["B001"], cfg, "en", "Hello")
     assert "Ask first for only the last four digits" in text
 
@@ -617,3 +618,18 @@ async def test_no_purpose_note_without_the_question(today, tmp_path):
     brain = make(llm, today, tmp_path)
     await run(brain, "Yes, speaking.")
     assert not any("asked what this call is about" in str(m["content"]) for m in llm.requests[0][1])
+
+
+def test_v12_prompt_states_the_fee_once_and_asks_to_pay_online():
+    from emi_agent.context import system_prompt
+    text = system_prompt(BORROWERS["B007"], load(), "en", "Hello")
+    assert "late payment charge" in text and "never repeat it" in text and "after they describe hardship" in text
+    assert "secure payment link on SMS or WhatsApp" in text and "how they would like to proceed" not in text
+
+
+async def test_invented_notice_is_dropped(today, tmp_path):
+    llm = ScriptedLLM([say("Thank you. Just a reminder, this call is being recorded. How can I help?")])
+    brain = make(llm, today, tmp_path)
+    out = await run(brain, "Yes.")
+    assert [s.text for s in out] == ["Thank you.", "How can I help?"]
+    assert brain.state.guard_hits[-1]["category"] == "invented_notice"

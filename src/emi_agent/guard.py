@@ -104,6 +104,19 @@ _ATTEMPTS = _words(r"(?:one more|another|ek aur|last|final|aakhri|akhri) (?:chan
 _LAST = _words(r"last", r"final", r"aakhri", r"akhri", "आखिरी", "अंतिम")
 
 
+# Notices nobody wrote (C2 again, prompt v12 run: "Just a reminder, this call is being recorded.",
+# "For your privacy, please do not share this payment link with anyone." before any link). Invented
+# policy (G-08), so the sentence is dropped, not replaced.
+_NOTICE = re.compile(
+    r"\b(?:this|the) call (?:is being|may be|will be|is|might be) recorded|"
+    r"call (?:record|recording) (?:ho rahi|ki ja rahi|hoti)|(?:कॉल|call) (?:रिकॉर्ड|record) (?:हो रही|की जा रही|हो सकती)|"
+    r"\b(?:do not|don't|never) share (?:this|the|your) (?:payment )?link", re.IGNORECASE)
+
+
+def invented_notice(sentence: str) -> bool:
+    return _NOTICE.search(sentence.replace("’", "'")) is not None
+
+
 def invented_verify_result(sentence: str, *, checked_now: bool, attempts_left: int) -> bool:
     """A mismatch or attempts claim with no failed check this turn, or "last chance" when more
     than one attempt is left."""

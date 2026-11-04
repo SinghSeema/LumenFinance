@@ -58,7 +58,7 @@ behavior:
   tool_timeout_s: 8
   verify_max_attempts: 3
   lender_name: "Lumen Finance"
-  prompt_version: v11         # src/emi_agent/prompts/system_<version>.md
+  prompt_version: v12         # src/emi_agent/prompts/system_<version>.md
   calls_log: results/calls.jsonl
 
 evals:

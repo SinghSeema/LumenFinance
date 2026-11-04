@@ -76,6 +76,7 @@ def loan_facts(b: Borrower, today: date, lang: str, script: str) -> LoanFacts:
         due_date_spoken=date_to_words(b.due_date, today, lang, script),
         loan_type=b.loan_type,
         overdue_spoken=days_to_words(b.days_overdue, lang, script) if b.days_overdue else None,
+        late_fee_spoken=amount_to_words(b.late_fee, lang, script) if b.days_overdue and b.late_fee else None,
     )
 
 
@@ -85,7 +86,7 @@ def protected_phrases(b: Borrower, today: date) -> list[str]:
     for lang, script in (("en", "roman"), ("hi", "roman"), ("hi", "devanagari"),
                          ("hi-en", "roman"), ("hi-en", "devanagari")):
         f = loan_facts(b, today, lang, script)
-        phrases.update(p for p in (f.amount_spoken, f.due_date_spoken, f.overdue_spoken) if p)
+        phrases.update(p for p in (f.amount_spoken, f.due_date_spoken, f.overdue_spoken, f.late_fee_spoken) if p)
     return sorted(phrases)
 
 

@@ -457,3 +457,18 @@ def test_model_value_stitched_from_fragments_is_not_checked(today):
                               heard=["हाँ वो... umm... सत्तावन... नहीं मतलब सत्तर... चार... तीन... haan कुछ वही..."])
     r = tools.call("verify_identity", {"factor": "last4", "value": "7043"})
     assert r["error"] == "not_heard" and state.verify_attempts == 0
+
+
+# Owner, 2026-11-04: a real late payment charge, stated once, only on an overdue loan.
+def test_late_fee_only_on_overdue_loans(today):
+    from emi_agent.data import load_borrowers
+    from emi_agent.tools import loan_facts
+    bs = load_borrowers()
+    assert loan_facts(bs["B007"], today, "en", "roman").as_dict()["late_fee_spoken"] == "five hundred rupees"
+    assert "late_fee_spoken" not in loan_facts(bs["B001"], today, "en", "roman").as_dict()
+
+
+def test_late_fee_is_protected_before_verification(today):
+    from emi_agent.data import load_borrowers
+    from emi_agent.tools import protected_phrases
+    assert "five hundred rupees" in protected_phrases(load_borrowers()["B007"], today)

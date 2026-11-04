@@ -19,6 +19,7 @@ class Borrower(BaseModel):
     emi_amount: int
     due_date: date
     days_overdue: int = 0
+    late_fee: int = 0  # late payment charge already applied, in rupees (owner 2026-11-04; mock data)
     preferred_language: Literal["en", "hi", "hinglish"]
 
     @property
@@ -43,6 +44,7 @@ class LoanFacts:
     due_date_spoken: str
     loan_type: str
     overdue_spoken: str | None = None
+    late_fee_spoken: str | None = None  # only on an overdue loan with a charge applied
 
     def as_dict(self) -> dict[str, str]:
         d = {
@@ -52,6 +54,8 @@ class LoanFacts:
         }
         if self.overdue_spoken:
             d["overdue_spoken"] = self.overdue_spoken
+        if self.late_fee_spoken:
+            d["late_fee_spoken"] = self.late_fee_spoken
         return d
 
 

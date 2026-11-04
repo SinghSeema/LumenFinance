@@ -17,13 +17,13 @@ Every defect found and fixed, with evidence: [`docs/issues-and-fixes.md`](docs/i
 
 ## Demo recordings
 
-Three live voice calls through the full stack (browser phone, local LiveKit, Pipecat, Deepgram, Sarvam), recorded on 4 Nov 2026. The owner plays each borrower. The files are MP4 with sound only. Each call's page (outcome record, transcript, latency per turn, tool calls, guard events) is in `results/calls/`; open it in a browser after cloning.
+Three live voice calls through the full stack (browser phone, local LiveKit, Pipecat, Deepgram, Sarvam), recorded on 4 Nov 2026. The owner plays each borrower. The files are MP4 with sound only. Each call's report page (outcome record, transcript, latency per turn, tool calls, guard events) is linked in the table below; GitHub shows these files as HTML source, so open them in a browser after cloning.
 
 | File | Call | What it shows | Call page |
 |---|---|---|---|
-| [`21-37-48_Normal.mp4`](DemoRecordings/) | B001, English, EMI due tomorrow | AI disclosure, verification by the last four digits, "give me a moment" handled, link sent on WhatsApp, promise date asked once and recorded for 5 Nov | `results/calls/20261104-213709-B001.html` |
-| [`22-11-30_hardship.mp4`](DemoRecordings/) | B007, overdue 14 days, **difficult: lost her job** | Wrong last four, recovery through the date of birth; English and Hindi mixed; the practical hardship reply (one-time charge that will not grow, part payment, team call back, one choice); no waiver or date promised; escalated as hardship | `results/calls/20261104-221126-B007.html` |
-| [`22-21-26_dispute.mp4`](DemoRecordings/) | B002, Hindi, overdue 6 days, says she already paid | Does not argue; says the internal team will check the payment; asks how she paid; outcome already_paid, escalated for a payment check | `results/calls/20261104-222132-B002.html` |
+| [`21-37-48_Normal.mp4`](DemoRecordings/) | B001, English, EMI due tomorrow | AI disclosure, verification by the last four digits, "give me a moment" handled, link sent on WhatsApp, promise date asked once and recorded for 5 Nov | [`results/calls/20261104-213709-B001.html`](results/calls/20261104-213709-B001.html) |
+| [`22-11-30_hardship.mp4`](DemoRecordings/) | B007, overdue 14 days, **difficult: lost her job** | Wrong last four, recovery through the date of birth; English and Hindi mixed; the practical hardship reply (one-time charge that will not grow, part payment, team call back, one choice); no waiver or date promised; escalated as hardship | [`results/calls/20261104-221126-B007.html`](results/calls/20261104-221126-B007.html) |
+| [`22-21-26_dispute.mp4`](DemoRecordings/) | B002, Hindi, overdue 6 days, says she already paid | Does not argue; says the internal team will check the payment; asks how she paid; outcome already_paid, escalated for a payment check | [`results/calls/20261104-222132-B002.html`](results/calls/20261104-222132-B002.html) |
 
 The plan for the recordings, and an optional fourth call where no word list matches and the LLM intent check decides, is [`docs/demo-script.md`](docs/demo-script.md).
 

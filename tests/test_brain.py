@@ -934,3 +934,39 @@ async def test_borrower_amount_can_be_read_back_in_another_language(today, tmp_p
     brain.state.verified = True
     out = await run(brain, "मेरी EMI twelve thousand rupees है, eighteen thousand नहीं।", "hi")
     assert out[0].guard is None and "बारह हज़ार" in out[0].text
+
+
+# v17-dev2 S05 run 2: "Close politely.</think>" was in the agent's reply (the judge found it).
+_LEAKS = ["Close politely.</think> क्षमा चाहती हूँ, शायद गलत number मिल गया। समय देने के लिए धन्यवाद।",
+          "<think>The user says wrong number. Close politely.</think> क्षमा चाहती हूँ, शायद गलत number मिल गया।"]
+
+
+async def test_leaked_reasoning_is_never_spoken(today, tmp_path):
+    for leak in _LEAKS:
+        brain = make(ScriptedLLM([say(leak)]), today, tmp_path, "B006")
+        out = [s.text for s in await run(brain, "ये तो गलत नंबर है, मैं कोई Amit नहीं हूँ।", "hi")]
+        assert out and not any("think" in x or "politely" in x for x in out) and out[0].startswith("क्षमा")
+        assert "think>" not in json.dumps(brain.history, ensure_ascii=False)
+
+
+async def test_normal_english_first_sentence_is_not_held_back(today, tmp_path):
+    brain = make(ScriptedLLM([say("Thank you, Arjun. Your EMI is due soon.")]), today, tmp_path)
+    out = [s.text for s in await run(brain, "Yes, this is Arjun.")]
+    assert out[0] == "Thank you, Arjun."
+
+
+async def test_held_instruction_like_sentence_is_said_when_no_reasoning_follows(today, tmp_path):
+    brain = make(ScriptedLLM([say("Now, about your EMI. It is due on the fifth.")]), today, tmp_path)
+    brain.state.verified = True
+    out = [s.text for s in await run(brain, "Okay.")]
+    assert out[0] == "Now, about your EMI." and len(out) == 2
+
+
+@pytest.mark.parametrize("text", ["8834. Aur suniye, is topic pe mujhe call mat karo.",
+                                  "Nahi, koi payment link bhejne ki zaroorat nahi hai. Maine bola na, mujhe is bare mein call mat karo."])
+def test_stop_request_is_judged_per_sentence(text):
+    assert is_stop_request(text)  # v17-dev3 S12 run 2
+
+
+def test_not_now_in_the_same_sentence_still_softens_a_stop():
+    assert not is_stop_request("Abhi call mat karo, shaam ko 6 baje karna.")

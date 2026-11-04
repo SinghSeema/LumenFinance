@@ -137,3 +137,9 @@ def test_conflict_reason_when_both_are_in_the_future():
 def test_ordinal_word_without_a_month_is_not_a_date():
     assert normalize("ek second, main check karta hoon", TODAY_TUE).date is None
     assert normalize("the second one", TODAY_TUE).date is None
+
+
+@pytest.mark.parametrize("text", ["मैं after 1 week करूंगी", "after a week", "ek hafte baad", "एक हफ्ते बाद"])
+def test_after_a_week_is_vague(text):
+    # Owner call B004 17:59: ask which day, never guess.
+    assert normalize(text, date(2026, 11, 4)).reason == "ambiguous_phrase"

@@ -111,8 +111,11 @@ cmd_call() {
   fi
 
   say "Agent: borrower $borrower, profile $profile. Open http://localhost:$CLIENT_PORT and press call."
-  say "Agent log is below and in $LOG_DIR/bot-$borrower.log. Ctrl-C ends everything."
-  "$PY" -m emi_agent.bot --profile "$profile" --borrower "$borrower" 2>&1 | tee "$LOG_DIR/bot-$borrower.log"
+  # One log per call (the 17:49 call of 2026-11-04 was overwritten by the next); bot-<id>.log points to the latest.
+  local log="$LOG_DIR/bot-$borrower-$(date +%Y%m%d-%H%M%S).log"
+  ln -sfn "$(basename "$log")" "$LOG_DIR/bot-$borrower.log"
+  say "Agent log is below and in $log. Ctrl-C ends everything."
+  "$PY" -m emi_agent.bot --profile "$profile" --borrower "$borrower" 2>&1 | tee "$log"
 }
 
 case "${1:-help}" in

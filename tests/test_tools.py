@@ -559,7 +559,7 @@ def test_get_policy_is_gated_and_speaks_amounts(borrower, today):
 def test_will_pay_with_no_date_on_a_loan_not_yet_due_asks_once(borrower, today):
     tools, state = _verified(borrower, today, ["I need to pay"])
     r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
-    assert r["error"] == "no_date" and "by the due date" in r["message"]
+    assert r["error"] == "no_date" and "on which date they plan to pay" in r["message"]
     assert tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})["recorded"]
 
 
@@ -596,3 +596,15 @@ def test_anger_at_a_correct_charge_is_not_a_dispute_at_first(borrower, today):
 def test_real_disputes_go_through_at_once(borrower, today, said):
     tools, state = _verified(borrower, today, [said])
     assert tools.call("escalate_to_human", {"reason": "dispute"})["escalated"]
+
+
+def test_will_pay_date_question_is_skipped_when_they_say_bye(borrower, today):
+    tools, state = _verified(borrower, today, ["Ok. You. Bye."])
+    assert tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})["recorded"]
+
+
+def test_will_pay_by_the_due_date_is_recorded_as_a_promise(borrower, today):
+    tools, state = _verified(borrower, today, ["ठीक है, मैं try करूँगी पूरा amount due date तक pay करने का।"])
+    r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert r["recorded"] and state.outcome.outcome.value == "promise_to_pay"
+    assert state.outcome.promise_to_pay_date == borrower.due_date

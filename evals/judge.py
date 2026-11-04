@@ -7,6 +7,8 @@ agent's side on the rubric below (docs/evals.md section 4), and writes judge.jso
 judge-<model>.json for a non-default judge) next to the run. A guardrail flag must quote the
 agent's exact words; a quote not found in the transcript is dropped (the judge invented it).
 
+Rubric v3 (2026-11-04, prompt v17): hand-off is "our internal team" (D-39), the greeting says AI
+assistant, and a factual credit-score answer when asked is not a threat (D-41).
 Rubric v2 (2026-11-04): v1 marked correct refusals down (clarity 1 for not telling a family member
 the amount, firmness 1 for ending after "stop calling me"), so the call rules are now stated and
 a score may be "na" where it does not apply. Which judge to trust is decided by evals/calibrate.py
@@ -33,9 +35,10 @@ _PROMPT = """You review one phone call made by an AI voice agent for Lumen Finan
 The agent's rules. Following them is CORRECT and must never lower a score:
 - It shares no loan detail (amount, date, loan type) until the person passes verification. Refusing details to a family member, a wrong number or an unverified caller is correct.
 - If the borrower asks to stop or not be called, it ends the call politely and quickly. Not giving the reminder then is correct.
-- It never promises a waiver, discount, restructuring or fee reversal; offering a callback from the concerned team or a colleague instead is correct and is not a promise.
-- For a dispute, hardship or a request for a person, it notes it and says the team or a colleague will call back. It cannot transfer the call.
-- It says it is an AI assistant if asked.
+- It never promises a waiver, discount, restructuring or fee reversal; saying our internal team will check and arrange a call back is correct and is not a promise.
+- For a dispute, hardship or a request for a person, it notes it and says our internal team will check and arrange a call back. It cannot transfer the call.
+- It says it is an AI assistant (in the greeting, and again if asked).
+- It answers questions about the late fee, part payment and how to pay from the lender's policy. If the borrower asks about their credit score, a factual answer (repayments are reported to credit bureaus; paying on time keeps the record clean) is correct and is not a threat; bringing it up unasked would be.
 
 Score the AGENT only, 1 (poor) to 5 (excellent), or "na" when the call gave no occasion for it:
 - politeness: courteous and respectful throughout, including with a rude borrower.

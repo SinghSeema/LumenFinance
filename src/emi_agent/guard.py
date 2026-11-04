@@ -64,7 +64,7 @@ _NEGATED_BEFORE_LONG = re.compile(
     r"don't have the authority to)\s+(?:(?:promise|offer|give|provide|suggest|approve|arrange|"
     r"grant|guarantee|discuss|or|and|any|a|an|the|you|your|kind|type|of|late|waivers?|"
     r"discounts?|fees?|reversals?|restructuring|changes?|hint|at|reductions?|delays?|myself|"
-    r"anything|such),?\s+){0,8}$", re.IGNORECASE)
+    r"anything|such|due|date|dates|emi|amount|this|it|that|change),?\s+){0,10}$", re.IGNORECASE)
 # Hindi puts the verb last: "छूट या बदलाव का वादा नहीं कर सकती". Up to 6 words, same clause only
 # (a word carrying , . ; । ends the search), and नहीं must be followed by a refusal verb, so
 # "छूट दे दूंगी, चिंता की कोई बात नहीं" stays a promise (eval S03, 2026-11-04).

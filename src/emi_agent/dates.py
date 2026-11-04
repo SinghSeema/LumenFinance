@@ -19,6 +19,8 @@ _LAST_DAY = ["last day of the month", "last day of this month", "month's last da
              "महीने की आखिरी तारीख"]
 _NEXT_WEEK = ["next week", "agle hafte", "agle week", "अगले हफ्ते"]
 _NEXT_MONTH = ["next month", "agle mahine", "अगले महीने"]
+_AFTER_WEEKS = re.compile(r"(?:after|in)\s+(?:a|one|1|2|two)\s+weeks?|(?:ek|do|1|2|एक|दो)\s*(?:hafte|hafton|हफ्ते|हफ़्ते|हफ्तों)\s*"
+                          r"(?:baad|बाद|me|mein|में)|(?:a|one|1)\s+week\s+(?:later|baad|बाद)", re.IGNORECASE)
 
 _RELATIVE = [  # longest phrases first
     (["day after tomorrow", "parso", "parson", "parsoon", "परसों", "परसो"], 2),
@@ -158,7 +160,8 @@ def normalize(text: str, today: date, lang: str | None = None) -> DateResult:
     if weekday is not None:
         return _ok(weekday[1])
 
-    if next_month or _has(t, _NEXT_WEEK):
+    # "मैं after 1 week करूंगी" (owner call B004 17:59): vague like "next week", so ask which day.
+    if next_month or _has(t, _NEXT_WEEK) or _AFTER_WEEKS.search(t):
         return _unclear("ambiguous_phrase")
     return _unclear("unrecognized")
 

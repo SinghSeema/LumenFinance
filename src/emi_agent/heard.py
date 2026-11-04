@@ -291,6 +291,10 @@ _MISHEARD_22 = re.compile(
     re.IGNORECASE)
 
 
+_WAIT = re.compile(r"\b(?:give me|just|wait|hold on|one|a|ek)\s+(?:a\s+)?(?:2nd|sec|second|minute|min|moment)\b|"
+                   r"एक (?:second|सेकंड|सेकेंड|मिनट|minute)", re.IGNORECASE)
+
+
 def find_dob(utterances: list[str], today: date) -> tuple[date | None, set[str]]:
     """A full date of birth from these utterances, in order, plus the parts still missing.
 
@@ -301,6 +305,7 @@ def find_dob(utterances: list[str], today: date) -> tuple[date | None, set[str]]
     Returns (None, set()) when every part is there but they do not form one real date.
     """
     text = _FOUR_PHRASE.sub(" ", " ".join(utterances))
+    text = _WAIT.sub(" ", text)  # "Give me a 2nd." is not day 2 (owner call B004 17:59)
     text = _MISHEARD_22.sub("22 ", text)
     if _UNSURE.search(_CORRECTION.split(text)[-1]):  # "18 March 1985... नहीं, शायद 1987": ask again
         return None, set()

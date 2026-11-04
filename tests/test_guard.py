@@ -284,6 +284,15 @@ def test_commitments_are_still_promises(s):
     assert _is_promise(s)
 
 
+def test_refusal_naming_the_due_date_is_not_a_promise():
+    # v17-dev3 S17 run 1
+    assert not _is_promise("I cannot change the due date or waive any charge myself, but our internal team can check if needed.")
+
+
+def _unused(s):
+    assert _is_promise(s)
+
+
 # G-08, live call B004 (2026-11-04): amounts must come from code; no "charge added" when none was.
 from emi_agent.guard import fee_added_claim, unknown_amount  # noqa: E402
 

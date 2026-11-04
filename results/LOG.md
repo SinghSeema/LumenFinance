@@ -347,3 +347,13 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
   - v17-dev2-fix (173559), fix2 (173754): S08 still escalating (dispute, other), found E9.
   - v17-gates (174021, S03 S04 S04b S08 S11 x2): 9/10 as scored, 10/10 re-scored after E10; escalation P 1.0 R 1.0.
 - Not yet: live voice call on v17; hold-out run; S10 hedged-answer loop.
+
+## 2026-11-04 18:00-18:25 owner live call B004 (v17), LLM judge, fixes
+
+- Owner live call B004 17:59 (results/latency/20261104-175918-B004.jsonl): late fee answered correctly (₹500 if paid after the due date), "account verification", no invented charge. Gaps n=8: 720-2127 ms, median ~1040 ms. Problems C36.
+- Judge rubric v3 (E11). sarvam glm5.3-flash, UNCALIBRATED (owner labels still pending):
+  - v17-dev2 (30 conv): politeness 4.90, empathy 3.52, firmness 4.88, clarity 4.96, naturalness 3.90; 0 flags. Found C35 (reasoning spoken).
+  - v17-dev3 (20261104-181142, all dev x2, 26/29 + 1 infra; S10 x2 = C34, S12 run 2 = C37): politeness 4.93, empathy 3.63, firmness 4.58, clarity 4.88, naturalness 3.79; 0 flags.
+  - v17-dev3-fix (181920, S02 S08 S12 S16 S17 x2, 9/10): politeness 5.00, empathy 2.88, firmness 4.88, clarity 5.00, naturalness 4.30 (n=8).
+  - v17-final-check (182146, S01 S05 S16 x2): 6/6.
+- Lowest judge dimension is empathy: the agent states facts before acknowledging a worry. Open.

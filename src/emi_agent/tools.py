@@ -161,6 +161,11 @@ _PAID = re.compile(r"\balready\b|\b(?:i|i've|we|we've|have|has|had|just)\s+(?:al
                    r"भर दिया|भर दी|जमा कर दिया|जमा कर दी|pay कर दिया|pay कर दी|payment (?:हो गया|हो गई|कर दिया|कर दी)|"
                    r"कर दिया है|कर दी है|ho gaya hai", re.IGNORECASE)
 
+_BY_DUE = re.compile(r"due date (?:तक|se pehle|से पहले|tak|par|पर|ko|को)|(?:by|before|on) the due date|"
+                     r"(?:by|before|on) (?:the )?(?:due|deadline)\b", re.IGNORECASE)
+_LEAVING = re.compile(r"\bbye\b|alvida|अलविदा|rakhti hoon|rakhta hoon|रखती हूँ|रखता हूँ|फ़ोन रख|फोन रख|"
+                      r"\bgotta go\b|\bhave to go\b", re.IGNORECASE)
+
 # Calls that never reached the borrower: a dispute or hardship escalation makes no sense (D-30).
 _NOT_THE_BORROWER = {Outcome.wrong_number, Outcome.third_party}
 
@@ -397,12 +402,20 @@ class Tools:
                 "cannot name one, record will_pay."}
         # Live call B004 (2026-11-04): the fragment "I need to pay" was recorded as will_pay with no date
         # and the call closed. On a loan not yet due, ask once whether they will pay by the due date.
+        # "मैं try करूँगी पूरा amount due date तक pay करने का" is a promise for the due date (the tool
+        # description says the due date counts); the model recorded will_pay and the call ended
+        # unresolved (v17-dev3-fix S16 run 2). Code records it as what it is.
+        if (Outcome(outcome) is Outcome.will_pay and not promise_to_pay_date and s.verified
+                and any(_BY_DUE.search(u) for u in s.heard[-2:])):
+            outcome, promise_to_pay_date = Outcome.promise_to_pay.value, self.borrower.due_date.isoformat()
+        # Not when they are saying bye: "Ok. You. Bye." got one more question (owner call B004 17:59).
         if (Outcome(outcome) is Outcome.will_pay and not promise_to_pay_date and self.borrower.days_overdue == 0
-                and s.verified and "asked_exact_date" not in s.flags):
+                and s.verified and "asked_exact_date" not in s.flags
+                and not (s.heard and _LEAVING.search(s.heard[-1]))):
             s.flags.add("asked_exact_date")
-            return {"error": "no_date", "message": "Ask once, kindly, whether they will pay by the due date ("
-                    + self.facts().due_date_spoken + "). If yes, record promise_to_pay with the due date; if "
-                    "they can't say, record will_pay."}
+            return {"error": "no_date", "message": "Ask once, kindly, on which date they plan to pay (the due date is "
+                    + self.facts().due_date_spoken + "; a later date is their choice, never push). Record "
+                    "promise_to_pay with their words for the date; if they can't say, record will_pay."}
         # An escalated dispute or hardship is the outcome, not a callback: the team arranges the
         # callback (v10 eval S04b run 4 recorded callback_requested and promised "today").
         if Outcome(outcome) is Outcome.callback_requested:

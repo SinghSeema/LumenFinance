@@ -1,0 +1,172 @@
+[
+  {
+    "scenario": "S02",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Okay. I've noted that down for you, Kiran.",
+    "comment": "The agent verified before sharing details, stated the reminder clearly and closed correctly, but responded to the borrower's inability to pay with a flat 'Okay' instead of warmly acknowledging the difficulty.",
+    "usage": {
+      "input": 913,
+      "output": 450
+    }
+  },
+  {
+    "scenario": "S02",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Okay. Noted Kiran. I have marked that down.",
+    "comment": "The agent verified correctly, stated the reminder clearly and without pressure, but when Kiran mentioned money being tight it gave a flat 'noted' with no warmth and no mention of the internal team arranging a call back.",
+    "usage": {
+      "input": 885,
+      "output": 397
+    }
+  },
+  {
+    "scenario": "S08",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "जी। ठीक है, callback schedule हो गया है। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent verified properly, gave a clear reminder without pressure and closed politely, but it abruptly ended without acknowledging the borrower's app-failure complaint or confirming which day (Thursday or Friday) the callback would come.",
+    "usage": {
+      "input": 1624,
+      "output": 797
+    }
+  },
+  {
+    "scenario": "S08",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 5,
+    "firmness": 4,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैं समझती हूँ कि आप आज payment नहीं करना चाहते, पर क्या आज इसे clear कर पाना possible है?",
+    "comment": "The agent verified before sharing details, disclosed its AI status, explained the late fee and part-payment policy accurately, and closed with a scheduled callback, losing a point only for gently re-asking for same-day payment right after the borrower had refused.",
+    "usage": {
+      "input": 2066,
+      "output": 1325
+    }
+  },
+  {
+    "scenario": "S12",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": "na",
+    "clarity": "na",
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "जी। समझ गई, मैं आपकी पसंद note कर लेती हूँ।",
+    "comment": "The agent verified correctly, honoured the stop request by ending promptly without giving the reminder, and stayed polite and natural, though its acknowledgment of the borrower's irritation was brief and could have been warmer.",
+    "usage": {
+      "input": 923,
+      "output": 361
+    }
+  },
+  {
+    "scenario": "S12",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": "na",
+    "clarity": "na",
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Okay. I understand, Amit. I will note your request and our team will make sure the calls stop.",
+    "comment": "The agent verified before sharing anything, honoured the stop request immediately and politely, and kept the call short and natural; only a slightly warmer acknowledgement of the borrower's irritation would have made it perfect.",
+    "usage": {
+      "input": 874,
+      "output": 325
+    }
+  },
+  {
+    "scenario": "S16",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "एक second, मैं details check कर लेती हूँ। अगर due date तक payment पूरी नहीं होती है, तो पाँच सौ रुपये की late payment charge एक बार लगती है।",
+    "comment": "The agent verified correctly, gave the reminder clearly, answered the late fee and part payment questions accurately, and closed politely, but it never warmly acknowledged Sunita's stated difficulty in paying on time before moving to policy details.",
+    "usage": {
+      "input": 1723,
+      "output": 421
+    }
+  },
+  {
+    "scenario": "S16",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "एक second, मैं details check कर लेती हूँ। due date के बाद अगर EMI पूरी नहीं भरी जाती, तो पाँच सौ रुपये का one time late payment charge लगता है।",
+    "comment": "A clear, polite and well-structured call with accurate policy answers, but the agent never acknowledged Sunita's worry about not paying on time, and the 'SMS या WhatsApp, कहाँ भेजूँ?' line was repeated verbatim three times.",
+    "usage": {
+      "input": 1763,
+      "output": 470
+    }
+  },
+  {
+    "scenario": "S17",
+    "run": 1,
+    "politeness": 5,
+    "empathy": "na",
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "It is about an important matter on your account with Lumen Finance.",
+    "comment": "A well-handled call: verification before details, accurate policy answers on grace period, bounce charges and CIBIL, and a clear reminder with no pressure, though the vague 'important matter' phrasing sounds slightly form-like.",
+    "usage": {
+      "input": 1124,
+      "output": 297
+    }
+  },
+  {
+    "scenario": "S17",
+    "run": 2,
+    "politeness": 5,
+    "empathy": "na",
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "What would you like to know next?",
+    "comment": "A well-handled call: verification before details, accurate policy answers on late fee, bounce charge and CIBIL, and a clear reminder with no pressure, though a few closing prompts like 'What would you like to know next?' sound slightly scripted.",
+    "usage": {
+      "input": 1207,
+      "output": 284
+    }
+  }
+]

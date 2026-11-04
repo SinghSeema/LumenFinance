@@ -26,6 +26,29 @@ INCOMPLETE_DOB = ("Not checked: the date of birth the borrower gave is incomplet
 HOLD_RETRY_SECS = 1.0  # pause before retrying the model once after a failure
 _SENTENCE_END = re.compile(r"(?<=[.!?।])\s+")
 
+# The model's hidden reasoning leaking into its reply: "जी। Close politely.</think> क्षमा चाहती हूँ..."
+# (v17-dev2 S05 run 2; judge review 2026-11-04). On a call the TTS would read it aloud.
+_THINK_BLOCK = re.compile(r"<think>.*?</think>", re.S)
+# A first sentence that reads like an instruction to itself, held until the next text shows whether a
+# "</think>" follows. Hindi text and normal replies are never held, so they get no added delay.
+_INSTRUCTION = re.compile(
+    r"^\s*(?:close|ask|say|respond|reply|answer|greet|end the call|now|next|then|the (?:user|borrower|caller)|user|"
+    r"borrower|i should|i need to|i must|i will now|let me think|okay,? so|so,? (?:the|i)\b|we (?:should|need)|"
+    r"need to|must|step \d|follow)\b|\b(?:politely|system note|tool call|record_outcome|escalate_to_human)\b",
+    re.IGNORECASE)
+
+
+def _strip_think(text: str) -> tuple[str, bool]:
+    """Text without reasoning: whole <think> blocks, or everything before a bare </think>."""
+    cleaned = _THINK_BLOCK.sub("", text)
+    if "</think>" in cleaned:
+        return cleaned.split("</think>")[-1].lstrip(), True
+    return cleaned, cleaned != text
+
+
+def _looks_like_reasoning(sentence: str) -> bool:
+    return not re.search(r"[\u0900-\u097F]", sentence) and _INSTRUCTION.search(sentence) is not None
+
 def _words(*patterns: str) -> re.Pattern:
     return re.compile(r"(?<![a-z0-9ऀ-ॿ])(?:" + "|".join(patterns) + r")(?![a-z0-9ऀ-ॿ])",
                       re.IGNORECASE)
@@ -69,9 +92,12 @@ def is_stop_request(text: str) -> bool:
     t = text.strip().replace("’", "'")
     if _STOP_STRONG.search(t):
         return True
-    if not _STOP_WEAK.search(t):
-        return False
-    return bool(_PERMANENT.search(t)) or not _NOT_NOW.search(_NO_PAY.sub(" ", t))
+    # Sentence by sentence, as D-24 says: "8834. Aur suniye, is topic pe mujhe call mat karo." was not a
+    # stop because the digits of the previous sentence counted as "not now" (v17-dev3 S12 run 2).
+    for s in re.split(r"(?<=[.!?।])\s+", t):
+        if _STOP_WEAK.search(s) and (_PERMANENT.search(s) or not _NOT_NOW.search(_NO_PAY.sub(" ", s))):
+            return True
+    return False
 
 
 # "What's this about?" before verification (owner, 2026-11-04): answered first, without the loan.
@@ -200,7 +226,7 @@ class Brain:
         """Model requests until it stops calling tools. Appends each spoken sentence to `spoken`."""
         bridge = None
         for _ in range(MAX_TOOL_ROUNDS):
-            turn, buf = None, ""
+            turn, buf, held, said_in_round = None, "", None, False
             async for kind, value in self.llm.stream(self.system, self.history, TOOL_SCHEMAS):
                 if kind == "turn":
                     turn = value
@@ -216,19 +242,38 @@ class Brain:
                         yield Sentence(bridge, bridge=True)
                     continue
                 buf += value
+                if "think>" in buf:
+                    buf, dropped = _strip_think(buf)
+                    if dropped:
+                        held = None  # the held sentence was reasoning
+                        self.state.guard_hits.append({"category": "reasoning_dropped", "original": value,
+                                                      "spoken": "", "stage": self.state.stage.value,
+                                                      "verified": self.state.verified})
+                    if "<think>" in buf:
+                        continue  # still inside the reasoning: wait for its end
                 *done, buf = _SENTENCE_END.split(buf)
                 for sentence in done:
-                    if (out := self._guarded(sentence)) and out.text not in spoken:
-                        spoken.append(out.text)
-                        yield out
+                    if held is None and not said_in_round and _looks_like_reasoning(sentence):
+                        held = sentence
+                        continue
+                    for s_ in ([held] if held else []) + [sentence]:
+                        if (out := self._guarded(s_)) and out.text not in spoken:
+                            spoken.append(out.text)
+                            said_in_round = True
+                            yield out
+                    held = None
             # A sentence already said this turn is not said again: the model wrote the closing,
             # called record_outcome, then wrote it again (v10 eval S04 run 2, S05 run 3).
-            if buf.strip() and (out := self._guarded(buf.strip())) and out.text not in spoken:
-                spoken.append(out.text)
-                yield out
+            for s_ in [held, buf.strip()]:
+                if s_ and (out := self._guarded(s_)) and out.text not in spoken:
+                    spoken.append(out.text)
+                    yield out
             for k in self.usage:
                 self.usage[k] += turn.usage.get(k, 0)
             self.turns_by_provider[turn.provider] = self.turns_by_provider.get(turn.provider, 0) + 1
+            for block in turn.content:  # the model must not see its leaked reasoning as said
+                if block.get("type") == "text" and "think>" in block.get("text", ""):
+                    block["text"] = _strip_think(block["text"])[0]
             self.history.append({"role": "assistant", "content": turn.content})
             if not turn.tool_calls:
                 return

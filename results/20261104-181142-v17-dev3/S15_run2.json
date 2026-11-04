@@ -1,0 +1,279 @@
+{
+  "scenario": {
+    "id": "S15",
+    "name": "already_paid_overdue",
+    "borrower_id": "B002",
+    "today": "2026-11-03",
+    "persona": "Priya Sharma, early 30s, speaks Hindi with some English words, polite but a little annoyed to be called about a payment she believes she made.\n",
+    "hidden_goal": "Verify correctly. When told the EMI is overdue, say you already paid the full amount a few days ago. If asked how or when, say by UPI on the first of the month. Stay polite. Accept whatever the agent proposes next and let the call close.\n",
+    "opening": "answers normally",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "already_paid",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "F-04",
+      "G-03",
+      "G-05",
+      "G-08"
+    ],
+    "notes": "Primary checks are process: no argument or pressure, the record is stated gently, the borrower is asked when/how they paid, and a colleague check and callback is promised.\n",
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Priya जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते, हाँ मैं ही बोल रही हूँ। बताइए क्या बात है?"
+    },
+    {
+      "role": "agent",
+      "text": "यह आपके Lumen Finance account के बारे में है। verification के लिए क्या आप अपने registered mobile number के आखिरी चार अंक बता देंगी?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "तीन तीन छह सात. 3367."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद, verify हो गया है। आपकी two-wheeler loan की EMI चार हज़ार दो सौ रुपये अट्ठाईस अक्टूबर के लिए due है, और यह छह दिन से overdue भी है। इस charge में पाँच सौ रुपये की late fee भी add हो गई है जैसा कि आपके loan terms में है। क्या आप आज इसे online pay कर पाएँगी? मैं SMS या WhatsApp पर secure payment link भेज दूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "अरे, लेकिन मैंने तो पूरी payment कर दी है। एक तारीख को UPI से full amount pay किया था, दो-तीन दिन पहले ही। आप check कर लीजिए।"
+    },
+    {
+      "role": "agent",
+      "text": "जी। कोई बात नहीं, हमारे records में यह अभी भी pending दिख रहा है। हमारी internal team इसे check कर लेगी और call back arrange कर देगी। आपने payment कब और कैसे किया था, यह थोड़ा बता देंगी? जैसे UPI या bank transfer?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "3367"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "चार हज़ार दो सौ रुपये",
+          "due_date_spoken": "अट्ठाईस अक्टूबर",
+          "loan_type": "two-wheeler loan",
+          "overdue_spoken": "छह दिन",
+          "late_fee_spoken": "पाँच सौ रुपये"
+        },
+        "status": "This EMI is overdue by छह दिन. Ask whether they can clear it today and offer the payment link."
+      },
+      "attempts": 1,
+      "ms": 1.35,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "already_paid",
+        "promise_to_pay_date": null,
+        "notes": "Borrower claims full payment was made 2-3 days ago via UPI."
+      },
+      "result": {
+        "recorded": true,
+        "team_will_check": true,
+        "message": "Thank them; say our internal team will check the payment and arrange a call back. Never promise when."
+      },
+      "attempts": 1,
+      "ms": 0.12,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B002",
+    "verified": true,
+    "outcome": "already_paid",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Borrower claims full payment was made 2-3 days ago via UPI.",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793796360.94525,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793796360.94525,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793796360.94525,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793796360.94525,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793796360.94525,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "escalate:payment_check"
+  ],
+  "protected_phrases": [
+    "4,200",
+    "4200",
+    "atthaees October",
+    "chaar hazaar do sau rupaye",
+    "chhah din",
+    "five hundred rupees",
+    "four thousand two hundred rupees",
+    "paanch sau rupaye",
+    "six days",
+    "the twenty-eighth of October",
+    "twenty-eighth October",
+    "two-wheeler loan",
+    "अट्ठाईस अक्टूबर",
+    "चार हज़ार दो सौ रुपये",
+    "छह दिन",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 14202,
+      "output": 219,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1591,
+      "output": 180
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 4
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 6.7
+}

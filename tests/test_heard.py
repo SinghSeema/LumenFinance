@@ -229,3 +229,9 @@ def test_vague_number_words_are_not_turned_into_dates():
 def test_hedged_dob_is_asked_again():
     # v10 fix-run 2, S10 run 1: "18 March 1985... नहीं, शायद 1987" was checked as 18 Mar 1985.
     assert find_dob(["18 March 1985... नहीं, शायद 1987... अरे याद नहीं आ रहा"], _T) == (None, set())
+
+
+def test_give_me_a_second_is_not_a_date():
+    # Owner call B004 17:59: "Give me a 2nd." was read as day 2 and the agent asked for the year.
+    assert find_dob(["Give me a 2nd."], date(2026, 11, 4)) == (None, {"day", "month", "year"})
+    assert find_dob(["Give me a 2nd.", "19 91.", "May 30th."], date(2026, 11, 4))[0] == date(1991, 5, 30)

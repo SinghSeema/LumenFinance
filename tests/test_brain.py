@@ -640,3 +640,17 @@ def test_v13_prompt_hardship_is_caring_with_one_handoff():
     text = system_prompt(BORROWERS["B007"], load(), "en", "Hello")
     assert "a colleague from our team" in text and "read back exactly what you noted" in text
     assert 'Don\'t ask "Is there anything else I can help with?"' in text
+
+
+async def test_hardship_drops_anything_else_and_repeated_warm_close(today, tmp_path):
+    llm = ScriptedLLM([say("I'm so sorry, Deepa. A colleague from our team will call you. Is there anything else I can help with?"),
+                       say("I understand. Please take care, Deepa, and thank you for talking with me."),
+                       say("I've noted it. Please take care, Deepa, and thank you for talking with me.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.flags.add("escalate:hardship")
+    first = [s.text for s in await run(brain, "I lost my job.")]
+    second = [s.text for s in await run(brain, "When will they call?")]
+    third = [s.text for s in await run(brain, "Please note it.")]
+    assert not any("anything else" in x for x in first)
+    assert any("Please take care" in x for x in second) and not any("Please take care" in x for x in third)

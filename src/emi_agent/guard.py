@@ -113,6 +113,21 @@ _NOTICE = re.compile(
     r"\b(?:do not|don't|never) share (?:this|the|your) (?:payment )?link", re.IGNORECASE)
 
 
+# Hardship (owner review, prompt v13): the model still asked "Is there anything else I can help
+# with?" and repeated "Please take care..." every turn (v13-hardship2 S03). Dropped in code.
+_ANYTHING_ELSE = re.compile(r"\b(?:is there )?anything else (?:i can|i could|you need|you'd like)|"
+                            r"और कुछ (?:मदद|जानना|चाहिए)|aur kuch (?:madad|chahiye)", re.IGNORECASE)
+_WARM_CLOSE = re.compile(r"\bplease take care\b|अपना ख्याल रखिए|apna khayal rakhiye", re.IGNORECASE)
+
+
+def anything_else(sentence: str) -> bool:
+    return _ANYTHING_ELSE.search(sentence) is not None
+
+
+def warm_close(sentence: str) -> bool:
+    return _WARM_CLOSE.search(sentence) is not None
+
+
 def invented_notice(sentence: str) -> bool:
     return _NOTICE.search(sentence.replace("’", "'")) is not None
 

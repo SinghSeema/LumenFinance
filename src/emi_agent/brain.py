@@ -122,6 +122,7 @@ class Brain:
         self._attempts_at_turn_start = 0  # a verify result may be stated only if this went up
         self._muted = False  # rest of this reply dropped after an invented verify result
         self._bridges, self._bridge_noted = 0, False
+        self._warm_closed = False  # "Please take care..." already said this call
         self._clock = clock
         self._started = clock()
 
@@ -343,6 +344,13 @@ class Brain:
         s = self.state
         if self._muted:
             return None
+        hardship = "escalate:hardship" in s.flags
+        if (hardship and guard.anything_else(sentence)) or (guard.warm_close(sentence) and self._warm_closed):
+            s.guard_hits.append({"category": "dropped_filler", "original": sentence, "spoken": "",
+                                 "stage": s.stage.value, "verified": s.verified})
+            return None
+        if guard.warm_close(sentence):
+            self._warm_closed = True  # "Please take care..." once per call
         if guard.invented_notice(sentence):
             s.guard_hits.append({"category": "invented_notice", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})

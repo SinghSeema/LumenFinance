@@ -139,7 +139,9 @@ def openai_tools(tools: list) -> list[dict]:
 
 
 async def accumulate(resp, provider: str, usage_of) -> AsyncIterator:
-    """OpenAI-style stream chunks -> ("text", piece)... then one ("turn", LLMTurn)."""
+    """OpenAI-style stream chunks -> ("text", piece)... then one ("turn", LLMTurn). Also
+    ("tool_start", name) the moment a tool call's name arrives, so the caller can hear a short
+    line instead of silence while the tool runs and the model writes the reply."""
     text, calls, usage, finish = [], {}, {}, None
     async for chunk in resp:
         usage = usage_of(chunk) or usage
@@ -156,6 +158,8 @@ async def accumulate(resp, provider: str, usage_of) -> AsyncIterator:
             acc = calls.setdefault(key, {"id": None, "name": "", "args": ""})
             acc["id"] = tc.id or acc["id"]
             if tc.function and tc.function.name:
+                if not acc["name"]:
+                    yield "tool_start", tc.function.name
                 acc["name"] = tc.function.name
             if tc.function and tc.function.arguments:
                 acc["args"] += tc.function.arguments

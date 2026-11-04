@@ -569,3 +569,33 @@ async def test_sentence_said_twice_in_one_turn_is_spoken_once(today, tmp_path):
     brain = make(llm, today, tmp_path)
     out = await run(brain, "ok")
     assert [s.text for s in out].count(close) == 1
+
+
+# No dead air on tool turns (owner call 2026-11-04 13:46: tool turns 1.8-2.4 s to first audio).
+async def test_bridge_line_while_a_tool_runs_then_the_reply(today, tmp_path):
+    llm = ScriptedLLM([say("", ("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None,
+                                                    "notes": "x"})), say("Thanks, noted.")], tool_start=True)
+    brain = make(llm, today, tmp_path)
+    brain.state.verified = True
+    out = await run(brain, "I'll pay on time.")
+    assert out[0].bridge and out[0].text == context.bridge("record_outcome", "en", brain.script)
+    assert any("already heard you say" in m["content"] for m in llm.requests[1][1] if m["role"] == "system")
+
+
+async def test_no_bridge_when_the_model_already_spoke(today, tmp_path):
+    llm = ScriptedLLM([say("Thank you.", ("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None,
+                                                              "notes": "x"})), say("Have a good day.")], tool_start=True)
+    brain = make(llm, today, tmp_path)
+    brain.state.verified = True
+    out = await run(brain, "I'll pay.")
+    assert not any(s.bridge for s in out)
+
+
+async def test_bridge_alone_does_not_replace_the_closing(today, tmp_path):
+    # Model records the outcome and says nothing more: the closing must still be said.
+    llm = ScriptedLLM([say("", ("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None,
+                                                    "notes": "x"})), say("")], tool_start=True)
+    brain = make(llm, today, tmp_path)
+    brain.state.verified = True
+    out = await run(brain, "Okay bye.")
+    assert out[0].bridge and out[-1].text == context.closing("en", brain.script, "Arjun")

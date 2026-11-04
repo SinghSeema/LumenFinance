@@ -96,6 +96,27 @@ _RETRY = {
 }
 
 
+# Said the moment the model starts a tool call with nothing said yet in the turn, so the caller
+# hears a natural line, not silence: tool turns took 1.8-2.4 s to first audio against 0.3-0.7 s
+# for other turns (owner call 2026-11-04 13:46). The brief: "tool calls without dead air".
+_BRIDGE = {
+    "verify_identity": {"en": "One moment, let me check that.", "roman": "Ek second, main check kar leti hoon.",
+                        "devanagari": "एक second, मैं check कर लेती हूँ।"},
+    "send_payment_link": {"en": "Sure, I'm sending the link now.", "roman": "Theek hai, main link bhej rahi hoon.",
+                          "devanagari": "ठीक है, मैं link भेज रही हूँ।"},
+    "_ack": {"en": "I understand.", "roman": "Ji, samajh gayi.", "devanagari": "जी, समझ गई।"},
+}
+
+
+def bridge(tool: str, lang: str, script: str) -> str:
+    return _BRIDGE.get(tool, _BRIDGE["_ack"])[_key(lang, script)]
+
+
+def note_bridge(line: str) -> str:
+    return (f"While that tool ran, the caller already heard you say: \"{line}\". Do not say it "
+            "again; continue naturally from there.")
+
+
 def retry(lang: str, script: str) -> str:
     return _RETRY[_key(lang, script)]
 

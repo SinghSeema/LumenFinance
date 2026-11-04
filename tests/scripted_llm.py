@@ -13,8 +13,9 @@ def say(text="", *tools, fail=False):
 
 
 class ScriptedLLM:
-    def __init__(self, turns):
+    def __init__(self, turns, tool_start=False):
         self.turns = list(turns)
+        self.tool_start = tool_start  # announce each tool call's name before the turn ends
         self.requests = []  # (system, messages) as sent
 
     async def stream(self, system, messages, tools):
@@ -28,6 +29,9 @@ class ScriptedLLM:
         for i in range(0, len(text), 7):  # stream in small chunks like a real model
             yield "text", text[i:i + 7]
         calls = [ToolCall(f"toolu_{next(_ids)}", name, inp) for name, inp in spec["tools"]]
+        if self.tool_start:
+            for c in calls:
+                yield "tool_start", c.name
         content = ([{"type": "text", "text": text}] if text else []) + [
             {"type": "tool_use", "id": c.id, "name": c.name, "input": c.input} for c in calls]
         yield "turn", LLMTurn(content=content, tool_calls=calls,

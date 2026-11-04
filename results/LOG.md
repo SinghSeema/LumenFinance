@@ -313,3 +313,9 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 - Fix round 2 (S02 S04 S13 S14a S15 x5 in 20261104-140824-v10-fixes2; S10 S14a x5 in 20261104-141354-v10-fixes3 after V16): 28/30; S13 5/5; S14a 3/5 with both failures the simulator improvising "already paid". 0 leaks in all 155 conversations. 706 tests pass.
 - Latency, current stack (all 4 Nov calls, 46 turns): gap median 1020 ms, p90 2393 ms. Median target met, p90 missed.
 - New: evals/judge.py, evals/report.py, evals/dashboard.py (results/dashboard.html), evals/failure_review.yaml, docs/eval-report.md, run.sh.
+
+## 2026-11-04 15:00 no dead air on tool turns (D-36)
+
+- Measured from the 13:46 live call log: the two slow turns were the tool turns ("22nd July" verify_identity 1802 ms; "Using UPI?" record_outcome 2433 ms to first sentence); the other six turns 284-710 ms. First turn of a call is no longer cold (8 of 9 calls 530-632 ms).
+- Change: tool_start event from the stream; a bridge line per tool in the caller's language; latency record marks bridge turns.
+- One real Sarvam tool turn (text mode, B002, "मैं सात नवंबर को pay कर दूँगी"): bridge at 1825 ms, tool call complete 2215 ms, reply 2563 ms. Gain ~740 ms on that turn (n=1). Sarvam needs ~1.8 s before it starts a tool call; the bridge cannot come sooner without guessing. 713 tests pass. Not yet tried in a live voice call.

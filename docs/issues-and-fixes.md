@@ -33,6 +33,7 @@ How issues are found: text evals (the real agent Brain against an LLM-played bor
 | C9 | "I'll pay today evening" ended unresolved | v10 baseline S14a run 1 | The outcome schema accepted only dates after today | Today is a valid promise date | Test | Done |
 | C10 | A disputed loan was recorded as callback_requested, with a callback "today" promised | v10 baseline S04b run 4 | The model scheduled its own callback after escalating | No schedule_callback after a dispute, hardship or payment-check escalation; the outcome stays the reason | S04b 4/5 to 5/5 | Done |
 | C11 | The closing line said twice in one turn | v10 baseline S04 run 2, S05 run 3 | The model wrote the closing, called record_outcome, then wrote it again | A sentence already said in the turn is dropped | Test | Done |
+| C12 | Silence while a tool runs: tool turns took 1.8-2.4 s to first audio, other turns 0.3-0.7 s | Owner live call 13:46 ("22nd July" with verify_identity: 1802 ms; "Using UPI?" with record_outcome: 2433 ms) | Nothing is spoken until the second LLM request after the tool writes the reply | The stream announces a tool as soon as its name arrives; code says a short line for that tool, once, when nothing has been said yet; the closing is still said if the model adds nothing (D-36) | Unit tests; one real Sarvam tool turn: first audio 2563 ms to 1825 ms | Done; not yet tried live |
 
 ### Verification and dates (guardrails)
 

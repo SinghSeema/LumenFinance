@@ -27,6 +27,7 @@ class Turn:
     stop_secs: float = 0.0
     interrupted: bool = False
     after_barge_in: bool = False  # reply right after a barge-in (Sarvam reconnects then)
+    bridge: bool = False  # first audio was a code bridge line said while a tool ran
 
     def stages_ms(self) -> dict[str, float]:
         """Duration of each stage that has both ends, plus the total gap."""

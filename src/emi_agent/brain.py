@@ -83,6 +83,7 @@ _ASK_LAST4 = re.compile(r"last (?:four|4)|four digits|4 digits|mobile|digits|aak
 class Sentence:
     text: str
     guard: str | None = None  # guard category if the model's sentence was replaced
+    bridge: bool = False  # said by code while a tool ran (no dead air), not by the model
     speech: tuple[str, ...] = ()  # pre-TTS fixes and flags (speakable.py)
 
 
@@ -113,6 +114,7 @@ class Brain:
         self._last4_pending = False  # fewer than four digits were given ("It's double" | "7 4 3")
         self._attempts_at_turn_start = 0  # a verify result may be stated only if this went up
         self._muted = False  # rest of this reply dropped after an invented verify result
+        self._bridges, self._bridge_noted = 0, False
         self._clock = clock
         self._started = clock()
 
@@ -135,6 +137,7 @@ class Brain:
 
         self._attempts_at_turn_start = attempts_before
         self._muted = False  # set when an invented verification result was replaced
+        self._bridges, self._bridge_noted = 0, False  # bridge lines said this turn (no dead air)
         spoken: list[str] = []
         finished = False
         held = 0  # 1 once the hold line was said
@@ -154,7 +157,8 @@ class Brain:
                     held = 1
                     yield Sentence(line)
                     await asyncio.sleep(HOLD_RETRY_SECS)
-            if len(spoken) == held and (s.stage is Stage.CLOSING or "stop_requested" in s.flags):
+            # A bridge line ("I understand.") is not a reply: the closing is still owed.
+            if len(spoken) == held + self._bridges and (s.stage is Stage.CLOSING or "stop_requested" in s.flags):
                 line = context.closing(s.reply_language, self.script, self._first_name)
                 spoken.append(line)
                 yield Sentence(line)
@@ -173,11 +177,19 @@ class Brain:
 
     async def _rounds(self, spoken: list[str]) -> AsyncIterator[Sentence]:
         """Model requests until it stops calling tools. Appends each spoken sentence to `spoken`."""
+        bridge = None
         for _ in range(MAX_TOOL_ROUNDS):
             turn, buf = None, ""
             async for kind, value in self.llm.stream(self.system, self.history, TOOL_SCHEMAS):
                 if kind == "turn":
                     turn = value
+                    continue
+                if kind == "tool_start":
+                    if not spoken and not buf.strip() and not self._muted and bridge is None:
+                        bridge = context.bridge(value, self.state.reply_language, self.script)
+                        self._bridges += 1
+                        spoken.append(bridge)
+                        yield Sentence(bridge, bridge=True)
                     continue
                 buf += value
                 *done, buf = _SENTENCE_END.split(buf)
@@ -200,6 +212,9 @@ class Brain:
                         "content": json.dumps(self._tool(c.name, c.input), ensure_ascii=False)}
                        for c in turn.tool_calls]
             self.history.append({"role": "user", "content": results})
+            if bridge and not self._bridge_noted:  # once per turn
+                self.history.append({"role": "system", "content": context.note_bridge(bridge)})
+                self._bridge_noted = True
 
     def _closing_line(self) -> Sentence:
         line = context.closing(self.state.reply_language, self.script, self._first_name)

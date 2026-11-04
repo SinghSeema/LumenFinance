@@ -271,7 +271,9 @@ class BrainProcessor(FrameProcessor):
                 self.last_agent_text += spoken + " "
                 if turn and turn.first_sentence is None:
                     turn.first_sentence = time.monotonic()
-                logger.info(f"agent> {spoken}" + (f"  [guard: {s.guard}]" if s.guard else ""))
+                    turn.bridge = s.bridge
+                logger.info(f"agent> {spoken}" + (f"  [guard: {s.guard}]" if s.guard else "")
+                            + ("  [bridge while a tool runs]" if s.bridge else ""))
                 if s.guard:
                     logger.info(f"  guard blocked: {self.brain.state.guard_hits[-1]['original']}")
                 if s.speech:

@@ -559,3 +559,13 @@ def test_v10_prompt_dispute_says_concerned_team():
     assert "the concerned team will look into it and arrange a callback" in text
     assert "a colleague will check it and call them back" not in text
     assert "Ask first for only the last four digits" in text  # v9 change kept
+
+
+async def test_sentence_said_twice_in_one_turn_is_spoken_once(today, tmp_path):
+    # v10 eval S04 run 2: closing written, record_outcome called, closing written again.
+    close = "समय देने के लिए धन्यवाद, आपका दिन शुभ हो।"
+    llm = ScriptedLLM([say("Hello.", ("record_outcome", {"outcome": "unresolved", "promise_to_pay_date": None,
+                                                          "notes": "x"})), say(close + " " + close)])
+    brain = make(llm, today, tmp_path)
+    out = await run(brain, "ok")
+    assert [s.text for s in out].count(close) == 1

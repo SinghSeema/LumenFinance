@@ -24,6 +24,7 @@ TYPES = {
 }
 LATENCY_DIR = Path("results/latency")
 STT_TUNED = "20261103-212818"  # first live call after Deepgram EU host + endpointing 100 (LOG.md)
+CURRENT = "20261104-000000"    # all 2026-11-04 calls: Sarvam LLM and today's turn-taking code
 
 
 def _btype(s: dict) -> str:
@@ -65,6 +66,11 @@ def scenario_table(arts: list[dict], scores: list[dict], judge: dict) -> list[st
 
 
 def metrics_table(arts: list[dict], scores: list[dict], judge: dict) -> list[str]:
+    out = ["| Metric | How it is scored | Result | Trust |", "|---|---|---|---|"]
+    return out + [f"| {a} | {b} | {c} | {d} |" for a, b, c, d in metrics_rows(arts, scores, judge)]
+
+
+def metrics_rows(arts: list[dict], scores: list[dict], judge: dict) -> list[tuple[str, str, str, str]]:
     valid = [(a, s) for a, s in zip(arts, scores) if not s["infra_error"]]
     sets = {k: [(a, s) for a, s in valid if a["scenario"]["set"] == k] for k in ("dev", "hold-out")}
     promise = [s for a, s in valid if "promise_to_pay_date" in a["scenario"]["expected"]
@@ -102,18 +108,22 @@ def metrics_table(arts: list[dict], scores: list[dict], judge: dict) -> list[str
         ("M11 Recovery / process", "Rule: AI disclosure when asked, no invented link after a tool failure, a question back on a vague date",
          pct(sum(v for _, v in proc), len(proc)) + " checks passed", "Medium"),
     ]
-    out = ["| Metric | How it is scored | Result | Trust |", "|---|---|---|---|"]
-    out += [f"| {a} | {b} | {c} | {d} |" for a, b, c, d in rows]
-    return out
+    return rows
 
 
-def latency_section() -> list[str]:
+def latency_turns() -> list[tuple[str, dict]]:
+    """(call stamp, turn) for every completed live turn in results/latency/."""
     turns = []
     for p in sorted(LATENCY_DIR.glob("*.jsonl")):
         for line in p.read_text().splitlines():
             t = json.loads(line)
             if not t.get("interrupted") and t.get("ms", {}).get("gap") is not None:
                 turns.append((p.name[:15], t))
+    return turns
+
+
+def latency_section() -> list[str]:
+    turns = latency_turns()
     out = ["| Live calls | Turns | Gap median | Gap p90 | Felt by caller (+VAD stop) median / p90 | STT final | LLM to first sentence | TTS to audio |",
            "|---|---|---|---|---|---|---|---|"]
 
@@ -130,6 +140,7 @@ def latency_section() -> list[str]:
                    f"{med('stt_final->first_sentence'):.0f} ms | {med('first_sentence->playback_start'):.0f} ms |")
     row("All owner calls, 2026-11-03 and 04", turns)
     row("Since the STT tuning (Deepgram EU, endpointing 100)", [x for x in turns if x[0] >= STT_TUNED])
+    row("Current stack only: 2026-11-04 calls (Sarvam LLM, streamed replies)", [x for x in turns if x[0] >= CURRENT])
     return out
 
 

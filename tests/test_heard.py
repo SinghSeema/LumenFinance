@@ -200,3 +200,32 @@ def test_misheard_22_before_a_month_is_22(said):
 @pytest.mark.parametrize("said", ["Twice July 19 94.", "he buys things", "Bies.", "July buys 1994"])
 def test_misheard_22_is_not_guessed_elsewhere(said):
     assert find_dob([said], _T)[0] is None
+
+
+# v10 fix-run S14a run 5: hedged or corrected answers are asked again, never checked.
+@pytest.mark.parametrize("said", ["हाँ वो... umm... सत्तावन... नहीं मतलब सत्तर... चार... तीन... haan कुछ वही...",
+                                  "शायद सात सात चार तीन", "7743 या 7734"])
+def test_unsure_last4_is_not_read(said):
+    assert find_last4(said) is None
+
+
+def test_yaani_restates_rather_than_corrects():
+    said = "मेरी date of birth nine November nineteen eighty-five है, यानी zero nine, eleven, one nine eight five."
+    assert find_dob([said], _T)[0] == _date(1985, 11, 9)
+
+
+@pytest.mark.parametrize("said,day", [("पाँच नवंबर", 5), ("बीस नवंबर", 20), ("नवंबर की पाँच तारीख", 5),
+                                      ("paanch November", 5), ("पाँच नवंबर दो हज़ार छब्बीस", 5)])
+def test_hindi_number_words_before_a_month_are_promise_dates(said, day):
+    from emi_agent import dates
+    assert dates.normalize(said, _date(2026, 11, 3)).date == _date(2026, 11, day)
+
+
+def test_vague_number_words_are_not_turned_into_dates():
+    from emi_agent import dates
+    assert dates.normalize("एक-दो दिन में कर दूँगा", _date(2026, 11, 3)).date is None
+
+
+def test_hedged_dob_is_asked_again():
+    # v10 fix-run 2, S10 run 1: "18 March 1985... नहीं, शायद 1987" was checked as 18 Mar 1985.
+    assert find_dob(["18 March 1985... नहीं, शायद 1987... अरे याद नहीं आ रहा"], _T) == (None, set())

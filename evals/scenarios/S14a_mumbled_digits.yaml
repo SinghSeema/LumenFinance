@@ -11,7 +11,9 @@ hidden_goal: >
   The first time asked for a date of birth or the last 4 digits, give a
   garbled or half-audible answer (trail off, use filler sounds, or run
   digits together unclearly). When asked to repeat or confirm, give the
-  correct value clearly.
+  correct value clearly. You have not paid this EMI yet.
+# "You have not paid this EMI yet" added 2026-11-04 after 4 of 15 runs had the simulator improvise
+# "I already paid" (test-side, see evals/failure_review.yaml). The expected outcome is unchanged.
 
 opening: "answers normally, but the first verification answer comes out muffled"
 

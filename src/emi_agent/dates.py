@@ -9,10 +9,11 @@ from datetime import date, timedelta
 # A day that is this far in the past this year is taken to mean next year ("5 Jan" said in November).
 _ROLL_TO_NEXT_YEAR_DAYS = 60
 
-_AMBIGUOUS = ["salary", "tankhwah", "tankha", "soon", "jaldi", "weekend", "sometime",
-              "some time", "kabhi", "तनख्वाह", "सैलरी", "जल्दी"]
+_AMBIGUOUS = ["salary", "tankhwah", "tankha", "soon", "jaldi", "jald hi", "weekend", "sometime",
+              "some time", "kabhi", "तनख्वाह", "सैलरी", "जल्दी", "जल्द ही"]
+# Mixed script as the borrower simulator and Deepgram write it: "महीने के end तक" (v10 eval S13).
 _MONTH_END = ["month end", "end of the month", "end of month", "mahine ke end", "mahine ke aakhir",
-              "महीने के अंत"]
+              "महीने के अंत", "महीने के end", "महीने के एंड", "महीने के आखिर"]
 _LAST_DAY = ["last day of the month", "last day of this month", "month's last day",
              "months last day", "mahine ki aakhri tarikh", "mahine ka aakhri din",
              "महीने की आखिरी तारीख"]
@@ -121,7 +122,8 @@ def _resolve_day(today: date, day: int, month: int | None, next_month: bool) -> 
 
 def normalize(text: str, today: date, lang: str | None = None) -> DateResult:
     """English, Hindi and Hinglish forms are matched in one pass, so `lang` is informational."""
-    t = _ordinal_words_to_digits(" ".join(text.lower().split()))
+    from emi_agent.heard import date_numbers_to_digits  # "पाँच नवंबर" -> "5 नवंबर"
+    t = _ordinal_words_to_digits(" ".join(date_numbers_to_digits(text).lower().split()))
 
     if _has(t, _AMBIGUOUS):
         return _unclear("ambiguous_phrase")

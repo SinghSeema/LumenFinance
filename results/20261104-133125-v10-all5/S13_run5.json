@@ -1,0 +1,266 @@
+{
+  "scenario": {
+    "id": "S13",
+    "name": "ambiguous_date",
+    "borrower_id": "B002",
+    "today": "2026-11-03",
+    "persona": "Priya Sharma, cooperative, speaks Hindi.",
+    "hidden_goal": "Verify correctly. When asked when you'll pay, answer only with vague phrases like \"mahine ke end tak\" (by month end) or \"jab salary aayegi\" (when my salary comes) — even if asked again the same way. Only give an exact date once the agent asks a clear, specific question (for example \"which date exactly\").\n",
+    "opening": "answers normally, cooperative but vague about timing",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "callback_requested",
+        "unresolved"
+      ],
+      "escalate_to_human": false
+    },
+    "process_checks": [
+      "clarify_vague_date"
+    ],
+    "covers": [
+      "G-08"
+    ],
+    "notes": "Primary check is process, not the final outcome: exactly one clarifying question is asked, and no date is recorded in the outcome before that question gets a specific answer.\n",
+    "runs": 5,
+    "set": "hold-out"
+  },
+  "run": 5,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "none",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v10",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Priya जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते, हाँ मैं ही बोल रही हूँ।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है। verification के लिए क्या आप अपने registered mobile number के आखिरी चार अंक बता सकती हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, तीन तीन छह सात। 3367."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद। आपके two-wheeler loan की चार हज़ार दो सौ रुपये की EMI अट्ठाईस अक्टूबर due थी, और यह अभी छह दिन overdue दिख रही है। आप इसे कैसे pay करना चाहेंगी?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, मैं पता है मुझे। जल्द ही pay कर दूँगी, महीने के end तक कर दूँगी।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है। मैं आपको payment link भेज देती हूँ। आप इसे SMS, WhatsApp या email, किस पर लेना चाहेंगी?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "3367"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "चार हज़ार दो सौ रुपये",
+          "due_date_spoken": "अट्ठाईस अक्टूबर",
+          "loan_type": "two-wheeler loan",
+          "overdue_spoken": "छह दिन"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.87,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "will_pay",
+        "promise_to_pay_date": null,
+        "notes": "Borrower promised to pay by end of month."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.15,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B002",
+    "verified": true,
+    "outcome": "will_pay",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower promised to pay by end of month.",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793780405.2700708,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793780405.2700708,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793780405.2700708,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793780405.2700708,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "4,200",
+    "4200",
+    "atthaees October",
+    "chaar hazaar do sau rupaye",
+    "chhah din",
+    "four thousand two hundred rupees",
+    "six days",
+    "the twenty-eighth of October",
+    "twenty-eighth October",
+    "two-wheeler loan",
+    "अट्ठाईस अक्टूबर",
+    "चार हज़ार दो सौ रुपये",
+    "छह दिन"
+  ],
+  "usage": {
+    "agent": {
+      "input": 9007,
+      "output": 139,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1443,
+      "output": 118
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 4
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 3.8
+}

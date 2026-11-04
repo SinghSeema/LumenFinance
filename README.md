@@ -92,33 +92,52 @@ python3 scripts/serve_client.py                                   # 3: open http
 
 After each call the agent prints the outcome record, token usage and a latency table (VAD stop to transcript, transcript to first sentence, first sentence to audio).
 
-## Tests and evals
+## Evals: how they work
+
+The brief asks how we know the agent is good, and where it is not. The answer has four parts.
+
+**1. Scenarios.** 17 YAML files in [`evals/scenarios/`](evals/scenarios/), one per borrower type the brief lists plus tricky cases (wrong verification three times, waiver demand, "stop calling", vague dates, mumbled digits, a payment-link tool that fails, "already paid" while overdue). Each states the borrower **persona**, a **hidden goal** the simulated borrower follows, and the **expected outcome record**. 12 are dev scenarios used while building; 5 are hold-out scenarios kept unseen until the baseline run.
+
+**2. Automated runs with a simulated borrower.** `evals/run.py` runs the real agent (the same Brain, tools, guards and prompt as the voice bot; only audio is skipped) against an LLM playing the borrower (`evals/simulator.py`, `glm5.3-flash`, a different model family from the agent's `sarvam-105b`). The simulator sees the persona, the hidden goal and today's date, never the expected outcome. Every scenario runs 5 times because conversations vary. Each conversation is saved in full: turns, tool calls and results, the outcome record, guard hits and a log of every loan fact the model was shown.
+
+**3. Scoring: rules first, a judge only where no rule works.**
+
+| How | What it scores | Trust |
+|---|---|---|
+| Rules (`evals/score.py`) | Outcome record vs expected (M1); loan detail before verification, from the disclosure log plus a scan of every unverified turn (M2, zero tolerance); promise date (M3); escalation precision and recall (M4); reply language (M6); process checks: says it is an AI when asked, no invented payment link after a tool failure, asks one clear question on a vague date (M11); turns per call (M8) | High |
+| Code guard, counted per run | Sentences replaced before speech for threats, waiver promises or early disclosure (M5) | High |
+| LLM judge (`evals/judge.py`) | Tone (M7): politeness, empathy, firmness without pressure, clarity of the reminder, natural phrasing, each 1 to 5, plus guardrail flags. `glm5.3-flash`, temperature 0, one call per conversation. A flag must quote the agent's exact words; a quote not found in the transcript is dropped | **Low**: a spot check found it marking correct refusals down (not telling a family member the amount; ending the call after "stop calling me"). Not calibrated against hand labels yet, so its scores are shown but never decide a pass |
+| Hand review (`evals/failure_review.yaml`) | Every failed conversation is read in full and marked as an agent defect, a code bug, or a test-side error (simulator off script, scorer wrong) | The final word on what a failure means |
+| Live-call timestamps (`results/latency/`) | Latency per turn (M9): VAD stop, final transcript, first sentence, first audio | High for what was measured |
+
+**4. Report and dashboard.** [`docs/eval-report.md`](docs/eval-report.md) is the write-up the brief asks for: results, real failures, what changed, what to fix next. `results/dashboard.html` shows the same evidence visually: pass rate per borrower type before and after fixes, metrics with trust, a latency histogram against the targets, the reviewed failures, and every conversation readable with its tool calls and outcome record. Open it in a browser; it needs no network.
 
 ```bash
-./run.sh test                                   # 671 unit and replay tests, no network
-./run.sh evals --scenarios dev --runs 5         # text evals: real Brain vs an LLM-played borrower (paid; asks first)
-./run.sh evals --scenarios holdout --runs 5     # hold-out scenarios
-./run.sh evals --scenarios S02,S15 --runs 3     # chosen scenarios
-./run.sh judge results/<run>                    # LLM tone judge on a finished run (paid; asks first)
-./run.sh report results/<run>                   # results tables for the report
+./run.sh test                                    # 706 unit and replay tests, no network
+./run.sh evals --scenarios all --runs 5          # all 17 scenarios x5 (paid; prints a cost estimate and asks first)
+./run.sh evals --scenarios S13,S14a --runs 5     # chosen scenarios
+./run.sh evals --scenarios all --runs 5 --resume results/<run>   # finish a run that was cut short
+./run.sh judge results/<run>                     # tone judge on a finished run (paid; asks first)
+./run.sh report results/<run>                    # markdown tables for the report
+./run.sh dashboard results/<baseline> results/<after-fix>   # writes results/dashboard.html
 ```
-
-The eval runner prints a cost estimate before it starts. Each run saves every transcript, tool call, guard hit and score under `results/<timestamp>-<label>/`. Scenarios (17, dev and hold-out) are in [`evals/scenarios/`](evals/scenarios/); metrics M1 to M11 and how each is scored are in [`docs/evals.md`](docs/evals.md). Scoring is rule-based today; the LLM judge for tone is designed but not wired in yet.
 
 Bake-off scripts for provider choices are in [`bakeoff/`](bakeoff/), for example `python3 -m bakeoff.stt_keyterms run` (Deepgram keyterm prompting on Hindi numbers and dates).
 
 ## Results so far
 
-Measured figures only; each one links to the run that produced it.
+Measured figures only. Full write-up: [`docs/eval-report.md`](docs/eval-report.md); visual version with every conversation: `results/dashboard.html`.
 
 | What | Result | Source |
 |---|---|---|
-| Text evals, prompt v7, dev set x5 | 52/55 pass, 0 disclosure leaks before verification; escalation precision 0.94, recall 1.0 | `results/20261104-105425-v7-dev5/` |
-| Text evals, prompt v4, dev set x5 | 48/55 pass, 0 leaks | `results/20261103-235541-sarvam-v4-dev5/` |
-| Live call latency (1 call, 8 turns) | Response gap median 992 ms, p90 1703 ms, plus the 0.5 s VAD stop | `results/latency/20261104-115655-B002.jsonl` |
+| Text evals, prompt v10, all 17 scenarios x5 (baseline) | 76/85 pass (dev 59/60, hold-out 17/25); 0 leaks before verification; escalation precision 0.93, recall 1.0 | `results/20261104-133125-v10-all5/` |
+| After two rounds of fixes (re-run scenarios x5) | Round 1: 36/40. Round 2: 28/30; S13 vague dates 0/5 to 5/5; the 2 remaining failures are the simulator going off script | `results/20261104-135904-v10-fixes/`, `...-140824-v10-fixes2/`, `...-141354-v10-fixes3/` |
+| Leaks before verification | 0 in all 155 conversations | same runs |
+| Tone (LLM judge, uncalibrated, low trust) | politeness 4.93, empathy 3.06, firmness 4.55, clarity 4.27, naturalness 4.19 (baseline) | `judge.json` in the baseline run |
+| Live call latency, current stack (9 calls, 46 turns) | Median 1020 ms (target 1.2 s met), p90 2393 ms (target 1.8 s missed), plus the 0.5 s VAD stop | `results/latency/` |
 | Deepgram keyterms (75 synthetic clips) | Date of birth read correctly 15/36 without, 26/36 with; last four digits 9/18 without, 15/18 with; no false numbers | `results/stt_keyterms/20261104-130330.txt` |
 
-**Not yet measured:** the current default prompt (v10: last four digits first, "concerned team" wording) has not been run through the evals or a live call. The latency gate (median under 1.2 s, p90 under 1.8 s over 30 voice turns) has not been run as a 30-turn set. Hold-out scenarios have not been run.
+**Not yet done:** the tone judge has not been calibrated against hand labels; the hold-out scenarios have now been fixed against, so a fresh unseen set is needed; the keyterm gain is from synthetic voices.
 
 Every defect found so far, with evidence, root cause, fix and how it was checked, is in [`docs/issues-and-fixes.md`](docs/issues-and-fixes.md); the day-by-day measurement log is [`results/LOG.md`](results/LOG.md).
 

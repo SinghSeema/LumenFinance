@@ -93,11 +93,14 @@ _SAFE = {
 # Verification results the model may only state after a real check (G-08). Live call 2026-11-04:
 # code noted "day still missing, never say it does not match"; the model said "यह जानकारी भी मेल
 # नहीं खा रही। आपके पास एक आखिरी मौका है।" with no check run and two attempts left.
+# Mixed script too: "वो भी match नहीं हुआ। आपके पास बस एक ही मौका बचा है" and "कोई मौका नहीं बचा"
+# were said with no check run (v10 fix-run 2, S10 run 1).
 _MISMATCH = _words(r"(?:does|did|do|is|was)\s*(?:n't|not)\s+match\w*", r"not\s+match\w*", r"no match",
-                   r"match nahi\w*", r"mel nahi\w*", "मेल नहीं", "मैच नहीं", "मिलान नहीं")
+                   r"match nahi\w*", r"mel nahi\w*", r"match\s+नहीं", r"मेल\s+नहीं", "मैच नहीं", "मिलान नहीं")
 _ATTEMPTS = _words(r"(?:one more|another|ek aur|last|final|aakhri|akhri) (?:chance|attempt|try|mauka)",
-                   r"(?:attempts?|chances?|tries) left", "एक और मौका", "आखिरी मौका", "अंतिम मौका",
-                   "मौका बाकी", "मौके बाकी", "कोशिश बाकी")
+                   r"(?:attempts?|chances?|tries) left", r"no (?:more )?(?:attempts|chances)",
+                   r"(?:mauka|mauke) (?:baaki|bacha|bache)", "एक और मौका", "आखिरी मौका", "अंतिम मौका",
+                   r"मौक[ाे] (?:बाकी|बचा|बचे)", r"मौका नहीं बचा", "कोशिश बाकी")
 _LAST = _words(r"last", r"final", r"aakhri", r"akhri", "आखिरी", "अंतिम")
 
 

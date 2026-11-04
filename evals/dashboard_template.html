@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EMI Agent Evals</title>
+<style>
+:root {
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --ring: rgba(11,11,11,0.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+  --good: #0ca30c; --good-ink: #006300; --warn: #fab219; --crit: #d03b3b;
+  --chip: #f0efec;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --good-ink: #0ca30c; --chip: #2c2c2a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --ring: rgba(255,255,255,0.10);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --good-ink: #0ca30c; --chip: #2c2c2a; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 1.7rem; margin: 0 0 4px; }
+h2 { font-size: 1.2rem; margin: 40px 0 6px; padding-top: 20px; border-top: 1px solid var(--grid); }
+p { margin: 6px 0; max-width: 75ch; color: var(--ink-2); }
+.meta { color: var(--muted); font-size: .85rem; }
+.card { background: var(--surface); border: 1px solid var(--ring); border-radius: 10px; padding: 16px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 16px; }
+.tile .label { color: var(--ink-2); font-size: .82rem; }
+.tile .value { font-size: 1.9rem; font-weight: 600; line-height: 1.2; }
+.tile .sub { color: var(--muted); font-size: .8rem; }
+.status { display: inline-flex; align-items: center; gap: 5px; font-size: .8rem; font-weight: 600; }
+.status .dot { width: 9px; height: 9px; border-radius: 50%; }
+.scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--grid); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; font-size: .75rem; text-transform: uppercase; letter-spacing: .04em; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chip { display: inline-block; padding: 1px 8px; border-radius: 999px; background: var(--chip); font-size: .75rem; white-space: nowrap; }
+.legend { display: flex; gap: 16px; font-size: .82rem; color: var(--ink-2); margin: 8px 0; flex-wrap: wrap; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+svg text { fill: var(--muted); font-size: 11px; }
+#tip { position: fixed; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--ring); border-radius: 8px; padding: 6px 10px; font-size: .8rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.12); display: none; max-width: 280px; z-index: 5; }
+.conv { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 12px; }
+@media (max-width: 760px) { .conv { grid-template-columns: 1fr; } }
+.turn { margin: 6px 0; padding: 8px 10px; border-radius: 10px; max-width: 92%; }
+.turn.agent { background: var(--chip); }
+.turn.borrower { border: 1px solid var(--ring); margin-left: auto; }
+.turn .who { font-size: .72rem; color: var(--muted); }
+.turn .tools { font-size: .72rem; color: var(--muted); margin-top: 2px; }
+pre { white-space: pre-wrap; word-break: break-word; font-size: .78rem; margin: 0; color: var(--ink-2); }
+select, button { font: inherit; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--axis);
+  background: var(--surface); color: var(--ink); }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.toggle { float: right; }
+ul { color: var(--ink-2); max-width: 75ch; padding-left: 1.2em; }
+</style>
+</head>
+<body>
+<main>
+  <button class="toggle" id="theme" aria-label="Switch light or dark">Light / dark</button>
+  <h1>EMI Reminder Agent: Evals</h1>
+  <p class="meta" id="meta"></p>
+  <p>How we know the Lumen Finance reminder agent is good, and where it is not. Laid out along the assignment brief: the borrower responses it lists, its metrics, latency, real failures and what changed. Every conversation is readable at the bottom.</p>
+
+  <div class="tiles" id="tiles"></div>
+
+  <h2>How the evals run</h2>
+  <ul>
+    <li><b>Scenarios:</b> 17 borrower scenarios, each with a persona, a hidden goal and the expected outcome record. 12 dev scenarios were used while building; 5 hold-out scenarios were kept unseen until the baseline run.</li>
+    <li><b>Simulated borrower:</b> an LLM (<span class="sim"></span>, a different model family from the agent) plays the borrower in text. It sees the persona and goal, never the expected outcome. Each scenario runs 5 times, because conversations vary.</li>
+    <li><b>Same code as the live agent:</b> the eval drives the same Brain, tools and guards as the voice bot; only audio is skipped.</li>
+    <li><b>Rule-based scoring</b> (<code>evals/score.py</code>) for everything a rule can decide: outcome fields, disclosure before verification (from a log of every loan fact the model saw), escalation, dates, language, and process checks such as "says it is an AI when asked".</li>
+    <li><b>LLM judge</b> (<code>evals/judge.py</code>, glm5.3-flash) only for tone: politeness, empathy, firmness, clarity and naturalness, 1 to 5. Any guardrail flag must quote the agent's exact words or it is dropped. <b>Trust is low:</b> a spot check of the 9 lowest scores found it punishing correct refusals (not telling a family member the amount; ending the call after "stop calling me"). Not calibrated against hand labels yet.</li>
+    <li><b>Hand review:</b> every failed conversation was read in full and marked as an agent defect, a code bug, or a test-side error (simulator off script, scorer wrong).</li>
+  </ul>
+
+  <h2>Pass rate by borrower type</h2>
+  <p>Runs passing out of 5 per scenario. A pass needs every field of the expected outcome record plus the scenario's process checks. The baseline ran all 17 scenarios; each fix round re-ran only the scenarios that failed, plus ones the fixes could break. All runs are scored with today's scorer: <span id="flipped"></span></p>
+  <div class="legend" id="passLegend"></div>
+  <div class="card scroll"><svg id="passChart" role="img" aria-label="Runs passing out of 5 per scenario, baseline and after fixes"></svg></div>
+  <div class="scroll" style="margin-top:12px"><table id="scnTable"></table></div>
+
+  <h2>Metrics</h2>
+  <p>The brief's example metrics plus language adherence and recovery. Scored on the baseline run. Trust says how much each number can be relied on.</p>
+  <div class="scroll"><table id="metrics"></table></div>
+
+  <h2>Latency (live voice calls)</h2>
+  <p>Per turn: from the moment voice activity detection says the caller stopped, to the first audio played. The caller also waits the 0.5 s silence before that. Target: median under 1.2 s, p90 under 1.8 s. Each bar counts turns in a 250 ms band; current stack only.</p>
+  <div class="legend"><span><i style="background:var(--s1)"></i>Turns (current stack)</span><span>Dashed lines: 1.2 s and 1.8 s targets</span></div>
+  <div class="card scroll"><svg id="latChart" role="img" aria-label="Histogram of response gaps"></svg></div>
+  <div class="scroll" style="margin-top:12px"><table id="latTable"></table></div>
+
+  <h2>Failures, read by hand</h2>
+  <p>Every failed conversation, with what actually went wrong. Agent and code verdicts are real defects; test verdicts are errors in the simulator or the scorer, reported rather than hidden.</p>
+  <div class="scroll"><table id="failTable"></table></div>
+
+  <h2>Conversations</h2>
+  <p>Pick any conversation to read the transcript, the tool calls and the outcome record it produced.</p>
+  <div class="controls"><select id="runSel" aria-label="Run"></select><select id="convSel" aria-label="Conversation"></select></div>
+  <div class="conv"><div class="card" id="convTurns"></div><div class="card" id="convSide"></div></div>
+</main>
+<div id="tip"></div>
+<script>
+const D = /*DATA*/null;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+
+// theme toggle (remembered per viewer; works without storage too)
+(() => { let t; try { t = localStorage.getItem("theme"); } catch (e) {}
+  if (t) document.documentElement.dataset.theme = t;
+  $("theme").onclick = () => {
+    const dark = document.documentElement.dataset.theme === "dark" ||
+      (!document.documentElement.dataset.theme && matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("theme", document.documentElement.dataset.theme); } catch (e) {}
+    drawCharts();
+  }; })();
+
+const tip = $("tip");
+function showTip(e, html) { tip.innerHTML = html; tip.style.display = "block";
+  tip.style.left = Math.min(e.clientX + 12, innerWidth - 300) + "px"; tip.style.top = (e.clientY + 12) + "px"; }
+function hideTip() { tip.style.display = "none"; }
+
+function status(ok, okText, badText) {
+  return `<span class="status"><span class="dot" style="background:var(${ok ? "--good" : "--crit"})"></span>${ok ? "✓ " + okText : "✗ " + badText}</span>`;
+}
+
+// header and tiles
+const M = D.meta, T = D.tiles, B = T[0], L = D.latency, SER = ["--s1", "--s2", "--s3"];
+$("meta").textContent = `Agent ${M.agent}, prompt ${M.prompt} · simulator ${M.simulator} · runs ` +
+  M.runs.map((r, i) => `${M.labels[i]} ${r}`).join(", ") + ` · generated ${M.generated}`;
+document.querySelectorAll(".sim").forEach(e => e.textContent = M.simulator);
+$("flipped").textContent = M.flipped ? `${M.flipped} conversation${M.flipped > 1 ? "s" : ""} that failed when first scored now pass, because scorer bugs were fixed; the failure table below says which and why.` : "no conversation changed result.";
+$("passLegend").innerHTML = M.labels.map((l, i) => `<span><i style="background:var(${SER[i]})"></i>${esc(l)}</span>`).join("");
+const pct = (a, b) => b ? Math.round(100 * a / b) + "%" : "-";
+const leaks = T.reduce((n, t) => n + t.leaks, 0), convN = T.reduce((n, t) => n + t.n, 0);
+$("tiles").innerHTML = [
+  ["Conversations scored", convN, M.labels.map((l, i) => `${l} ${T[i].n}`).join(" · "), ""],
+  ["Pass rate, baseline", pct(B.pass, B.n), `dev ${B.dev[0]}/${B.dev[1]} · hold-out ${B.hold[0]}/${B.hold[1]}`, ""],
+  ...T.slice(1).map((t, i) => [`Pass rate, ${M.labels[i + 1].toLowerCase()}`, pct(t.pass, t.n),
+    `${t.pass}/${t.n} on ${t.scenarios.join(", ")}`, ""]),
+  ["Loan details leaked before verification", leaks, "across every run", status(leaks === 0, "zero tolerance met", "leak found")],
+  ["Escalation recall", B.recall == null ? "-" : Number(B.recall).toFixed(2),
+    `precision ${B.precision == null ? "-" : Number(B.precision).toFixed(2)} (baseline)`, ""],
+  ["Live latency, median", (L.median / 1000).toFixed(2) + " s", `${L.gaps.length} turns, current stack`,
+    status(L.median < 1200, "under 1.2 s", "over 1.2 s")],
+  ["Live latency, p90", (L.p90 / 1000).toFixed(2) + " s", "target under 1.8 s",
+    status(L.p90 < 1800, "under 1.8 s", "over 1.8 s")],
+].map(([l, v, s, st]) =>
+  `<div class="card tile"><div class="label">${esc(l)}</div><div class="value">${esc(v)}</div><div class="sub">${esc(s)}</div>${st}</div>`).join("");
+
+// scenario table
+$("scnTable").innerHTML = `<tr><th>Scenario</th><th>Borrower type</th><th>Borrower</th><th>Set</th>` +
+  M.labels.map(l => `<th class="num">${esc(l)}</th>`).join("") +
+  `<th class="num">Leaks</th><th class="num">Escalation right</th><th class="num">Turns</th><th class="num">Tone</th><th>Expected outcome</th></tr>` +
+  D.scenarios.map(s => `<tr><td><b>${s.id}</b></td><td>${esc(s.type)}</td><td>${esc(s.borrower)}</td>
+    <td><span class="chip">${s.set}</span></td>` +
+    s.runs.map(r => `<td class="num">${r ? r.pass + "/" + r.n : "-"}</td>`).join("") +
+    `<td class="num">${s.leaks}</td><td class="num">${s.esc}</td><td class="num">${s.turns}</td>
+    <td class="num">${s.tone ?? "-"}</td>
+    <td>${esc(s.expected.outcome || (s.expected.accepted_outcomes || []).join(" / "))}</td></tr>`).join("");
+
+// metrics
+$("metrics").innerHTML = "<tr><th>Metric</th><th>How it is scored</th><th>Result</th><th>Trust</th></tr>" +
+  D.metrics.map(r => `<tr><td><b>${esc(r[0])}</b></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td></tr>`).join("");
+
+// latency table
+$("latTable").innerHTML = `<tr><th>Live calls</th><th class="num">Calls</th><th class="num">Turns</th><th class="num">Median</th>
+  <th class="num">p90</th><th class="num">STT final</th><th class="num">LLM to first sentence</th><th class="num">TTS to audio</th></tr>` +
+  L.rows.map(r => `<tr><td>${esc(r.label)}</td><td class="num">${r.calls}</td><td class="num">${r.turns}</td>
+    <td class="num">${Math.round(r.median)} ms</td><td class="num">${Math.round(r.p90)} ms</td><td class="num">${Math.round(r.stt)} ms</td>
+    <td class="num">${Math.round(r.llm)} ms</td><td class="num">${Math.round(r.tts)} ms</td></tr>`).join("");
+
+// failures
+const verdictLabel = {agent: "Agent defect", code: "Code bug", test: "Test-side", "not reviewed": "Not reviewed"};
+$("failTable").innerHTML = "<tr><th>Run</th><th>Conversation</th><th>Verdict</th><th>What happened</th><th>Fix</th></tr>" +
+  (D.failures.length ? D.failures.map(f => `<tr><td>${esc(f.run)}</td><td><b>${esc(f.key)}</b><br><span class="meta">${esc(f.outcome)}; failed ${esc(f.failed.join(", "))}</span></td>
+    <td><span class="status"><span class="dot" style="background:var(${f.verdict === "test" ? "--warn" : f.verdict === "not reviewed" ? "--axis" : "--crit"})"></span>${esc(verdictLabel[f.verdict] || f.verdict)}</span></td>
+    <td>${esc(f.note)}</td><td>${esc(f.fix)}</td></tr>`).join("") : `<tr><td colspan="5">No failures.</td></tr>`);
+
+// charts (inline SVG, redrawn on theme change)
+function drawCharts() { passChart(); latChart(); }
+function passChart() {
+  const svg = $("passChart"), S = D.scenarios, k = M.labels.length, barH = 9, gap = 3;
+  const rowH = k * (barH + gap) + 10, left = 70, w = Math.max(520, svg.parentElement.clientWidth - 32), right = 40;
+  const h = S.length * rowH + 30, x = v => left + (w - left - right) * v / 5;
+  let g = "";
+  for (let v = 0; v <= 5; v++) g += `<line x1="${x(v)}" x2="${x(v)}" y1="0" y2="${h - 22}" stroke="${css("--grid")}"/><text x="${x(v)}" y="${h - 6}" text-anchor="middle">${v}</text>`;
+  S.forEach((s, i) => {
+    const y = i * rowH + 4;
+    g += `<text x="${left - 8}" y="${y + rowH / 2}" text-anchor="end" style="fill:${css("--ink-2")}">${s.id}</text>`;
+    s.runs.forEach((d, r) => { if (!d) return;
+      const yy = y + r * (barH + gap), bw = Math.max(x(d.pass) - x(0), 2);
+      g += `<rect class="hit" data-i="${i}" data-r="${r}" x="${x(0)}" y="${yy}" width="${bw}" height="${barH}" rx="3" fill="${css(SER[r])}"/>`;
+      g += `<text x="${x(0) + bw + 4}" y="${yy + barH - 1}">${d.pass}/${d.n}</text>`;
+    });
+  });
+  svg.setAttribute("width", w); svg.setAttribute("height", h); svg.innerHTML = g;
+  svg.querySelectorAll(".hit").forEach(el => {
+    const s = S[el.dataset.i], d = s.runs[el.dataset.r];
+    el.onmousemove = e => showTip(e, `<b>${s.id}</b> · ${esc(s.type)}<br>${esc(M.labels[el.dataset.r])}: ${d.pass}/${d.n} pass<br>` +
+      Object.entries(d.outcomes).map(([o, n]) => `${esc(o)} × ${n}`).join("<br>"));
+    el.onmouseleave = hideTip;
+  });
+}
+function latChart() {
+  const svg = $("latChart"), gaps = L.gaps, bin = 250, maxV = Math.min(Math.max(...gaps), 6000);
+  const nb = Math.ceil((maxV + 1) / bin), counts = Array(nb).fill(0);
+  gaps.forEach(v => counts[Math.min(nb - 1, Math.floor(v / bin))]++);
+  const w = Math.max(520, svg.parentElement.clientWidth - 32), h = 220, left = 34, bottom = 26, top = 10;
+  const x = v => left + (w - left - 10) * v / (nb * bin), cmax = Math.max(...counts), y = c => top + (h - top - bottom) * (1 - c / cmax);
+  let g = "";
+  for (let c = 0; c <= cmax; c += Math.max(1, Math.ceil(cmax / 4)))
+    g += `<line x1="${left}" x2="${w - 10}" y1="${y(c)}" y2="${y(c)}" stroke="${css("--grid")}"/><text x="${left - 6}" y="${y(c) + 4}" text-anchor="end">${c}</text>`;
+  for (let s = 0; s <= nb * bin; s += 1000) g += `<text x="${x(s)}" y="${h - 8}" text-anchor="middle">${s / 1000} s</text>`;
+  counts.forEach((c, i) => { if (!c) return;
+    const x0 = x(i * bin) + 1, bw = x((i + 1) * bin) - x(i * bin) - 2;
+    g += `<rect class="hit" data-i="${i}" x="${x0}" y="${y(c)}" width="${bw}" height="${y(0) - y(c)}" rx="3" fill="${css("--s1")}"/>`; });
+  [[1200, "1.2 s"], [1800, "1.8 s"]].forEach(([v, t]) =>
+    g += `<line x1="${x(v)}" x2="${x(v)}" y1="${top}" y2="${y(0)}" stroke="${css("--ink-2")}" stroke-dasharray="4 4"/><text x="${x(v) + 4}" y="${top + 10}">${t}</text>`);
+  g += `<line x1="${left}" x2="${w - 10}" y1="${y(0)}" y2="${y(0)}" stroke="${css("--axis")}"/>`;
+  svg.setAttribute("width", w); svg.setAttribute("height", h); svg.innerHTML = g;
+  svg.querySelectorAll(".hit").forEach(r => { const i = +r.dataset.i;
+    r.onmousemove = e => showTip(e, `${(i * bin / 1000).toFixed(2)}–${((i + 1) * bin / 1000).toFixed(2)} s: <b>${counts[i]}</b> turn${counts[i] > 1 ? "s" : ""}`);
+    r.onmouseleave = hideTip; });
+}
+drawCharts(); addEventListener("resize", drawCharts);
+
+// conversation explorer
+const runs = [...new Set(D.convs.map(c => c.run))];
+$("runSel").innerHTML = runs.map(r => `<option>${esc(r)}</option>`).join("");
+function fillConvs() {
+  const list = D.convs.filter(c => c.run === $("runSel").value);
+  $("convSel").innerHTML = list.map((c, i) => `<option value="${D.convs.indexOf(c)}">${esc(c.key)} · ${c.pass ? "pass" : "FAIL"} · ${esc(c.outcome.outcome)}</option>`).join("");
+  const firstFail = list.find(c => !c.pass);
+  if (firstFail) $("convSel").value = D.convs.indexOf(firstFail);
+  showConv();
+}
+function showConv() {
+  const c = D.convs[+$("convSel").value];
+  $("convTurns").innerHTML = c.turns.map(t => `<div class="turn ${t.role}"><div class="who">${t.role === "agent" ? "Agent" : "Borrower (simulated)"}</div>${esc(t.text)}` +
+    (t.tools && t.tools.length ? `<div class="tools">tools: ${esc(t.tools.join(", "))}</div>` : "") + `</div>`).join("");
+  const checks = Object.entries(c.checks).map(([k, v]) => `${v ? "✓" : "✗"} ${esc(k)}`).join("<br>");
+  const judge = Object.keys(c.judge).length ? Object.entries(c.judge).map(([k, v]) => `${esc(k)}: ${esc(v)}`).join("<br>") : "not judged";
+  $("convSide").innerHTML = `<b>${c.pass ? "✓ Pass" : "✗ Fail"}</b><p class="meta">Checks</p><div style="font-size:.85rem">${checks}</div>
+    <p class="meta">Outcome record</p><pre>${esc(JSON.stringify(c.outcome, null, 1))}</pre>
+    <p class="meta">Tool calls</p><pre>${c.tools.map(t => esc(t.name + " " + JSON.stringify(t.args) + "\n  → " + JSON.stringify(t.result))).join("\n")}</pre>
+    <p class="meta">Leaks: ${c.leaks.length} · guard replaced: ${esc(c.guard.join(", ") || "none")}</p>
+    <p class="meta">Judge (tone, low trust)</p><div style="font-size:.85rem">${judge}</div>`;
+}
+$("runSel").onchange = fillConvs; $("convSel").onchange = showConv; fillConvs();
+</script>
+</body>
+</html>

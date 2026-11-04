@@ -1,0 +1,434 @@
+{
+  "scenario": {
+    "id": "S14a",
+    "name": "mumbled_digits",
+    "borrower_id": "B003",
+    "today": "2026-11-03",
+    "persona": "Rahul Verma, speaks Hinglish, has a bad phone line and trails off or mumbles when giving numbers.\n",
+    "hidden_goal": "The first time asked for a date of birth or the last 4 digits, give a garbled or half-audible answer (trail off, use filler sounds, or run digits together unclearly). When asked to repeat or confirm, give the correct value clearly.\n",
+    "opening": "answers normally, but the first verification answer comes out muffled",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "will_pay",
+        "promise_to_pay",
+        "callback_requested"
+      ],
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-08",
+      "Q-07"
+    ],
+    "notes": "Primary check is process: the agent reads back what it heard and asks for confirmation rather than guessing or accepting a half-audible value.\n",
+    "runs": 5,
+    "set": "hold-out"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v10",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Rahul जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते, हाँ बोलिए, मैं ही Rahul Verma हूँ।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है Rahul जी, verification के लिए क्या आप अपने registered mobile number के आखिरी चार digits बता सकते हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ वो... उम्म... सात सात... चार... कुछ... hello? लाइन में शोर है शायद..."
+    },
+    {
+      "role": "agent",
+      "text": "माफ़ कीजिएगा, आवाज़ थोड़ी कट रही थी। क्या आप अपने mobile number के आखिरी चार digits फिर से बता सकते हैं? बस वो चार numbers बताइए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, साफ़ बता रहा हूँ — सात, सात, चार, तीन। 7743."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद Rahul जी, verify हो गया है। आपके consumer durable loan की तीन हज़ार आठ सौ रुपये की EMI एक नवंबर को due थी, और हमारे records में यह दो दिन overdue दिख रही है। आप बताइए, आगे कैसे बढ़ना चाहेंगे?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "अरे हाँ, वो EMI की बात है ना... देखिए, salary अभी एक-दो दिन में आनी है, उसके बाद मैं payment कर दूँगा।"
+    },
+    {
+      "role": "agent",
+      "text": "समझ गई। तो exact कौन सी तारीख तक आप payment कर पाएंगे? क्या आप पाँच नवंबर तक कर देंगे?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, पाँच नवंबर तक कर दूँगा, salary आते ही पहला काम यही करूँगा।"
+    },
+    {
+      "role": "agent",
+      "text": "माफ़ कीजिएगा, मुझे तारीख साफ़ समझ नहीं आई। क्या आप पाँच नवंबर तक payment कर देंगे, या कोई और तारीख है?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, पाँच नवंबर, यानी 5 November तक payment कर दूँगा।"
+    },
+    {
+      "role": "agent",
+      "text": "माफ़ कीजिएगा, system में date ठीक से update नहीं हो पा रही है। क्या आप पाँच नवंबर की तारीख एक बार फिर से confirm कर सकते हैं? जैसे पाँच नवंबर दो हज़ार छब्बीस?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, confirm — पाँच नवंबर दो हज़ार छब्बीस, 5 November 2026।"
+    },
+    {
+      "role": "agent",
+      "text": "माफ़ कीजिएगा, मुझे system में आपकी तारीख record करने में थोड़ी दिक्कत आ रही है। क्या आप payment link अभी लेना चाहेंगे, या मैं आपको पाँच नवंबर के आसपास callback करवा दूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Callback करवा दीजिए, पाँच तारीख के बाद मैं खुद payment कर दूँगा।"
+    },
+    {
+      "role": "agent",
+      "text": "माफ़ कीजिएगा, callback schedule करने में थोड़ी परेशानी हो रही है। क्या मैं आपकी बात अपने colleague से करवा दूँ, जो इसे आगे बढ़ा देंगे? या फिर मैं payment link अभी भेज दूँ, ताकि आप अपनी सुविधा से payment कर सकें?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "schedule_callback"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "अच्छा ठीक है, payment link भेज दीजिए, मैं पाँच तारीख तक कर दूँगा।"
+    },
+    {
+      "role": "agent",
+      "text": "समय देने के लिए धन्यवाद, आपका दिन शुभ हो। अगर आपको कोई भी मदद चाहिए हो तो हमें संपर्क कर लीजिएगा।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "send_payment_link",
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "7743"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "तीन हज़ार आठ सौ रुपये",
+          "due_date_spoken": "एक नवंबर",
+          "loan_type": "consumer durable loan",
+          "overdue_spoken": "दो दिन"
+        }
+      },
+      "attempts": 1,
+      "ms": 2.42,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "एक-दो दिन में",
+        "notes": "Borrower said salary is due in one to two days and will make payment then."
+      },
+      "result": {
+        "error": "date_unclear",
+        "reason": "unrecognized",
+        "message": "They gave only a vague time. Ask one clear question: which date exactly will they pay? Today is 3 November 2026; never suggest a date that has passed."
+      },
+      "attempts": 1,
+      "ms": 0.81,
+      "stage": "intent"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "पाँच नवंबर",
+        "notes": "Borrower promised to pay by पांच नवंबर after salary arrives."
+      },
+      "result": {
+        "error": "date_unclear",
+        "reason": "unrecognized",
+        "message": "They gave only a vague time. Ask one clear question: which date exactly will they pay? Today is 3 November 2026; never suggest a date that has passed."
+      },
+      "attempts": 1,
+      "ms": 1.01,
+      "stage": "intent"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "पाँच नवंबर",
+        "notes": "Borrower confirmed payment by पांच नवंबर."
+      },
+      "result": {
+        "error": "date_unclear",
+        "reason": "unrecognized",
+        "message": "They gave only a vague time. Ask one clear question: which date exactly will they pay? Today is 3 November 2026; never suggest a date that has passed."
+      },
+      "attempts": 1,
+      "ms": 0.77,
+      "stage": "intent"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "पाँच नवंबर दो हज़ार छब्बीस",
+        "notes": "Borrower confirmed payment by पांच नवंबर दो हज़ार छब्बीस."
+      },
+      "result": {
+        "error": "date_unclear",
+        "reason": "unrecognized",
+        "message": "They gave only a vague time. Ask one clear question: which date exactly will they pay? Today is 3 November 2026; never suggest a date that has passed."
+      },
+      "attempts": 1,
+      "ms": 0.62,
+      "stage": "intent"
+    },
+    {
+      "name": "schedule_callback",
+      "args": {
+        "when_text": "पाँच नवंबर के बाद"
+      },
+      "result": {
+        "status": "ambiguous",
+        "reason": "unrecognized"
+      },
+      "attempts": 1,
+      "ms": 0.39,
+      "stage": "intent"
+    },
+    {
+      "name": "send_payment_link",
+      "args": {
+        "channel": "sms"
+      },
+      "result": {
+        "sent": true,
+        "channel": "sms",
+        "url": "https://pay.lumenfinance.example/l/B003-****"
+      },
+      "attempts": 1,
+      "ms": 0.05,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "पाँच नवंबर दो हज़ार छब्बीस",
+        "notes": "Borrower agreed to pay and payment link sent via SMS. Will pay by पांच नवंबर दो हज़ार छब्बीस."
+      },
+      "result": {
+        "error": "date_unclear",
+        "reason": "unrecognized",
+        "message": "They gave only a vague time. Ask one clear question: which date exactly will they pay? Today is 3 November 2026; never suggest a date that has passed."
+      },
+      "attempts": 1,
+      "ms": 0.64,
+      "stage": "action"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B003",
+    "verified": true,
+    "outcome": "unresolved",
+    "promise_to_pay_date": null,
+    "payment_link_sent": true,
+    "escalate_to_human": false,
+    "notes": "recorded by code: model did not record an outcome",
+    "language_used": "hinglish+hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793781183.2047472,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793781183.2047472,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793781183.2047472,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793781183.2047472,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "3,800",
+    "3800",
+    "consumer durable loan",
+    "do din",
+    "ek November",
+    "first November",
+    "teen hazaar aath sau rupaye",
+    "the first of November",
+    "three thousand eight hundred rupees",
+    "two days",
+    "एक नवंबर",
+    "तीन हज़ार आठ सौ रुपये",
+    "दो दिन"
+  ],
+  "usage": {
+    "agent": {
+      "input": 45549,
+      "output": 650,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 10464,
+      "output": 568
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 16
+  },
+  "end_reason": "borrower_hung_up",
+  "infra_error": null,
+  "wall_secs": 21.8
+}

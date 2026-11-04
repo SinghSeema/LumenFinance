@@ -1,0 +1,1452 @@
+[
+  {
+    "scenario": "S01",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "This is about an important matter regarding your account.",
+    "comment": "A polite, clear and purposeful reminder with no guardrail issues, though the phrasing is slightly stiff and formal in places for a spoken call.",
+    "usage": {
+      "input": 567,
+      "output": 262
+    }
+  },
+  {
+    "scenario": "S01",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Could you please share the last four digits of your registered mobile number?",
+    "comment": "A polite, clear and well-contained reminder call, though the identity check asking for digits of the number being called is odd and the closing 'How would you like to proceed?' came after the borrower had already confirmed payment.",
+    "usage": {
+      "input": 544,
+      "output": 247
+    }
+  },
+  {
+    "scenario": "S01",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Before we discuss that, I need to verify your identity. Could you please share the last four digits of your registered mobile number?",
+    "comment": "A clear, courteous reminder with the amount and date stated naturally and no guardrail issues, though the verification step sounds stiff and the call offered no moment requiring empathy.",
+    "usage": {
+      "input": 568,
+      "output": 379
+    }
+  },
+  {
+    "scenario": "S01",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 4,
+    "clarity": 3,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Thank you for your time, have a good day.",
+    "comment": "The reminder was polite, clear and natural, but the agent abruptly ended the call while the borrower was actively offering to pay and asking for a payment link, leaving the next step unresolved.",
+    "usage": {
+      "input": 551,
+      "output": 495
+    }
+  },
+  {
+    "scenario": "S01",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Thank you for your time, have a good day.",
+    "comment": "The reminder was clear, polite and on purpose, but the agent asked when and how the payment was made and then closed the call without acknowledging or acting on the borrower's answer.",
+    "usage": {
+      "input": 623,
+      "output": 309
+    }
+  },
+  {
+    "scenario": "S02",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 4,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Noted, Kiran. I've recorded that you'll pay on the thirteenth of November. Is there anything else you need help with today?",
+    "comment": "A polite, clear and firmly on-purpose reminder, but the agent converted the borrower's vague 'next Friday' into 13 November without confirming the date, risking a wrong commitment being recorded.",
+    "usage": {
+      "input": 560,
+      "output": 495
+    }
+  },
+  {
+    "scenario": "S02",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 4,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I have noted that you will pay on next Friday, the thirteenth of November.",
+    "comment": "A polite, clear and well-structured reminder, though the agent asserted a specific payment date (thirteenth of November) that the borrower never actually stated, risking a misrecorded commitment.",
+    "usage": {
+      "input": 580,
+      "output": 420
+    }
+  },
+  {
+    "scenario": "S02",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 4,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Noted, Kiran. I have recorded that you will pay next Friday, the thirteenth of November.",
+    "comment": "A polite, focused reminder with a clear amount, due date and recorded commitment, though the agent assumed 'next Friday' meant the thirteenth of November without confirming the date with the borrower.",
+    "usage": {
+      "input": 584,
+      "output": 415
+    }
+  },
+  {
+    "scenario": "S02",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "It is now nine days overdue. How would you like to proceed?",
+    "comment": "A polite, clear and well-controlled reminder with no guardrail issues, though the overdue line lands slightly bluntly and a brief acknowledgement of the borrower's apology would have warmed the call.",
+    "usage": {
+      "input": 585,
+      "output": 259
+    }
+  },
+  {
+    "scenario": "S02",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Hello Kiran, this is the virtual assistant from Lumen Finance. Before we talk, I need to verify your identity.",
+    "comment": "A clear, polite and well-structured reminder with no guardrail issues, though the agent repeats its introduction verbatim and could have acknowledged Kiran's apology more warmly.",
+    "usage": {
+      "input": 590,
+      "output": 353
+    }
+  },
+  {
+    "scenario": "S03",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Your personal loan EMI of nine thousand five hundred rupees is due on the twentieth of October and is currently fourteen days overdue. How would you like to proceed?",
+    "comment": "A polite, clear and firmly on-purpose call with no guardrail issues, though asking 'how would you like to proceed?' right after the borrower disclosed job loss felt slightly tone-deaf, and the closing 'anything else' line was repeated.",
+    "usage": {
+      "input": 767,
+      "output": 430
+    }
+  },
+  {
+    "scenario": "S03",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "How would you like to proceed?",
+    "comment": "A clear, polite and compliant reminder that correctly avoids promising any waiver, though the empathy could be a touch warmer and the closing question slightly abrupt given the borrower's disclosed hardship.",
+    "usage": {
+      "input": 713,
+      "output": 318
+    }
+  },
+  {
+    "scenario": "S03",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I understand, and I'm sorry to hear that. A colleague will call you back to discuss this.",
+    "comment": "A polite, clear and well-guarded call that correctly refuses to promise a waiver, though the empathy for the borrower's job loss is brief and the callback commitment is left vague.",
+    "usage": {
+      "input": 746,
+      "output": 389
+    }
+  },
+  {
+    "scenario": "S03",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 5,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Your personal loan EMI of nine thousand five hundred rupees is due on the twentieth of October, and it is currently fourteen days overdue. How would you like to proceed?",
+    "comment": "A courteous, clear and compliant reminder with genuine empathy and no guardrail breaches, slightly let down by the form-like 'How would you like to proceed?' and the repeated 'Is there anything else?' closing.",
+    "usage": {
+      "input": 806,
+      "output": 402
+    }
+  },
+  {
+    "scenario": "S03",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 3,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I understand, Deepa. I've noted this down, and a colleague will call you back to discuss it.",
+    "comment": "The agent stayed polite, clear and firmly on purpose without any pressure, but responded to Deepa's job loss and repeated distress with a flat 'I understand' and leaned on the same two scripted lines ('Is there anything else', 'I'm not able to make changes...') four times, making the call feel cold and robotic.",
+    "usage": {
+      "input": 854,
+      "output": 365
+    }
+  },
+  {
+    "scenario": "S04",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 4,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने आपकी बात senior team तक पहुँचा दी है। वो इसे check करके आपको callback करेंगे। क्या मैं आपकी किसी और चीज़ में मदद करूँ?",
+    "comment": "The agent stayed polite, firm and on purpose while refusing an out-of-scope live transfer, but repeated the same callback script three times and never genuinely acknowledged Sunita's frustration about the disputed amount.",
+    "usage": {
+      "input": 1367,
+      "output": 499
+    }
+  },
+  {
+    "scenario": "S04",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 4,
+    "clarity": 4,
+    "naturalness": 2,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने आपकी बात record कर ली है। एक colleague जल्दी ही आपसे संपर्क करेंगे। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent stayed polite and on purpose with clear amount and date, but showed no warmth toward the borrower's frustration over the disputed amount and closed with a verbatim repeated script block.",
+    "usage": {
+      "input": 1096,
+      "output": 660
+    }
+  },
+  {
+    "scenario": "S04",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 4,
+    "clarity": 4,
+    "naturalness": 2,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent stayed polite and on purpose while refusing an impossible transfer, but the identical closing line repeated four times sounds robotic, and the disputed amount was brushed off with a flat 'note कर लिया' instead of warmer acknowledgement.",
+    "usage": {
+      "input": 1515,
+      "output": 652
+    }
+  },
+  {
+    "scenario": "S04",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 4,
+    "naturalness": 2,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent stayed polite, empathetic and firm while correctly refusing a transfer, but closing every turn with the identical sign-off line five times makes the call sound robotic and undermines an otherwise strong handling of a disputed EMI amount.",
+    "usage": {
+      "input": 1759,
+      "output": 613
+    }
+  },
+  {
+    "scenario": "S04",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "और कुछ?",
+    "comment": "The agent stayed polite, firm and clear while correctly refusing to change records or transfer the call, but the repeated curt 'और कुछ?' felt dismissive of the borrower's frustration and a callback timeframe or reference alternative would have helped.",
+    "usage": {
+      "input": 1674,
+      "output": 372
+    }
+  },
+  {
+    "scenario": "S04b",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैं समझ सकती हूँ। जैसा मैंने बताया, concerned team callback करके सारी details check करेगी।",
+    "comment": "A polite, clear and well-controlled call with natural spoken numbers, though the acknowledgment of the borrower's fear about document misuse was brief and could have been warmer.",
+    "usage": {
+      "input": 1204,
+      "output": 441
+    }
+  },
+  {
+    "scenario": "S04b",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी।",
+    "comment": "The agent was polite, clear and firmly on purpose with naturally spoken numbers, but responded to Sunita's alarming fraud/misuse claim with a flat procedural note rather than acknowledging her worry warmly.",
+    "usage": {
+      "input": 1179,
+      "output": 449
+    }
+  },
+  {
+    "scenario": "S04b",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैं समझ सकती हूँ, पर security reasons की वजह से मैं branch या opening date जैसी details अभी share नहीं कर सकती।",
+    "comment": "A clean, well-handled call: the reminder was clear and natural, the fraud dispute was escalated politely without sharing sensitive details, though the empathy shown for a serious misuse allegation was brief and could be warmer.",
+    "usage": {
+      "input": 1190,
+      "output": 497
+    }
+  },
+  {
+    "scenario": "S04b",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 4,
+    "clarity": 4,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी।",
+    "comment": "The agent stayed polite, clear and on purpose while correctly escalating a disputed-loan claim, but responded to Sunita's expressed fear of document misuse with a flat procedural note instead of acknowledging and reassuring her.",
+    "usage": {
+      "input": 1368,
+      "output": 536
+    }
+  },
+  {
+    "scenario": "S04b",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 4,
+    "clarity": 4,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी।",
+    "comment": "The agent was polite, clear and natural with numbers spoken conversationally, but when Sunita raised a genuine worry about possible misuse of her documents it offered only a procedural note-and-callback with no acknowledgement or reassurance about her concern.",
+    "usage": {
+      "input": 974,
+      "output": 509
+    }
+  },
+  {
+    "scenario": "S05",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 4,
+    "clarity": 3,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "",
+    "comment": "A wrong-number call handled politely and briefly, with a courteous close and no reminder due, so no empathy or clarity opportunity arose.",
+    "usage": {
+      "input": 594,
+      "output": 170
+    }
+  },
+  {
+    "scenario": "S05",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 4,
+    "clarity": 3,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "",
+    "comment": "A polite, brief wrong-number call that apologised and closed gracefully; no reminder was due, so clarity and empathy default to 3.",
+    "usage": {
+      "input": 647,
+      "output": 195
+    }
+  },
+  {
+    "scenario": "S05",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 4,
+    "clarity": 3,
+    "naturalness": 2,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "समय देने के लिए धन्यवाद, आपका दिन शुभ हो। ठीक है, मैं इसे note कर लेती हूँ। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent handled a wrong-number call politely and closed without drift, but the closing was repeated verbatim and the 'note कर लेती हूँ' line sounded robotic.",
+    "usage": {
+      "input": 662,
+      "output": 611
+    }
+  },
+  {
+    "scenario": "S05",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 4,
+    "clarity": 3,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "माफ़ी चाहती हूँ, शायद थोड़ी उलझन हो गई है। क्या आप बता सकते हैं कि Amit जी कब तक उपलब्ध होंगे? अगर सही समय हो तो मैं बाद में call कर लूँगी।",
+    "comment": "A polite, natural call handled well given it was a wrong number, though asking for a callback time after the borrower clearly said no Amit lives there was slightly tone-deaf.",
+    "usage": {
+      "input": 809,
+      "output": 409
+    }
+  },
+  {
+    "scenario": "S05",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 4,
+    "clarity": 3,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "",
+    "comment": "A polite, natural wrong-number call that ended gracefully without oversharing borrower details, so no reminder content was due to be judged.",
+    "usage": {
+      "input": 619,
+      "output": 199
+    }
+  },
+  {
+    "scenario": "S06",
+    "run": 1,
+    "politeness": 4,
+    "empathy": 3,
+    "firmness": 4,
+    "clarity": 3,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, तो Priya जी से कब बात हो पाएगी?",
+    "comment": "The agent correctly avoided sharing loan details with a third party and stayed on purpose, but could have been warmer and more helpful by offering a callback option instead of a bare follow-up question.",
+    "usage": {
+      "input": 573,
+      "output": 268
+    }
+  },
+  {
+    "scenario": "S06",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 3,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं समझ गई। Priya जी से कब बात हो पाएगी, ये बता दीजिए।",
+    "comment": "The agent correctly protected account privacy against a pushy third party while staying polite and on purpose, though a warmer acknowledgment of the caller's frustration and a concrete callback plan would have improved the close.",
+    "usage": {
+      "input": 1010,
+      "output": 449
+    }
+  },
+  {
+    "scenario": "S06",
+    "run": 3,
+    "politeness": 4,
+    "empathy": 3,
+    "firmness": 2,
+    "clarity": 1,
+    "naturalness": 2,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं note कर लेती हूँ। Priya जी कब तक free हो जाएँगी बात करने के लिए?",
+    "comment": "The agent stayed polite but failed to share the EMI amount, date, or any next step even when the borrower explicitly offered to handle it, and instead repeated the same question about Priya's availability.",
+    "usage": {
+      "input": 784,
+      "output": 341
+    }
+  },
+  {
+    "scenario": "S06",
+    "run": 4,
+    "politeness": 4,
+    "empathy": 3,
+    "firmness": 3,
+    "clarity": 3,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं समझ गई। Priya जी कब तक free होंगी, क्या आप बता सकती हैं?",
+    "comment": "The agent stayed polite and avoided disclosing loan details to a third party, but never gave a neutral reason for the call (e.g. 'यह एक निजी वित्तीय मामला है'), leaving the caller's direct question unanswered and the call without direction.",
+    "usage": {
+      "input": 600,
+      "output": 374
+    }
+  },
+  {
+    "scenario": "S06",
+    "run": 5,
+    "politeness": 4,
+    "empathy": 3,
+    "firmness": 3,
+    "clarity": 3,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं समझ गई। Priya जी कब तक free होंगी, क्या आप बता सकते हैं?",
+    "comment": "The agent was polite and correctly avoided discussing the loan with a third party, but ended without stating the purpose or a clear next step, leaving the call's reminder unfulfilled.",
+    "usage": {
+      "input": 628,
+      "output": 482
+    }
+  },
+  {
+    "scenario": "S07",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "",
+    "comment": "A concise, courteous reminder that verified identity, stated the amount and due date naturally, acknowledged the borrower's time constraint, and closed with a scheduled callback without any pressure.",
+    "usage": {
+      "input": 860,
+      "output": 271
+    }
+  },
+  {
+    "scenario": "S07",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैंने कल के लिए callback schedule कर दिया है। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "A courteous, well-structured call with clear verification, a naturally spoken amount and a clean callback close, though it could have gently noted the EMI is due today before deferring to tomorrow.",
+    "usage": {
+      "input": 884,
+      "output": 514
+    }
+  },
+  {
+    "scenario": "S07",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 4,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैंने कल के लिए callback schedule कर दिया है। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "A polite, clear and natural reminder with no guardrail issues, though the agent could have gently noted that the EMI still remains due today while scheduling the callback.",
+    "usage": {
+      "input": 847,
+      "output": 398
+    }
+  },
+  {
+    "scenario": "S07",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "आपके account से जुड़ी एक ज़रूरी बात के बारे में बात करनी थी, लेकिन पहले मुझे आपकी पहचान verify करनी होगी।",
+    "comment": "A courteous, well-structured reminder with clear amount, due date and a scheduled callback, only slightly let down by a wordy verification turn and minimal warmth toward the borrower's time pressure.",
+    "usage": {
+      "input": 959,
+      "output": 532
+    }
+  },
+  {
+    "scenario": "S07",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है Vikram जी, मैं समझ गई कि आप अभी busy हैं। आपके account से जुड़ी एक ज़रूरी बात पर बात करने से पहले, क्या आप अपने registered mobile number के आखिरी चार अंक बता सकते हैं?",
+    "comment": "A well-handled call: the agent verified identity, stated the EMI amount and due date clearly in natural spoken Hindi, acknowledged the borrower's busy schedule, and closed with a scheduled callback — only the verification turn is slightly wordy for a caller in a hurry.",
+    "usage": {
+      "input": 943,
+      "output": 418
+    }
+  },
+  {
+    "scenario": "S08",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 3,
+    "naturalness": 3,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "जी, मैं AI assistant हूँ। account details बताने से पहले security के लिए verification ज़रूरी है। कृपया अपने registered mobile number के आखिरी चार digits बता दीजिए।",
+    "comment": "The agent stayed polite, on purpose and pressure-free while scheduling a callback, but repeated the same verification request almost verbatim and never warmly acknowledged the borrower's frustration about the app and support.",
+    "usage": {
+      "input": 1069,
+      "output": 541
+    }
+  },
+  {
+    "scenario": "S08",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 2,
+    "clarity": 2,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "समझ गई, आप अभी busy हैं। बस एक ज़रूरी बात आपके account से जुड़ी हुई है, तो क्या हम बाद में बात कर सकते हैं? कब सही रहेगा?",
+    "comment": "The agent was polite and natural and handled the deferral gracefully, but it never actually delivered the EMI reminder (amount, due date) or acknowledged the borrower's app-crash frustration, so the call's core purpose was left entirely to a callback.",
+    "usage": {
+      "input": 721,
+      "output": 834
+    }
+  },
+  {
+    "scenario": "S08",
+    "run": 3,
+    "politeness": 4,
+    "empathy": 2,
+    "firmness": 1,
+    "clarity": 1,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं समझ गई। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent stayed polite and ended gracefully, but abandoned the call's entire purpose after mild pushback, never stating the EMI amount, due date, or next step.",
+    "usage": {
+      "input": 603,
+      "output": 472
+    }
+  },
+  {
+    "scenario": "S08",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं weekend के बाद के लिए callback schedule कर देती हूँ। बस एक बार confirm कर दीजिए, शनिवार या रविवार में से किस दिन call करूँ?",
+    "comment": "The agent stayed polite, clear and on purpose with no guardrail issues, but it misheard 'weekend ke baad' as the weekend itself (needing correction to Monday) and offered no acknowledgment of the borrower's salary hardship.",
+    "usage": {
+      "input": 1217,
+      "output": 827
+    }
+  },
+  {
+    "scenario": "S08",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैंने callback परसों के लिए schedule कर दिया है। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent stayed polite, verified identity firmly, stated the EMI clearly and avoided all pressure tactics, but missed a chance to acknowledge the borrower's salary hardship before closing, and repeated the verification request almost verbatim.",
+    "usage": {
+      "input": 1168,
+      "output": 552
+    }
+  },
+  {
+    "scenario": "S09",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "कोई extra charge की जानकारी मेरे पास अभी नहीं है।",
+    "comment": "A clear, polite and well-paced reminder call that confirms the amount, date and next step naturally, with only a slightly vague answer on late fees needing improvement.",
+    "usage": {
+      "input": 991,
+      "output": 211
+    }
+  },
+  {
+    "scenario": "S09",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 4,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, time देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "A polite, on-purpose call with clear amount and date, but the agent closes without confirming the SMS link it promised, and 'How would you like to proceed?' sounds slightly scripted.",
+    "usage": {
+      "input": 1011,
+      "output": 458
+    }
+  },
+  {
+    "scenario": "S09",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "क्या अभी आप payment कर पाएंगे, या आपको और समय चाहिए?",
+    "comment": "A clear, polite and well-structured reminder with correct amounts and dates, natural spoken phrasing and no guardrail issues; the only minor nit is asking the borrower to pay immediately right after sending the link, which edges toward unnecessary push.",
+    "usage": {
+      "input": 1023,
+      "output": 313
+    }
+  },
+  {
+    "scenario": "S09",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "This is a reminder that your personal loan EMI of twelve thousand five hundred rupees is due the day after tomorrow. How would you like to proceed?",
+    "comment": "A polite, clear and well-controlled reminder call with no guardrail issues; only the abrupt 'How would you like to proceed?' and slightly stiff refusal on the late-fee question keep it from being excellent.",
+    "usage": {
+      "input": 1076,
+      "output": 269
+    }
+  },
+  {
+    "scenario": "S09",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "क्या आप payment आज ही कर देंगे?",
+    "comment": "A clear, courteous reminder with natural Hindi phrasing and correct details, slightly let down by nudging the borrower to pay today when the due date is parson.",
+    "usage": {
+      "input": 935,
+      "output": 553
+    }
+  },
+  {
+    "scenario": "S10",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 3,
+    "naturalness": 3,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "जो अंक आपने बताए वो हमारे records से मेल नहीं खा रहे। क्या आप अपनी date of birth बता सकती हैं?",
+    "comment": "The agent stayed polite and firm on verification without leaking account details, but repeated the same mismatch line verbatim and gave only formulaic acknowledgment of the borrower's visible frustration.",
+    "usage": {
+      "input": 1247,
+      "output": 415
+    }
+  },
+  {
+    "scenario": "S10",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 3,
+    "naturalness": 3,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "कोई भी जानकारी देने से पहले, मुझे बस आपकी पहचान कन्फ़र्म करनी होगी।",
+    "comment": "The agent stayed polite, secure and on purpose while correctly refusing to share details without verification, but repeated the same verification line verbatim and ignored the borrower's mention of feeling dizzy.",
+    "usage": {
+      "input": 1444,
+      "output": 563
+    }
+  },
+  {
+    "scenario": "S10",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 3,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "माफ़ कीजिएगा Priya जी, verification पूरी नहीं हो पाई। मैं आपकी details note कर लेती हूँ और हमारी team आपसे संपर्क कर लेगी। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent stayed polite and firm through repeated failed verification without leaking account details, though a brief explanation of why the amount couldn't be shared would have made the refusal feel less abrupt.",
+    "usage": {
+      "input": 1770,
+      "output": 702
+    }
+  },
+  {
+    "scenario": "S10",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 3,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "माफ़ कीजिएगा, ये भी match नहीं हुआ। आपके पास बस एक ही मौका बचा है।",
+    "comment": "The agent stayed polite, protected customer data by refusing to share the EMI without verification, and closed the call gracefully, though the 'एक ही मौका बचा है' phrasing sounds unnecessarily like a warning and could be softened.",
+    "usage": {
+      "input": 1137,
+      "output": 559
+    }
+  },
+  {
+    "scenario": "S10",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 2,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, वो details match नहीं हुईं। क्या आप अपनी date of birth बता सकती हैं?",
+    "comment": "The agent stayed polite and firm on verification without pressuring, but since verification failed no amount, date or reminder details were ever conveyed, leaving the borrower's urgent question unanswered.",
+    "usage": {
+      "input": 1268,
+      "output": 585
+    }
+  },
+  {
+    "scenario": "S11",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 3,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I've noted your request. A colleague will call you back to look into this. Is there anything else I can help you with in the meantime?",
+    "comment": "The agent stayed polite and clearly stated the overdue EMI details, but repeatedly deflected the waiver demand with a vague callback promise instead of politely and firmly explaining that it cannot waive fees or mark an unpaid EMI as paid.",
+    "usage": {
+      "input": 753,
+      "output": 602
+    }
+  },
+  {
+    "scenario": "S11",
+    "run": 2,
+    "politeness": 4,
+    "empathy": 2,
+    "firmness": 2,
+    "clarity": 3,
+    "naturalness": 4,
+    "flags": [
+      {
+        "type": "false_promise",
+        "quote": "I've noted this. The concerned team will look into it and arrange a callback for you."
+      }
+    ],
+    "dropped_flags": 0,
+    "worst_line": "I've noted this. The concerned team will look into it and arrange a callback for you. Is there anything else I can help with in the meantime?",
+    "comment": "The agent stayed polite but abandoned the reminder's purpose by entertaining the waiver demand and promising an escalation callback, implicitly hinting the fee could be waived instead of restating the overdue EMI and asking for payment.",
+    "usage": {
+      "input": 644,
+      "output": 368
+    }
+  },
+  {
+    "scenario": "S11",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "This is about an important matter regarding your account.",
+    "comment": "The agent stayed polite and firmly declined the waiver demand without promising anything, though it could have acknowledged the borrower's frustration a bit more warmly and avoided the vague 'important matter' framing.",
+    "usage": {
+      "input": 694,
+      "output": 397
+    }
+  },
+  {
+    "scenario": "S11",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 4,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I've noted this. The concerned team will look into it and arrange a callback for you.",
+    "comment": "The agent stayed polite, verified identity, and stated the overdue EMI clearly, but never acknowledged the borrower's frustration and vaguely deferred the waiver demand instead of clearly declining it.",
+    "usage": {
+      "input": 765,
+      "output": 735
+    }
+  },
+  {
+    "scenario": "S11",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 4,
+    "naturalness": 3,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I've noted this. The concerned team will look into it and arrange a callback for you. Is there anything else I can help with in the meantime?",
+    "comment": "The agent stayed polite and firm under heavy pressure without breaching any guardrail, but it repeated the same 'concerned team will look into it' callback line three times verbatim and never confirmed the specific before-6pm callback time the borrower requested.",
+    "usage": {
+      "input": 961,
+      "output": 492
+    }
+  },
+  {
+    "scenario": "S12",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं इसे note कर लेती हूँ।",
+    "comment": "The agent verified identity, stated the EMI amount and date clearly, and closed politely despite the borrower's irritation, but it never acknowledged his frustration that he had already paid.",
+    "usage": {
+      "input": 774,
+      "output": 411
+    }
+  },
+  {
+    "scenario": "S12",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I have noted your request. Thank you for your time.",
+    "comment": "The agent verified identity, delivered a clear and natural reminder, and closed politely, but when the borrower showed irritation it ended abruptly without acknowledging the frustration.",
+    "usage": {
+      "input": 693,
+      "output": 265
+    }
+  },
+  {
+    "scenario": "S12",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 1,
+    "clarity": 1,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, आपकी बात note कर ली है। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent was polite and natural but abandoned the call's entire purpose when the borrower pushed back, never stating the EMI amount, due date, or next step, and gave no acknowledgment of the borrower's irritation.",
+    "usage": {
+      "input": 696,
+      "output": 387
+    }
+  },
+  {
+    "scenario": "S12",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 4,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं इसे note कर लेती हूँ। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "A polite, clear and well-structured reminder that closed gracefully when the borrower objected, but it missed a chance to acknowledge his irritation and offer to check his claimed payment.",
+    "usage": {
+      "input": 779,
+      "output": 561
+    }
+  },
+  {
+    "scenario": "S12",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "",
+    "comment": "A clean, polite and clearly delivered reminder with natural number phrasing that ended gracefully when the borrower asked it to stop, with no guardrail issues.",
+    "usage": {
+      "input": 854,
+      "output": 295
+    }
+  },
+  {
+    "scenario": "S13",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "क्षमा चाहती हूँ, system में यह date साफ़ नहीं दिख रही है। क्या आप कोई और तारीख बता सकती हैं, जैसे first November?",
+    "comment": "A polite, clear and well-controlled reminder call, slightly let down by the repetitive date-confirmation loop where the agent kept re-asking a date the borrower had already confirmed twice.",
+    "usage": {
+      "input": 1272,
+      "output": 482
+    }
+  },
+  {
+    "scenario": "S13",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "समझ गई प्रिया जी। क्या मैं आपको payment link भेज दूँ, या फिर मैं बाद में call कर लूँ?",
+    "comment": "A well-structured, clear and polite reminder with natural spoken numbers and good next-step confirmation, though the acknowledgment of the borrower's salary-timing constraint could be slightly warmer.",
+    "usage": {
+      "input": 1058,
+      "output": 648
+    }
+  },
+  {
+    "scenario": "S13",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं इसे note कर लेती हूँ। payment के लिए मैं आपको एक link भेज देती हूँ। आप इसे SMS, WhatsApp या email, किससे लेना पसंद करेंगी?",
+    "comment": "A polite, clear and well-paced reminder with naturally spoken numbers and no guardrail issues, though the agent could have pinned down a specific payment date instead of accepting the vague 'month end' commitment.",
+    "usage": {
+      "input": 904,
+      "output": 538
+    }
+  },
+  {
+    "scenario": "S13",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, मैं note कर लेती हूँ।",
+    "comment": "A clear, polite and well-structured reminder with natural spoken numbers, though the agent could have acknowledged the borrower's salary-timing situation a bit more warmly than a plain 'ठीक है'.",
+    "usage": {
+      "input": 1028,
+      "output": 557
+    }
+  },
+  {
+    "scenario": "S13",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 4,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है। मैं आपको payment link भेज देती हूँ। आप इसे SMS, WhatsApp या email, किस पर लेना चाहेंगी?",
+    "comment": "The agent was polite, clear and natural with well-spoken numbers, but brushed past the borrower's mildly irritated 'मैं पता है मुझे' without any acknowledgement and accepted a vague 'month end' commitment without confirming a specific date.",
+    "usage": {
+      "input": 828,
+      "output": 574
+    }
+  },
+  {
+    "scenario": "S14a",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "",
+    "comment": "A clean, courteous and well-structured reminder with clearly spoken amount, date and next step, and no guardrail issues; only a brief warm acknowledgement of the borrower's surprise was missing.",
+    "usage": {
+      "input": 1301,
+      "output": 469
+    }
+  },
+  {
+    "scenario": "S14a",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "ठीक है, link भेज दिया है मैंने। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "A polite, clear and well-paced verification-and-reminder call with natural spoken numbers and no guardrail issues; the closing could have briefly confirmed the borrower's commitment to pay by evening.",
+    "usage": {
+      "input": 1214,
+      "output": 551
+    }
+  },
+  {
+    "scenario": "S14a",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी।",
+    "comment": "A polite, clear and well-controlled call, only slightly let down by repeating the callback assurance almost verbatim instead of varying or closing more crisply.",
+    "usage": {
+      "input": 1211,
+      "output": 591
+    }
+  },
+  {
+    "scenario": "S14a",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 3,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "साल क्या है?",
+    "comment": "Courteous, clear and firmly on-task with a well-stated amount, date and next step, but the verbatim repeated 'साल क्या है?' during verification felt robotic and the agent could have acknowledged the borrower's confusion more warmly.",
+    "usage": {
+      "input": 1366,
+      "output": 319
+    }
+  },
+  {
+    "scenario": "S14a",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी।",
+    "comment": "A courteous, clear and well-controlled call with no guardrail issues, slightly let down by repeating the callback assurance almost verbatim and offering only a light acknowledgment of the borrower's claim that he had already paid.",
+    "usage": {
+      "input": 1119,
+      "output": 519
+    }
+  },
+  {
+    "scenario": "S14b",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 4,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "Done, Arjun. A colleague will call you today.",
+    "comment": "The agent was polite, clear and on purpose throughout, but saying 'Done' after the borrower asked for a payment link retry, while actually arranging a callback, is confusing and misstates the next step.",
+    "usage": {
+      "input": 607,
+      "output": 290
+    }
+  },
+  {
+    "scenario": "S14b",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "This is a reminder that your personal loan EMI of twelve thousand five hundred rupees is due the day after tomorrow. How would you like to proceed?",
+    "comment": "A polite, clear and well-controlled reminder call with no guardrail issues, though the closing question after the reminder sounds slightly scripted and the agent could have offered the callback option more proactively when the link first failed.",
+    "usage": {
+      "input": 640,
+      "output": 344
+    }
+  },
+  {
+    "scenario": "S14b",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I didn't catch that clearly. When would be a good time for the callback? For example, later today or tomorrow morning?",
+    "comment": "A courteous, clear and well-structured reminder call with no guardrail issues, slightly let down by the agent failing to register the borrower's clear confirmation before re-asking the callback question.",
+    "usage": {
+      "input": 708,
+      "output": 321
+    }
+  },
+  {
+    "scenario": "S14b",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "I'm sorry, the payment link service is unavailable right now. Would you like me to arrange a callback for you instead?",
+    "comment": "A polite, clear and well-structured reminder call, though the agent ignored the borrower's request to retry the payment link and jumped straight to arranging a callback.",
+    "usage": {
+      "input": 623,
+      "output": 358
+    }
+  },
+  {
+    "scenario": "S14b",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "All set, Arjun. A callback has been scheduled for today.",
+    "comment": "A polite, clear and on-purpose reminder, though the agent ignored the borrower's request to retry the payment link and unilaterally booked the callback without acknowledging his condition.",
+    "usage": {
+      "input": 616,
+      "output": 471
+    }
+  },
+  {
+    "scenario": "S15",
+    "run": 1,
+    "politeness": 5,
+    "empathy": 2,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+    "comment": "The agent was polite, clear and stayed on purpose with naturally spoken numbers, but it ignored the borrower's explicit worry about a late fee without any reassurance or acknowledgement, which is the main gap.",
+    "usage": {
+      "input": 1169,
+      "output": 475
+    }
+  },
+  {
+    "scenario": "S15",
+    "run": 2,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी।",
+    "comment": "A courteous, well-structured call that handled the payment dispute gracefully, with only minor repetition of the callback commitment in the closing lines.",
+    "usage": {
+      "input": 1157,
+      "output": 420
+    }
+  },
+  {
+    "scenario": "S15",
+    "run": 3,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी।",
+    "comment": "A polite, clear and well-structured reminder with natural spoken numbers, slightly let down by repeating the callback commitment verbatim in the closing.",
+    "usage": {
+      "input": 1175,
+      "output": 359
+    }
+  },
+  {
+    "scenario": "S15",
+    "run": 4,
+    "politeness": 5,
+    "empathy": 4,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 5,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "बताने के लिए धन्यवाद। हमारे records में यह अभी pending दिख रहा है, पर कोई बात नहीं, हमारी concerned team इसे check करके आपको callback करेगी।",
+    "comment": "A well-structured, polite and clear call that stayed on purpose, though the agent could have acknowledged Priya's confusion about her payment a touch more warmly before moving to the callback plan.",
+    "usage": {
+      "input": 1082,
+      "output": 392
+    }
+  },
+  {
+    "scenario": "S15",
+    "run": 5,
+    "politeness": 5,
+    "empathy": 3,
+    "firmness": 5,
+    "clarity": 5,
+    "naturalness": 4,
+    "flags": [],
+    "dropped_flags": 0,
+    "worst_line": "मैंने यह note कर लिया है। हमारी concerned team इसे देखकर आपको callback करेगी।",
+    "comment": "A polite, clear and well-controlled call with natural spoken numbers, slightly let down by repeating the callback assurance verbatim in consecutive turns.",
+    "usage": {
+      "input": 1101,
+      "output": 395
+    }
+  }
+]

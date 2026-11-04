@@ -415,3 +415,45 @@ def test_person_escalations_still_say_colleague(borrower, today, reason):
     state.verified = True
     r = tools.call("escalate_to_human", {"reason": reason})
     assert r["escalated"] and "colleague" in r["message"]
+
+
+# v10 eval fixes (2026-11-04)
+def _verified(borrower, today, heard):
+    tools, state = make_tools(borrower, today, heard=heard)
+    state.verified = True
+    return tools, state
+
+
+def test_vague_time_on_overdue_emi_gets_one_clear_question(today):
+    from emi_agent.data import load_borrowers
+    b = load_borrowers()["B002"]  # 6 days overdue
+    tools, state = _verified(b, today, ["हाँ, महीने के end तक कर दूँगी"])
+    r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert r["error"] == "vague_date" and "which date exactly" in r["message"]
+    r2 = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert r2["recorded"]  # asked once already: accepted
+
+
+def test_past_date_says_it_has_passed(borrower, today):
+    tools, state = _verified(borrower, today, ["thirty-first October"])
+    r = tools.call("record_outcome", {"outcome": "promise_to_pay",
+                                      "promise_to_pay_date": "2026-10-31", "notes": "x"})
+    assert r["reason"] == "past_date" and "already passed" in r["message"]
+
+
+def test_no_callback_scheduled_after_a_dispute_and_outcome_is_the_dispute(borrower, today):
+    tools, state = _verified(borrower, today, ["ye loan mera nahi hai"])
+    tools.call("escalate_to_human", {"reason": "dispute"})
+    r = tools.call("schedule_callback", {"when_text": "today"})
+    assert r["status"] == "not_needed" and state.callback_time is None
+    tools.call("record_outcome", {"outcome": "callback_requested", "promise_to_pay_date": None, "notes": "x"})
+    assert state.outcome.outcome.value == "dispute"
+
+
+def test_model_value_stitched_from_fragments_is_not_checked(today):
+    # "सत्तावन... नहीं मतलब सत्तर... चार... तीन" was checked as 7043 (v10 fix-run S14a run 5).
+    from emi_agent.data import load_borrowers
+    tools, state = make_tools(load_borrowers()["B003"], today,
+                              heard=["हाँ वो... umm... सत्तावन... नहीं मतलब सत्तर... चार... तीन... haan कुछ वही..."])
+    r = tools.call("verify_identity", {"factor": "last4", "value": "7043"})
+    assert r["error"] == "not_heard" and state.verify_attempts == 0

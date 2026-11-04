@@ -1,0 +1,286 @@
+{
+  "scenario": {
+    "id": "S14a",
+    "name": "mumbled_digits",
+    "borrower_id": "B003",
+    "today": "2026-11-03",
+    "persona": "Rahul Verma, speaks Hinglish, has a bad phone line and trails off or mumbles when giving numbers.\n",
+    "hidden_goal": "The first time asked for a date of birth or the last 4 digits, give a garbled or half-audible answer (trail off, use filler sounds, or run digits together unclearly). When asked to repeat or confirm, give the correct value clearly.\n",
+    "opening": "answers normally, but the first verification answer comes out muffled",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "will_pay",
+        "promise_to_pay",
+        "callback_requested"
+      ],
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-08",
+      "Q-07"
+    ],
+    "notes": "Primary check is process: the agent reads back what it heard and asks for confirmation rather than guessing or accepting a half-audible value.\n",
+    "runs": 5,
+    "set": "hold-out"
+  },
+  "run": 5,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v10",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Rahul जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते, हाँ बोलिए, मैं ही Rahul Verma हूँ।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है Rahul जी, verification के लिए बस अपने registered mobile number के आखिरी चार digits बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ वो... umm... सत्तावन... नहीं मतलब सत्तर... चार... तीन... haan कुछ वही..."
+    },
+    {
+      "role": "agent",
+      "text": "कोई बात नहीं, इसके बजाय आप अपनी date of birth बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "वो मेरी DOB है... नौ नवंबर... उन्नासी... या पचासी... हाँ वही..."
+    },
+    {
+      "role": "agent",
+      "text": "समझ गई, वो match नहीं हो पाया। अब आप अपनी date of birth बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "अच्छा ध्यान से सुनिए, मेरी date of birth nine November nineteen eighty-five है, यानी zero nine, eleven, one nine eight five."
+    },
+    {
+      "role": "agent",
+      "text": "बस साल भी बता दीजिए। वो कौन सा साल था?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Nineteen eighty-five, यानी one nine eight five."
+    },
+    {
+      "role": "agent",
+      "text": "साल कौन सा था, वो भी बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "अरे मैंने बता दिया na, nineteen eighty-five — one, nine, eight, five."
+    },
+    {
+      "role": "agent",
+      "text": "माफ़ कीजिए, verification पूरी नहीं हो पाई। मैं अपने colleague से कह देती हूँ कि वो आपसे संपर्क कर लें। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "7043"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 2,
+        "ask_next": "their date of birth instead (do not ask for the digits again)"
+      },
+      "attempts": 1,
+      "ms": 0.89,
+      "stage": "verifying"
+    },
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "5770"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 1,
+        "ask_next": "their date of birth instead (do not ask for the digits again)"
+      },
+      "attempts": 1,
+      "ms": 3.39,
+      "stage": "verifying",
+      "by": "code"
+    },
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "1985-09-08"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 0
+      },
+      "attempts": 1,
+      "ms": 1.8,
+      "stage": "closing",
+      "by": "code"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B003",
+    "verified": false,
+    "outcome": "verification_failed",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "verification attempts exhausted",
+    "language_used": "hinglish+hi",
+    "callback_time": null
+  },
+  "disclosure_log": [],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "3,800",
+    "3800",
+    "consumer durable loan",
+    "do din",
+    "ek November",
+    "first November",
+    "teen hazaar aath sau rupaye",
+    "the first of November",
+    "three thousand eight hundred rupees",
+    "two days",
+    "एक नवंबर",
+    "तीन हज़ार आठ सौ रुपये",
+    "दो दिन"
+  ],
+  "usage": {
+    "agent": {
+      "input": 16723,
+      "output": 142,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 3658,
+      "output": 309
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 7
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 9.5
+}

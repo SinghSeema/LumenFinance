@@ -211,3 +211,39 @@ async def test_simulator_hangup_is_not_garbage():
     assert await sim.reply("Thank you for your time.") is None
     sim.client = Client(["[EXTRACTION_RESULT]", "Haan ji, boliye."])
     assert await sim.reply("Namaste") == "Haan ji, boliye."
+
+
+def test_asking_for_a_real_person_is_not_a_bot_question():
+    from evals.score import ai_disclosure
+    a = {"turns": [{"role": "agent", "text": "Namaste"},
+                   {"role": "borrower", "text": "मुझे अभी कोई real person से बात कराइए"},
+                   {"role": "agent", "text": "एक colleague आपको callback करेंगे।"}]}
+    assert ai_disclosure(a) is None
+
+
+def test_simulator_is_told_todays_date():
+    from types import SimpleNamespace as NS
+    from evals.simulator import system_prompt
+    s = {"persona": "p", "opening": "o", "hidden_goal": "g", "today": "2026-11-03"}
+    b = NS(name="Priya Sharma", dob=__import__("datetime").date(1994, 7, 22), last4="3367")
+    assert "Tuesday 3 November 2026" in system_prompt(s, b)
+
+
+def test_vague_date_check_ignores_records_that_code_refused():
+    from evals.score import clarify_vague_date
+    a = {"turns": [{"role": "agent", "text": "EMI due.", "verified": True, "tools": []},
+                   {"role": "borrower", "text": "mahine ke end tak kar dungi"},
+                   {"role": "agent", "text": "Which date exactly?", "verified": True, "tools": ["record_outcome"]}],
+         "tool_calls": [{"name": "record_outcome", "args": {}, "result": {"error": "vague_date"}}]}
+    assert clarify_vague_date(a) is True
+    a["tool_calls"][0]["result"] = {"recorded": True}
+    assert clarify_vague_date(a) is False
+
+
+@pytest.mark.parametrize("text", ["किसी असली person या senior से connect करो",
+                                  "मैं recorded callback का इंतज़ार नहीं करूँगी",
+                                  "Connect me to a real human please"])
+def test_requests_for_a_human_are_not_bot_questions(text):
+    from evals.score import ai_disclosure
+    a = {"turns": [{"role": "borrower", "text": text}, {"role": "agent", "text": "Ok."}]}
+    assert ai_disclosure(a) is None

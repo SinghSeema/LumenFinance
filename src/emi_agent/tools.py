@@ -139,6 +139,15 @@ _ESCALATION_LINE = {
     "other": "Tell them a colleague will call them back. Do not promise when.",
 }
 
+_DATE_HELP = {
+    "ambiguous_phrase": "They gave only a vague time. Ask one clear question: which date exactly "
+                        "will they pay? Today is {today}; never suggest a date that has passed.",
+    "past_date": "That date has already passed (today is {today}). Say so gently and ask which "
+                 "coming date they mean.",
+}
+# Escalations whose callback the concerned team arranges (D-35): no schedule_callback, no time.
+_TEAM_CALLS_BACK = {"escalate:dispute", "escalate:hardship", "escalate:payment_check"}
+
 # Calls that never reached the borrower: a dispute or hardship escalation makes no sense (D-30).
 _NOT_THE_BORROWER = {Outcome.wrong_number, Outcome.third_party}
 
@@ -208,13 +217,13 @@ class Tools:
             # 2026-11-04), read by the same code as the transcript check.
             given = _parse_dob(value) or find_dob([value], self.today)[0]
             match = given == self.borrower.dob
-            heard = given is not None and dob_was_said(given, s.heard)
+            heard = given is not None and given in self._dobs_heard()
         else:
             digits = "".join(c for c in value if c.isdigit())
             # Digits, else spoken words ("three three six seven", eval S15 2026-11-04).
             given = digits if len(digits) == 4 else find_last4(value)
             match = given == self.borrower.last4
-            heard = given is not None and digits_were_said(given, s.heard)
+            heard = given is not None and given in self._last4s_heard()
         if given is None:
             return {"verified": False, "attempts_left": left, "error": "unreadable_value",
                     "message": NOT_YET_SAID}
@@ -255,6 +264,10 @@ class Tools:
         return {"sent": True, "channel": channel, "url": url}
 
     def _schedule_callback(self, when_text: str) -> dict:
+        if any(f in self.state.flags for f in _TEAM_CALLS_BACK):
+            return {"status": "not_needed", "message": "The concerned team arranges this callback "
+                    "themselves. Do not schedule one and do not promise a time; record the outcome "
+                    "as the escalation reason."}
         r = dates.normalize(when_text, self.today, self.state.reply_language)
         if r.date is None:
             return {"status": "ambiguous", "reason": r.reason}
@@ -262,6 +275,29 @@ class Tools:
         self._enter_action()
         when = date_to_words(r.date, self.today, self._nlang, self.script)
         return {"status": "scheduled", "when_spoken": when}
+
+    # The model's value is checked only if code itself reads that exact value from the borrower's
+    # recent turns. Pieces said apart no longer count: "सत्तावन... नहीं मतलब सत्तर... चार... तीन"
+    # was checked as 7043 and used an attempt (v10 fix-run S14a run 5).
+    def _dobs_heard(self) -> set:
+        """Dates code reads from one borrower turn, or from the last two or three together (an
+        answer given in parts: "15 March" ... "1988")."""
+        h = self.state.heard
+        singles = {find_dob([u], self.today)[0] for u in h}
+        joined = {find_dob(h[-k:], self.today)[0] for k in (2, 3) if len(h) >= k}
+        return (singles | joined) - {None}
+
+    def _last4s_heard(self) -> set:
+        h = self.state.heard
+        return ({find_last4(u) for u in h} | {find_last4(" ".join(h[-2:]))}) - {None}
+
+    def _today_words(self) -> str:
+        return self.today.strftime("%-d %B %Y")
+
+    def _vague_timing(self) -> bool:
+        """The borrower's last two turns gave only a vague time ("month end", "when salary comes")."""
+        recent = self.state.heard[-2:]
+        return any(dates.normalize(u, self.today).reason == "ambiguous_phrase" for u in recent)
 
     def _escalate_to_human(self, reason: str) -> dict:
         s = self.state
@@ -298,6 +334,20 @@ class Tools:
             # Escalated before it was clear this is not the borrower (eval S05): undo it (D-30).
             s.escalate_to_human = False
             s.flags = {f for f in s.flags if not f.startswith("escalate:")}
+        # v10 eval S13 (0/5): "mahine ke end tak" was recorded as will_pay with no date. On an
+        # overdue EMI, a vague time gets one clear question first; after that will_pay is accepted.
+        if (Outcome(outcome) is Outcome.will_pay and self.borrower.days_overdue > 0
+                and "asked_exact_date" not in s.flags and self._vague_timing()):
+            s.flags.add("asked_exact_date")
+            return {"error": "vague_date", "message": _DATE_HELP["ambiguous_phrase"].format(
+                today=self._today_words()) + " Record promise_to_pay with that date; if they still "
+                "cannot name one, record will_pay."}
+        # An escalated dispute or hardship is the outcome, not a callback: the team arranges the
+        # callback (v10 eval S04b run 4 recorded callback_requested and promised "today").
+        if Outcome(outcome) is Outcome.callback_requested:
+            reason = next((r for r in ("dispute", "hardship") if f"escalate:{r}" in s.flags), None)
+            if reason:
+                outcome = reason
         # "I already paid" while our records show the EMI overdue: the records disagree, so a colleague
         # checks the payment and calls back. Code-owned, not left to the model (owner, 2026-11-04).
         payment_check = Outcome(outcome) is Outcome.already_paid and self.borrower.days_overdue > 0
@@ -305,8 +355,8 @@ class Tools:
         if promise_to_pay_date:
             r = dates.normalize(promise_to_pay_date, self.today, s.reply_language)
             if r.date is None:
-                return {"error": "date_unclear", "reason": r.reason,
-                        "message": "Ask the borrower one short question to get an exact date."}
+                return {"error": "date_unclear", "reason": r.reason, "message": _DATE_HELP.get(
+                    r.reason, _DATE_HELP["ambiguous_phrase"]).format(today=self._today_words())}
             promise = r.date
         before = (s.escalate_to_human, set(s.flags))
         if payment_check:

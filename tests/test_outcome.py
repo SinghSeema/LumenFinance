@@ -31,10 +31,10 @@ def test_promise_requires_date(today):
         make(today, outcome="promise_to_pay")
 
 
-def test_promise_date_must_be_future(today):
-    with pytest.raises(ValidationError, match="future"):
-        make(today, outcome="promise_to_pay", promise_to_pay_date=today)
-    with pytest.raises(ValidationError, match="future"):
+def test_promise_date_today_or_later(today):
+    # v10 eval S14a run 1: "aaj shaam tak" was rejected four times; a promise for today is real.
+    assert make(today, outcome="promise_to_pay", promise_to_pay_date=today).promise_to_pay_date == today
+    with pytest.raises(ValidationError, match="today or later"):
         make(today, outcome="promise_to_pay", promise_to_pay_date=date(2026, 11, 1))
     assert make(today, outcome="promise_to_pay",
                 promise_to_pay_date=date(2026, 11, 13)).promise_to_pay_date == date(2026, 11, 13)

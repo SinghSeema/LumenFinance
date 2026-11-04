@@ -305,3 +305,11 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 - Live: "बाईस" heard as "Twice", "Bies.", "Bies." (confidence 0.67, 0.59); verified on "22nd July". Last four came back "Double 3, 5 7" (3357, not 3367): one real attempt used. Keyterms were still none.
 - Changes: stt.keyterms none -> full (D-33 evidence + this call); "buys/bies/byes" before a month = 22 (V13); startup line `deepgram query: model=nova-3 language=multi keyterms=51 ...`; per-turn `langs` from Deepgram (multi only). 680 tests pass.
 - v10 eval (results/20261104-133125-v10-all5, all 17 scenarios x5, resumed after the session ended at 42/85): 75/85 pass, 0 leaks, escalation precision 0.93 recall 1.0 (fp 2). S13 0/5 (vague date), S14a 2/5, S04 4/5, S04b 4/5. Agent tokens 667,151 in / 9,647 out (this half only). Failures not yet reviewed.
+
+## 2026-11-04 afternoon: v10 baseline, two fix rounds, judge, dashboard
+
+- Baseline (all 17 x5, 20261104-133125-v10-all5): 76/85 re-scored (75/85 as first scored), dev 59/60, hold-out 17/25, 0 leaks, escalation P 0.93 R 1.0. Judge (glm5.3-flash, ~79k in / 38k out tokens): politeness 4.93, empathy 3.06, firmness 4.55, clarity 4.27, naturalness 4.19; spot check: 6 of the 9 lowest scores punished correct refusals (low trust).
+- Fix round 1 (8 scenarios x5, 20261104-135904-v10-fixes): 36/40 re-scored. Found V14 (Hindi number words in promise dates) and V15 (hedged-answer lockout).
+- Fix round 2 (S02 S04 S13 S14a S15 x5 in 20261104-140824-v10-fixes2; S10 S14a x5 in 20261104-141354-v10-fixes3 after V16): 28/30; S13 5/5; S14a 3/5 with both failures the simulator improvising "already paid". 0 leaks in all 155 conversations. 706 tests pass.
+- Latency, current stack (all 4 Nov calls, 46 turns): gap median 1020 ms, p90 2393 ms. Median target met, p90 missed.
+- New: evals/judge.py, evals/report.py, evals/dashboard.py (results/dashboard.html), evals/failure_review.yaml, docs/eval-report.md, run.sh.

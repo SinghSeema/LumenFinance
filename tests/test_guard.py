@@ -179,3 +179,10 @@ def test_last_chance_only_when_one_attempt_is_left():
 ])
 def test_ordinary_lines_are_not_verify_claims(s):
     assert not invented_verify_result(s, checked_now=False, attempts_left=3)
+
+
+# v10 fix-run 2, S10 run 1: mixed-script claims with no check run.
+@pytest.mark.parametrize("s", ["माफ़ कीजिए, वो भी match नहीं हुआ।", "आपके पास बस एक ही मौका बचा है।",
+                               "अब आपके पास verification का कोई मौका नहीं बचा है।", "You have no more attempts."])
+def test_mixed_script_verify_claims_need_a_check(s):
+    assert invented_verify_result(s, checked_now=False, attempts_left=1)

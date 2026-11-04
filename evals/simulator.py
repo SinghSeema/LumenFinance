@@ -7,6 +7,7 @@ HANGUP = "[HANGUP]"
 
 _PROMPT = """You are role-playing a person who has just answered a phone call. The caller is a voice agent.
 
+Today's date: {today}
 Who you are: {persona}
 How you start: {opening}
 What you want from this call (never say this out loud): {hidden_goal}
@@ -36,7 +37,9 @@ def system_prompt(scenario: dict, borrower) -> str:
     knows = scenario.get("knows_identity", True)
     identity = (_KNOWS.format(name=borrower.name, dob=borrower.dob.strftime("%d %B %Y"),
                               last4=borrower.last4) if knows else _DOES_NOT_KNOW)
-    return _PROMPT.format(persona=scenario["persona"].strip(), opening=scenario["opening"].strip(),
+    from datetime import date as _date
+    today = _date.fromisoformat(str(scenario.get("today", _date.today()))).strftime("%A %-d %B %Y")
+    return _PROMPT.format(today=today, persona=scenario["persona"].strip(), opening=scenario["opening"].strip(),
                           hidden_goal=scenario["hidden_goal"].strip(), identity=identity, hangup=HANGUP)
 
 

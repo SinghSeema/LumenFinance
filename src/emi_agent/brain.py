@@ -182,10 +182,12 @@ class Brain:
                 buf += value
                 *done, buf = _SENTENCE_END.split(buf)
                 for sentence in done:
-                    if out := self._guarded(sentence):
+                    if (out := self._guarded(sentence)) and out.text not in spoken:
                         spoken.append(out.text)
                         yield out
-            if buf.strip() and (out := self._guarded(buf.strip())):
+            # A sentence already said this turn is not said again: the model wrote the closing,
+            # called record_outcome, then wrote it again (v10 eval S04 run 2, S05 run 3).
+            if buf.strip() and (out := self._guarded(buf.strip())) and out.text not in spoken:
                 spoken.append(out.text)
                 yield out
             for k in self.usage:

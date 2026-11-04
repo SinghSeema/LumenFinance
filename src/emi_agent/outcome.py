@@ -55,8 +55,8 @@ class OutcomeRecord(BaseModel):
         if self.outcome is Outcome.promise_to_pay:
             if self.promise_to_pay_date is None:
                 raise ValueError("promise_to_pay_date is required for promise_to_pay")
-            if self.promise_to_pay_date <= today:
-                raise ValueError("promise_to_pay_date must be a future date")
+            if self.promise_to_pay_date < today:  # today is a real promise ("aaj shaam tak")
+                raise ValueError("promise_to_pay_date must be today or later")
         elif self.promise_to_pay_date is not None:
             raise ValueError("promise_to_pay_date is only allowed with promise_to_pay")
         return self

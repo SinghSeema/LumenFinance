@@ -239,6 +239,9 @@ _FOUR_PHRASE = re.compile(r"\b(?:last|final|aakhri|akhri|antim)\s+(?:four|4|chaa
 def find_last4(text: str) -> str | None:
     """The single four-digit number in one utterance ('7 7 4 3', '77 43', 'saat saat chaar teen')."""
     text = _FOUR_PHRASE.sub(" ", text)
+    text = _CORRECTION.split(text)[-1]  # "सत्तावन... नहीं मतलब सत्तर चार तीन": only what follows counts
+    if _UNSURE.search(text):  # "...चार... तीन... haan कुछ वही": the borrower is not sure; ask again
+        return None
     fours = {n for n in said_numbers([text]) if len(n) == 4}
     if len(fours) > 1:
         # "twenty-two July ninety-four ... three three six seven": 2294 is two DOB parts joined;
@@ -268,8 +271,15 @@ def partial_digits(text: str) -> bool:
 
 
 # A self-correction: what follows is the answer ("इक्कीस जुलाई... मतलब बाईस जुलाई", eval S15).
-_CORRECTION = re.compile(r"\b(?:i mean|sorry|actually|no wait|matlab|yaani|yani)\b|मतलब|यानी|यानि|सॉरी",
-                         re.IGNORECASE)
+# Hedges: the borrower is not sure of the value, so it is asked again, never checked (v10 fix-run
+# S14a run 5: "सत्तर... चार... तीन... haan कुछ वही" was checked as 7043).
+_UNSURE = re.compile(r"कुछ वही|शायद|पता नहीं|लगता है|\b(?:umm+|uhh*|maybe|i think|pata nahi|shayad|"
+                     r"kuch wahi|lagta hai|or)\b|(?<![ऀ-ॿ])या(?![ऀ-ॿ])", re.IGNORECASE)
+
+# "यानी"/"yaani" (that is) restates the same answer; it is not a correction: "nine November
+# nineteen eighty-five, यानी zero nine, eleven, one nine eight five" kept only the digit tail and
+# read 8 Sep 1985 (v10 fix-run S14a run 5).
+_CORRECTION = re.compile(r"\b(?:i mean|sorry|actually|no wait|matlab)\b|मतलब|सॉरी", re.IGNORECASE)
 
 
 # Deepgram multi writes the Hindi "बाईस" (22) as English-looking words: "Buys, July 19 94",
@@ -292,6 +302,8 @@ def find_dob(utterances: list[str], today: date) -> tuple[date | None, set[str]]
     """
     text = _FOUR_PHRASE.sub(" ", " ".join(utterances))
     text = _MISHEARD_22.sub("22 ", text)
+    if _UNSURE.search(_CORRECTION.split(text)[-1]):  # "18 March 1985... नहीं, शायद 1987": ask again
+        return None, set()
     parts = _CORRECTION.split(text)
     tail = parts[-1]
     if len(parts) > 1 and (_tokens(tail) or any(w in _MONTH_WORDS for w in _words(tail))):
@@ -354,3 +366,21 @@ def find_dob(utterances: list[str], today: date) -> tuple[date | None, set[str]]
 def has_number_or_month(text: str) -> bool:
     """True for answers like 'April', '9', 'saat': short, but not a backchannel."""
     return bool(_tokens(text)) or any(w in _MONTH_WORDS for w in _words(text))
+
+
+_DATE_ANCHOR = {"तारीख", "tarikh", "tareekh", "date"}
+
+
+def date_numbers_to_digits(text: str) -> str:
+    """Number words right next to a month name or "तारीख" as digits, the rest unchanged:
+    "पाँच नवंबर" -> "5 नवंबर", "नवंबर की बीस तारीख" -> "नवंबर की 20 तारीख". Elsewhere numbers stay
+    words, so "एक-दो दिन में" (a day or two) is never read as a date (v10 fix-run S14a run 1)."""
+    words = _words(text)
+    anchor = lambda i: 0 <= i < len(words) and (words[i] in _MONTH_WORDS or words[i] in _DATE_ANCHOR)
+    out, last = [], 0
+    for value, _, numeral, a, b in _tokens_at(words):
+        if numeral or not (anchor(a - 1) or anchor(b)):
+            continue
+        out += words[last:a] + [value]
+        last = b
+    return " ".join(out + words[last:]) if out else text

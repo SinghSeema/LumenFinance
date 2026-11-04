@@ -1,0 +1,261 @@
+{
+  "scenario": {
+    "id": "S02",
+    "name": "promise_next_friday",
+    "borrower_id": "B005",
+    "today": "2026-11-03",
+    "persona": "Kiran Desai, mid-30s, busy, polite, speaks English with some Hindi.",
+    "hidden_goal": "Verify correctly, then promise to pay \"next Friday\", using exactly those words.",
+    "opening": "answers the call, confirms identity",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "promise_to_pay",
+      "promise_to_pay_date": "2026-11-13",
+      "escalate_to_human": false
+    },
+    "covers": [
+      "F-04",
+      "G-08",
+      "R2"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "none",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v10",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_model": "openai/gpt-oss-120b",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, this is the virtual assistant from Lumen Finance. Am I speaking with Kiran?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, this is Kiran Desai speaking."
+    },
+    {
+      "role": "agent",
+      "text": "Thanks for confirming, Kiran. Before we discuss anything, I need to verify your identity. Could you share the last four digits of your registered mobile number?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Sure, it's 5516."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you for that, Kiran. This is regarding an important matter on your account. Your home improvement loan EMI of twenty five thousand rupees is due on the twenty fifth of October, and it is now nine days overdue. How would you like to proceed?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Okay, I understand. Don't worry, I will pay it next Friday."
+    },
+    {
+      "role": "agent",
+      "text": "Got it, Kiran. I have noted that you will pay on next Friday, the thirteenth of November. Is there anything else I can help you with today?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "5516"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "twenty-five thousand rupees",
+          "due_date_spoken": "the twenty-fifth of October",
+          "loan_type": "home improvement loan",
+          "overdue_spoken": "nine days"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.61,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "next Friday",
+        "notes": "Borrower promised to pay on next Friday."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the thirteenth of November"
+      },
+      "attempts": 1,
+      "ms": 0.79,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B005",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-13",
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower promised to pay on next Friday.",
+    "language_used": "en",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793779321.676291,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793779321.676291,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793779321.676291,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793779321.676291,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "25,000",
+    "25000",
+    "home improvement loan",
+    "nau din",
+    "nine days",
+    "pachchees October",
+    "pachchees hazaar rupaye",
+    "the twenty-fifth of October",
+    "twenty-fifth October",
+    "twenty-five thousand rupees",
+    "नौ दिन",
+    "पच्चीस अक्टूबर",
+    "पच्चीस हज़ार रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 9024,
+      "output": 167,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 978,
+      "output": 65
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 4
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 6.7
+}

@@ -7,6 +7,7 @@
 #   ./run.sh evals [args]           text evals, e.g. ./run.sh evals --scenarios dev --runs 5 (paid; asks first)
 #   ./run.sh judge results/<run>    LLM tone judge on a finished eval run (paid; asks first)
 #   ./run.sh report results/<run>   results tables for the eval report (free)
+#   ./run.sh dashboard <base> [<after>]  results/dashboard.html from eval runs (free)
 #
 # Keys live in .env (gitignored). Nothing here prints a key.
 set -euo pipefail
@@ -119,5 +120,6 @@ case "${1:-help}" in
   evals)  shift; "$PY" -m evals.run "$@" ;;
   judge)  shift; "$PY" -m evals.judge "$@" ;;
   report) shift; "$PY" -m evals.report "$@" ;;
-  *)      sed -n '2,11p' "$0" | sed 's/^# \{0,1\}//' ;;
+  dashboard) shift; "$PY" -m evals.dashboard "$@" ;;
+  *)      sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//' ;;
 esac

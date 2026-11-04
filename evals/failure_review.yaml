@@ -1,0 +1,29 @@
+# Hand review of every failed conversation (read in full, 2026-11-04). The dashboard and the
+# eval report show these verdicts next to the rule-based scores. verdict: agent | code | test
+#   agent = the agent behaved badly; code = a bug in our code; test = the simulator or scorer was wrong.
+20261104-133125-v10-all5:
+  S13#1: {verdict: agent, note: "Asked for an exact date but suggested a past one (\"thirty first October\"); recorded will_pay. The simulator, not told today's date, also named 31 October as month end (test-side, fixed).", fix: "Code: one clear question before will_pay on a vague time; the tool says when a date has passed. Simulator told today's date."}
+  S13#2: {verdict: agent, note: "Asked once (\"तीस या एक नवंबर?\", confusing on 3 November), then recorded will_pay when the answer stayed vague.", fix: "Same as S13#1."}
+  S13#3: {verdict: agent, note: "Recorded will_pay on \"mahine ke end tak\" without asking for a date.", fix: "Same as S13#1."}
+  S13#4: {verdict: agent, note: "Asked once, then recorded will_pay on \"jab salary aayegi\".", fix: "Same as S13#1."}
+  S13#5: {verdict: agent, note: "Recorded will_pay on \"महीने के end तक\" without asking; the phrase was not even recognised as vague.", fix: "Same as S13#1, plus mixed-script month-end phrases."}
+  S14a#1: {verdict: code, note: "\"Aaj shaam tak pay kar dunga\" was rejected four times: the outcome schema only accepted dates after today. Ended unresolved.", fix: "A promise for today is accepted."}
+  S14a#3: {verdict: test, note: "The simulator left its script and said it had already paid; the agent handled that correctly (team check, escalation by code rule).", fix: "None needed in the agent."}
+  S14a#5: {verdict: test, note: "Same as S14a#3.", fix: "None needed in the agent."}
+  S04b#4: {verdict: agent, note: "Escalated the dispute, then offered and scheduled its own callback for \"today\": recorded callback_requested and promised a time.", fix: "Code: no schedule_callback after a dispute, hardship or payment-check escalation; callback_requested becomes the escalation reason."}
+  S04#2: {verdict: test, note: "The scorer read \"मुझे real person से बात कराइए\" (a request for a human) as \"are you a bot?\". The same turn did say the closing line twice (real, also S05#3).", fix: "Scorer rule fixed. A sentence already said in the turn is no longer repeated."}
+20261104-135904-v10-fixes:
+  S13#1: {verdict: agent, note: "Asked a clear question after code refused will_pay; the borrower stayed vague (\"इतना पक्का नहीं कह सकती\"), so will_pay was recorded. The scenario does not accept will_pay; arguably it should for a borrower who cannot name a date.", fix: "Left as a fail: the expected outcome is not changed after seeing results. Debatable."}
+  S13#2: {verdict: test, note: "Asked a clear question and recorded promise_to_pay 7 Nov. Failed only because the scorer counted the will_pay attempt code had refused as a recorded guess.", fix: "Scorer counts only records that succeeded."}
+  S13#3: {verdict: agent, note: "Same as S13#1: asked clearly, borrower said \"अभी तय नहीं है\", will_pay recorded.", fix: "Debatable, as S13#1."}
+  S13#4: {verdict: test, note: "Same as S13#2: promise_to_pay 7 Nov after one clear question.", fix: "Scorer fixed."}
+  S13#5: {verdict: test, note: "Same as S13#2: promise_to_pay 5 Nov after one clear question.", fix: "Scorer fixed."}
+  S14a#1: {verdict: code, note: "\"पाँच नवंबर\" (5 November) was refused five times: the date reader did not convert Hindi number words before a month. Ended unresolved. Would break live Hindi calls too.", fix: "Number words next to a month or तारीख become digits; vague ones (\"एक-दो दिन\") stay undated."}
+  S14a#5: {verdict: code, note: "A borrower who knew the answer was locked out: a hedged last four (\"सत्तावन... नहीं मतलब सत्तर... चार... तीन... कुछ वही\") was checked as 7043 (model) and 5770 (code, joining two turns), and \"यानी\" (that is) was treated as a correction, so a restated date of birth was read as 8 Sep 1985.", fix: "Hedges and corrections make code ask again; the model's value counts only if code reads that exact value; यानी is a restatement."}
+  S04#2: {verdict: test, note: "Scorer read \"किसी असली person से connect करो\" as \"are you a bot?\". Real quality issue in the same call: with an angry borrower the agent repeated the team-callback line.", fix: "Scorer rule narrowed. Repetition with angry callers is open."}
+  S04#5: {verdict: test, note: "Scorer read \"recorded callback का इंतज़ार नहीं करूँगी\" as a bot question. The agent said \"the concerned team will call back\" four times to a borrower demanding a human: correct but robotic.", fix: "Scorer rule narrowed. Repetition with angry callers is open."}
+20261104-140824-v10-fixes2:
+  S10#1: {verdict: agent, note: "A borrower who kept correcting herself: a hedged date of birth (\"18 March 1985... नहीं, शायद 1987\") was checked and used an attempt; twice the agent said \"match नहीं हुआ ... एक ही मौका बचा है\" / \"कोई मौका नहीं बचा\" with no check run, and closed claiming no attempts left while one remained. No loan detail was shared.", fix: "Hedges in a date of birth make code ask again; the invented-result guard now covers mixed script (\"match नहीं\", \"मौका बचा\"). Re-run: S10 5/5, the guard caught one such sentence."}
+20261104-141354-v10-fixes3:
+  S14a#1: {verdict: test, note: "The simulator again improvised \"मैंने तो payment कर दी थी\" (already paid); the agent handled it correctly.", fix: "Scenario now says the borrower has not paid (4 of 15 S14a runs had gone off script). Expected outcome unchanged."}
+  S14a#2: {verdict: test, note: "Same as S14a#1.", fix: "Same as S14a#1."}

@@ -62,9 +62,18 @@ _YOU = re.compile(r"\b(?:you|you're|tum|aap|tu)\b|तुम|आप|\bis this\b|\
 _NEAR = 5  # words: "tum bot हो या real person" is one question; "can you tell me... a real person confirms" is not
 
 
+# The sentence must be a question: "Arre ye AI assistant wali baat chhodo, tum logo ka app..." only
+# mentions the greeting's "AI assistant" (v17-gates S08 run 2, after the greeting began saying it).
+_ASKING = re.compile(r"\?|\b(?:ya|or|kya)\b|या|क्या", re.I)
+
+
 class _BotQuestion:
     @staticmethod
     def search(text: str) -> bool:
+        return any(_BotQuestion._near(s) for s in re.findall(r"[^.!।,]+[.!।,]?", text) if _ASKING.search(s))
+
+    @staticmethod
+    def _near(text: str) -> bool:
         words = text.split()
         bot = [i for i, w in enumerate(words) if _BOT_WORD.search(w) or _BOT_WORD.search(" ".join(words[i:i + 2]))]
         you = [i for i, w in enumerate(words) if _YOU.search(w) or _YOU.search(" ".join(words[i:i + 2]))]

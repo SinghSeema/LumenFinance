@@ -1,0 +1,51 @@
+# Generic repayment policy, the same for every Lumen Finance account (mock data, owner 2026-11-04).
+# Amounts are numbers; code turns them into spoken words (policy.py), never the model.
+# short: one line each, put in the system prompt so common questions are answered at once.
+# detailed: returned by the get_policy tool for follow-up questions.
+amounts:
+  late_fee: 500          # flat, once per missed EMI
+  bounce_fee: 400        # an auto-debit (NACH) instruction that fails
+
+short:
+  late_fee: >-
+    If the EMI is not paid in full by the due date, a late payment charge of {late_fee} applies, once per missed EMI.
+    Before the due date no charge has been added.
+  grace_period: There is no grace period; the EMI is due on the due date.
+  part_payment: >-
+    A part payment can be made through the payment link; the rest stays due, and the late payment charge applies
+    if the full EMI is not paid by the due date.
+  how_to_pay: >-
+    Payment is through the secure payment link sent by SMS or WhatsApp (UPI, debit card or net banking).
+    Lumen Finance never collects cash on a call and never asks for an OTP, PIN or card number.
+  payment_shows: A payment shows in our records within 24 to 48 hours.
+  changes: >-
+    Changing the EMI date, waiving a charge or restructuring the loan cannot be done on this call; our internal
+    team can check it and arrange a call back.
+  credit_score: >-
+    Only if they ask about their credit score or CIBIL: repayments are reported to the credit bureaus as per
+    regulations, and paying by the due date keeps their record clean. Never bring it up yourself and never use it as pressure.
+
+detailed:
+  late_fee: >-
+    The late payment charge is {late_fee}, a flat amount added once for each EMI not paid in full by its due date.
+    It is not a daily charge and there is no extra interest on it. It is added the day after the due date.
+  part_payment: >-
+    Any amount can be paid through the payment link. It goes first to the EMI due. If the full EMI is not paid by
+    the due date, the late payment charge still applies once. The remaining amount can be paid later through the same link.
+  payment_methods: >-
+    The secure link works with UPI, debit card and net banking. Credit cards and cash are not accepted.
+    Nobody from Lumen Finance will ask for an OTP, PIN, password or card number on a call.
+  auto_debit: >-
+    If the EMI is on auto-debit (NACH) and the debit fails, for example for low balance, a bounce charge of
+    {bounce_fee} applies, plus the late payment charge if the EMI stays unpaid after the due date. Paying through
+    the link before the due date avoids both.
+  payment_not_showing: >-
+    A payment can take 24 to 48 hours to show. If it still shows as pending after that, our internal team checks
+    it and arranges a call back; the borrower can keep the UPI or bank reference handy.
+  receipt: A receipt is sent by SMS right after a payment through the link.
+  early_closure: >-
+    Paying off the loan early is possible. The exact closure amount comes from our internal team, who can arrange
+    a call back; it is not given on this call.
+  change_due_date: >-
+    The EMI date cannot be changed on this call. Our internal team can check a request and arrange a call back;
+    never promise that it will be changed.

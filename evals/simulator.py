@@ -4,6 +4,8 @@ from __future__ import annotations
 import re
 
 HANGUP = "[HANGUP]"
+# v17-dev2-fix2 S08: the simulator hung up as "[हैंगअप]" and "[कॉल समाप्त]"; the call went on.
+_HANGUP_ANY = re.compile(r"\[\s*(?:hang ?up|हैंगअप|हैंग अप|कॉल समाप्त|call (?:ended|end)|फ़ोन कट|फोन कट)[^\]]*\]", re.IGNORECASE)
 
 _PROMPT = """You are role-playing a person who has just answered a phone call. The caller is a voice agent.
 
@@ -69,11 +71,11 @@ class Simulator:
             self.usage["input"] += r.usage.prompt_tokens
             self.usage["output"] += r.usage.completion_tokens
             text = (r.choices[0].message.content or "").strip()
-            if HANGUP in text or not _GARBAGE.match(text):  # "[HANGUP]" alone also matches the
+            if _HANGUP_ANY.search(text) or not _GARBAGE.match(text):  # "[HANGUP]" alone also matches the
                 break                                       # bracket pattern (glm, 2026-11-04)
             if attempt == 2:
                 raise SimulatorGarbage(f"simulator produced {text!r} twice")
         self.messages.append({"role": "assistant", "content": text})
-        if not text or HANGUP in text:
+        if not text or _HANGUP_ANY.search(text):
             return None
         return text

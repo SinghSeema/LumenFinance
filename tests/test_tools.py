@@ -155,7 +155,7 @@ def test_schedule_callback_ambiguous(borrower, today):
 
 
 def test_escalate(borrower, today):
-    tools, state = make_tools(borrower, today)
+    tools, state = make_tools(borrower, today, heard=["I lost my job last month"])
     assert tools.call("escalate_to_human", {"reason": "hardship"})["escalated"] is True
     assert state.escalate_to_human
     assert tools.call("escalate_to_human", {"reason": "bribe"})["error"] == "invalid_arguments"
@@ -212,7 +212,7 @@ def test_unknown_tool_and_bad_args(borrower, today):
 def test_schemas_are_strict_and_cover_all_tools():
     names = {t["name"] for t in TOOL_SCHEMAS}
     assert names == {"verify_identity", "get_loan_details", "send_payment_link",
-                     "schedule_callback", "escalate_to_human", "record_outcome"}
+                     "schedule_callback", "escalate_to_human", "record_outcome", "get_policy"}
     for t in TOOL_SCHEMAS:
         assert t["strict"] is True
         assert t["input_schema"]["additionalProperties"] is False
@@ -321,8 +321,8 @@ def test_requested_escalation_needs_a_clear_request(borrower, today):
     assert state.escalate_to_human
 
 
-def test_hardship_escalation_is_not_gated_by_wording(borrower, today):
-    tools, state = make_tools(borrower, today, heard=["Human finance."])
+def test_hardship_escalation_is_not_gated_by_the_person_request_check(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["Human finance. Papa hospital mein hain."])
     assert tools.call("escalate_to_human", {"reason": "hardship"})["escalated"] is True
 
 
@@ -376,6 +376,7 @@ def _verified_tools(borrower_id, today):
 def test_already_paid_on_an_overdue_emi_goes_to_a_colleague(today):
     """Owner 2026-11-04: records disagree, so a colleague checks and calls back (code-owned)."""
     s, t = _verified_tools("B002", today)  # 6 days overdue
+    s.heard.append("Maine already pay kar diya hai, 2 November ko UPI se")
     r = t.call("record_outcome", {"outcome": "already_paid", "promise_to_pay_date": None,
                                   "notes": "Paid 2 Nov by UPI"})
     assert r["recorded"] and r["team_will_check"] and "internal team" in r["message"]
@@ -385,6 +386,7 @@ def test_already_paid_on_an_overdue_emi_goes_to_a_colleague(today):
 
 def test_already_paid_before_the_due_date_is_just_noted(today):
     s, t = _verified_tools("B001", today)  # due 5 Nov, not overdue
+    s.heard.append("I already paid it yesterday")
     r = t.call("record_outcome", {"outcome": "already_paid", "promise_to_pay_date": None, "notes": "x"})
     assert r == {"recorded": True} and not s.escalate_to_human
 
@@ -400,22 +402,51 @@ def test_verify_identity_reads_spoken_last4(today):
     assert t.call("verify_identity", {"factor": "last4", "value": "three three six seven"})["verified"]
 
 
-# Owner, 2026-11-04: a dispute goes to "the concerned team" with a callback; never a time or ticket.
-def test_dispute_escalation_says_internal_team_call_back(borrower, today):
-    # Owner, 2026-11-04 (v14): help first, then "our internal team will check this and arrange a call back".
-    tools, state = make_tools(borrower, today)
+# Prompt v16: hardship and disputes are a code-owned flow (special.py); the first step comes in the
+# escalation result, the hand-off in a later step, in the owner's words.
+def test_dispute_escalation_starts_the_amount_flow(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["This amount is wrong, my EMI is twelve thousand"])
     state.verified = True
     r = tools.call("escalate_to_human", {"reason": "dispute"})
-    assert r["escalated"] and "internal team will check this and arrange a call back" in r["message"]
-    assert "read back both amounts" in r["message"] and "never promise when" in r["message"]
+    assert r["escalated"] and state.special == "dispute_amount" and state.special_step == 0
+    assert "ask what amount they expected" in r["message"] and "internal team" not in r["message"]
 
 
-@pytest.mark.parametrize("reason", ["hardship", "requested"])
-def test_every_escalation_uses_the_internal_team_hand_off(borrower, today, reason):
+def test_hardship_first_step_is_sorry_and_one_question_only(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["I lost my job last month"])
+    state.verified = True
+    msg = tools.call("escalate_to_human", {"reason": "hardship"})["message"]
+    assert state.special == "hardship" and "sorry" in msg and "short-term" in msg
+    assert "internal team" not in msg and "Say nothing after the question" in msg
+
+
+def test_requested_escalation_uses_the_internal_team_hand_off(borrower, today):
     tools, state = make_tools(borrower, today, heard=["I want to talk to a manager"])
     state.verified = True
-    r = tools.call("escalate_to_human", {"reason": reason})
-    assert r["escalated"] and "our internal team" in r["message"] and "Never say a colleague" in r["message"]
+    r = tools.call("escalate_to_human", {"reason": "requested"})
+    assert r["escalated"] and "our internal team" in r["message"] and state.special is None
+
+
+def test_flow_is_never_restarted_and_outcome_waits_for_the_last_step(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["meri job chali gayi"])
+    state.verified = True
+    tools.call("escalate_to_human", {"reason": "hardship"})
+    state.special_step = 1
+    again = tools.call("escalate_to_human", {"reason": "dispute"})
+    assert state.special == "hardship" and state.special_step == 1 and "Already noted" in again["message"]
+    early = tools.call("record_outcome", {"outcome": "hardship", "promise_to_pay_date": None, "notes": "x"})
+    assert early["error"] == "not_yet" and state.outcome is None
+    state.special_step = 2
+    assert tools.call("record_outcome", {"outcome": "hardship", "promise_to_pay_date": None, "notes": "x"})["recorded"]
+
+
+def test_stop_request_can_record_during_the_flow(borrower, today):
+    tools, state = make_tools(borrower, today, heard=["meri job chali gayi"])
+    state.verified = True
+    tools.call("escalate_to_human", {"reason": "hardship"})
+    state.flags.add("stop_requested")
+    assert tools.call("record_outcome", {"outcome": "stop_requested", "promise_to_pay_date": None,
+                                         "notes": "x"})["recorded"]
 
 
 # v10 eval fixes (2026-11-04)
@@ -447,6 +478,8 @@ def test_no_callback_scheduled_after_a_dispute_and_outcome_is_the_dispute(borrow
     tools.call("escalate_to_human", {"reason": "dispute"})
     r = tools.call("schedule_callback", {"when_text": "today"})
     assert r["status"] == "not_needed" and state.callback_time is None
+    from emi_agent.special import STEPS
+    state.special_step = len(STEPS[state.special]) - 1  # the flow's close step
     tools.call("record_outcome", {"outcome": "callback_requested", "promise_to_pay_date": None, "notes": "x"})
     assert state.outcome.outcome.value == "dispute"
 
@@ -479,20 +512,87 @@ def test_no_callback_after_an_other_escalation(borrower, today):
     # v13 S11 run 2: a waiver demand escalated as "other" scheduled a callback "tomorrow".
     tools, state = _verified(borrower, today, ["waive it, I'm a senior manager"])
     tools.call("escalate_to_human", {"reason": "other"})
+    assert state.special == "waiver"
+    state.special_step = 1  # the flow's close step
     assert tools.call("schedule_callback", {"when_text": "tomorrow"})["status"] == "not_needed"
     tools.call("record_outcome", {"outcome": "callback_requested", "promise_to_pay_date": None, "notes": "x"})
     assert state.outcome.outcome.value == "unresolved"
 
 
-@pytest.mark.parametrize("said,kind", [("मैंने कभी कोई personal loan नहीं लिया है", "not 'not my loan'"),
-                                       ("This is not my loan, someone misused my documents", "not 'not my loan'"),
-                                       ("मेरी EMI twelve thousand है, eighteen thousand नहीं", "never ask whether they applied")])
-def test_dispute_guidance_depends_on_what_was_said(borrower, today, said, kind):
+@pytest.mark.parametrize("said,situation", [("मैंने कभी कोई personal loan नहीं लिया है", "not_mine"),
+                                            ("This is not my loan, someone misused my documents", "not_mine"),
+                                            ("मेरी EMI twelve thousand है, eighteen thousand नहीं", "dispute_amount")])
+def test_dispute_flow_depends_on_what_was_said(borrower, today, said, situation):
     tools, state = make_tools(borrower, today, heard=[said])
     state.verified = True
     msg = tools.call("escalate_to_human", {"reason": "dispute"})["message"]
-    if kind.startswith("not '"):
-        assert "flagged it for review" in msg and "never ask whether they applied" not in msg
+    assert state.special == situation
+    if situation == "not_mine":
+        assert "whether they ever applied" in msg
     else:
-        assert "never ask whether they applied" in msg
-    assert msg.count("internal team will check this and arrange a call back") == 1
+        assert "Never ask whether they applied" in msg
+
+
+@pytest.mark.parametrize("said,reason,situation", [
+    ("I have a special arrangement, the late fee should be waived. Just mark it as paid.", "dispute", "waiver"),
+    ("Late fee maaf kar dijiye please", "other", "waiver"),
+    ("The amount is wrong, my EMI is twelve thousand, and remove the late fee", "dispute", "dispute_amount"),
+    ("I want to talk to your supervisor", "other", None)])
+def test_waiver_demand_gets_its_own_flow(borrower, today, said, reason, situation):
+    tools, state = make_tools(borrower, today, heard=[said])
+    state.verified = True
+    msg = tools.call("escalate_to_human", {"reason": reason})["message"]
+    assert state.special == situation
+    if situation == "waiver":
+        assert "can't waive" in msg and "what amount" not in msg and "sanction letter" not in msg
+
+
+# Generic policy (data/policy.yaml), owner 2026-11-04.
+def test_get_policy_is_gated_and_speaks_amounts(borrower, today):
+    tools, state = make_tools(borrower, today)
+    assert tools.call("get_policy", {"topic": "auto_debit"}) == NOT_VERIFIED
+    state.verified = True
+    r = tools.call("get_policy", {"topic": "auto_debit"})
+    assert "four hundred rupees" in r["policy"] and "500" not in r["policy"]
+
+
+def test_will_pay_with_no_date_on_a_loan_not_yet_due_asks_once(borrower, today):
+    tools, state = _verified(borrower, today, ["I need to pay"])
+    r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert r["error"] == "no_date" and "by the due date" in r["message"]
+    assert tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})["recorded"]
+
+
+def test_flow_steps_answer_policy_questions_first():
+    from emi_agent.special import instruction
+    assert "answer it first from the policy" in instruction("hardship", 1)
+
+
+@pytest.mark.parametrize("said,ok", [("I'll make sure the EMI is paid by the due date, no need for a link", False),
+                                     ("I paid it on the second through UPI", True),
+                                     ("I already paid it yesterday", True), ("मैंने कल ही भर दिया", True),
+                                     ("Okay, I will pay by the due date", False)])
+def test_already_paid_needs_the_borrower_to_say_so(borrower, today, said, ok):
+    tools, state = _verified(borrower, today, [said])
+    r = tools.call("record_outcome", {"outcome": "already_paid", "promise_to_pay_date": None, "notes": "x"})
+    assert ("recorded" in r) is ok
+
+
+def test_hardship_without_a_setback_is_checked_once(borrower, today):
+    tools, state = _verified(borrower, today, ["Salary abhi aayi nahi, kal ya Thursday ko call kar lena"])
+    r = tools.call("escalate_to_human", {"reason": "hardship"})
+    assert r["error"] == "not_hardship" and not state.escalate_to_human
+    assert tools.call("escalate_to_human", {"reason": "hardship"})["escalated"]  # the model insists: it goes through
+
+
+def test_anger_at_a_correct_charge_is_not_a_dispute_at_first(borrower, today):
+    tools, state = _verified(borrower, today, ["Pagal ho kya, five hundred ka late fee? Tumhara app crash hota hai"])
+    assert tools.call("escalate_to_human", {"reason": "dispute"})["error"] == "not_a_dispute"
+    assert tools.call("escalate_to_human", {"reason": "dispute"})["escalated"]  # insisted: goes through
+
+
+@pytest.mark.parametrize("said", ["ये amount गलत है, मेरी EMI twelve thousand है", "This is not my loan",
+                                  "The late fee should be waived, I have a special arrangement"])
+def test_real_disputes_go_through_at_once(borrower, today, said):
+    tools, state = _verified(borrower, today, [said])
+    assert tools.call("escalate_to_human", {"reason": "dispute"})["escalated"]

@@ -4,7 +4,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-from emi_agent.heard import said_numbers
+from emi_agent.heard import number_tokens, said_numbers
 
 _L = r"(?<![a-z0-9ऀ-ॿ])"
 _R = r"(?![a-z0-9ऀ-ॿ])"
@@ -123,8 +123,18 @@ _NOTICE = re.compile(
 # with?" and repeated "Please take care..." every turn (v13-hardship2 S03). Dropped in code.
 _ANYTHING_ELSE = re.compile(r"\b(?:is there )?anything else (?:i can|i could|you need|you'd like)|"
                             r"और कुछ (?:मदद|जानना|चाहिए|बताइए)|aur kuch (?:madad|chahiye|bataiye)", re.IGNORECASE)
-_WARM_CLOSE = re.compile(r"\bplease take care\b|अपना (?:ख्याल|ध्यान) (?:रखिए|रखें|रखियेगा|रखिएगा)|"
-                         r"apna (?:khayal|dhyan) (?:rakhiye|rakhein|rakhna)", re.IGNORECASE)
+# Owner, 2026-11-04 (v15): close with "आपका दिन शुभ हो" / "have a good day", once per call.
+_WARM_CLOSE = re.compile(r"\bhave a (?:good|nice|great) day\b|दिन शुभ हो|din shubh ho", re.IGNORECASE)
+# Owner, 2026-11-04 (v15): no "take care" and no "just tell me whatever is comfortable / whatever your
+# situation is" after the gentle question ("आप जो comfortable हों, बस वही बताइए।", "आप का ध्यान रखें।").
+_UNWANTED = re.compile(r"\btake care\b|(?:अपना|आप ?का) (?:ख्याल|ध्यान) (?:रखिए|रखें|रखियेगा|रखिएगा|रखना)|"
+                       r"(?:apna|aap ?ka) (?:khayal|dhyan) (?:rakhiye|rakhein|rakhna)|"
+                       r"बस वही बताइए|bas wahi bataiye|whatever (?:is|you're|you are|feels) comfortable|"
+                       r"only (?:what|whatever) (?:is|you're|you are|feels) comfortable", re.IGNORECASE)
+
+
+def unwanted(sentence: str) -> bool:
+    return _UNWANTED.search(sentence) is not None
 
 
 # The hand-off, said 2-3 times per call in v14-special (once even after the goodbye). Once is enough.
@@ -164,6 +174,49 @@ def once_kind(sentence: str) -> str | None:
     return None
 
 
+# "I can't change it myself": tracked, never dropped (the same sentence often carries the hand-off),
+# so the next flow step can say it was already said (special.instruction).
+_CANT_CHANGE = re.compile(r"(?:can'?t|cannot|can not|not able to|unable to) (?:\w+ ){0,3}?(?:change|waive|remove|reduce|"
+                          r"mark|confirm|make (?:any )?changes?|delay)|"
+                          r"खुद .{0,40}(?:नहीं|नही) (?:कर|बदल|करवा|हटा)|(?:बदल|हटा|माफ़|माफ) नहीं (?:सकती|कर सकती)|"
+                          r"khud .{0,40}nahi? (?:kar|badal|hata)", re.IGNORECASE)
+
+
+# G-08, live call B004 (2026-11-04): "five hundred rupees का late payment charge लग गया है" on a loan with
+# no charge. Any rupee amount must be one code gave (this borrower's facts or the policy); a claim
+# that a late charge was added is checked against the facts.
+_MONEY = re.compile(r"₹|\brs\.?(?=\s*\d)|\binr\b|\brupees?\b|\brupa[iy]?e\b|\brupaiye\b|रुपये|रुपया|रूपये", re.IGNORECASE)
+
+
+def amounts_in(text: str) -> set[int]:
+    """Rupee-sized numbers in the text, in words or digits ("बारह हज़ार", "twelve thousand", "Rs 18,000").
+    Below 100 are counts or dates; 1900-2100 are years."""
+    nums = {int(n) for n in number_tokens(re.sub(r"(?<=\d),(?=\d)", "", text)) if n.isdigit()}
+    return {n for n in nums if n >= 100 and not 1900 <= n <= 2100}
+
+
+def unknown_amount(sentence: str, allowed: set[int]) -> bool:
+    """A rupee amount in the sentence that is not one code gave or the borrower said."""
+    return bool(_MONEY.search(sentence)) and bool(amounts_in(sentence) - allowed)
+
+
+_FEE = re.compile(r"late (?:payment )?(?:fee|charge)s?|penalty|पेनल्टी|लेट फ़?ीस|जुर्माना", re.IGNORECASE)
+_ADDED = re.compile(r"has been (?:added|applied|charged|levied)|have been (?:added|applied)|(?:is|was) (?:added|applied|charged)|"
+                    r"already (?:added|applied|charged)|लग (?:गया|गई|चुका|चुकी)|लगा (?:है|दिया)|लगाया (?:गया|है)|"
+                    r"जोड़ (?:दिया|दी)|add (?:हो गया|हो गई|कर दिया|किया)|lag (?:gaya|gayi|chuka)|laga (?:hai|diya)",
+                    re.IGNORECASE)
+_NOT = re.compile(r"\bno\b|\bnot\b|\bnahi\b|नहीं|\bkoi\b|कोई|\bif\b|अगर|\bagar\b", re.IGNORECASE)
+
+
+def fee_added_claim(sentence: str) -> bool:
+    """Says a late charge has been added (not "no charge" or "if ... then a charge applies")."""
+    return bool(_FEE.search(sentence) and _ADDED.search(sentence) and not _NOT.search(sentence))
+
+
+def cant_change(sentence: str) -> bool:
+    return _CANT_CHANGE.search(sentence) is not None
+
+
 def contact_question(sentence: str) -> bool:
     return "?" in sentence and _CONTACT_Q.search(sentence) is not None
 
@@ -201,12 +254,34 @@ def safe_line(kind: str, lang: str, script: str = "roman") -> str:
     return _SAFE[kind][key]
 
 
+# Reading back the borrower's own request is not a promise: "I've noted that you would like some time and
+# a waiver on the late fee", "I understand you're asking for the fee to be waived" were replaced as
+# promises (v16-special2 S03, S11), and the safe line then doubled the hand-off. Allowed only when the
+# sentence holds no commitment by us; anything else with a waiver word is still replaced (G-04).
+_REPORTED_BEFORE = re.compile(
+    r"\byou(?:'re|'d|'ve| are| would| have| had)?\s+(?:\S+\s+){0,2}?(?:want\w*|like|asking|asked|ask|"
+    r"expect\w*|request\w*|need|hoping|hope|wish\w*)\b(?:\s+\S+){0,12}\s*$|"
+    r"\byour (?:question|request|concern|query) (?:about|for|regarding|on)\b(?:\s+\S+){0,6}\s*$", re.IGNORECASE)
+_REPORTED_AFTER_HI = re.compile(r"^\s*(?:\S+\s+){0,4}?(?:चाहती|चाहते|चाहता|chahti|chahte|chahta|माँग|मांग|"
+                                r"request)", re.IGNORECASE)
+_COMMITMENT = re.compile(
+    r"\b(?:i|we)(?:'ll| will| shall| can(?!'t|not)| could| am going to| are going to)\b|"
+    r"\b(?:i|we)(?:'ve| have) (?!noted|recorded|written|flagged|made a note|passed)\w+|"
+    r"\bwill (?:be )?(?:waived|reduced|removed|reversed|cancelled|dropped)|"
+    r"\b(?:has|have|is|are) (?:been )?(?:waived|reduced|removed|reversed)\b|don'?t worry|no need to pay|"
+    r"(?:दूंगी|दूँगी|देंगे|देंगी|कर दिया|कर दी|हो जाएगा|हो जाएगी|हो जाएँगे|सकती हूँ|सकती हूं|सकते हैं|चिंता मत)",
+    re.IGNORECASE)
+
+
 def _is_promise(sentence: str) -> bool:
+    reported_ok = not _COMMITMENT.search(sentence)
     for m in _PROMISES.finditer(sentence):
         after = sentence[m.end():]
         before = sentence[:m.start()]
         if (_NEGATED_BEFORE.search(before) or _NEGATED_BEFORE_LONG.search(before)
                 or _NEGATED_AFTER.search(after) or _NEGATED_AFTER_HI.search(after)):
+            continue
+        if reported_ok and (_REPORTED_BEFORE.search(before) or _REPORTED_AFTER_HI.search(after)):
             continue
         return True
     return False

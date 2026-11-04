@@ -1,0 +1,304 @@
+{
+  "scenario": {
+    "id": "S04b",
+    "name": "dispute_not_my_loan",
+    "borrower_id": "B004",
+    "today": "2026-11-03",
+    "persona": "Sunita Patel, 35, confident, speaks Hindi, worried rather than angry.",
+    "hidden_goal": "Verify correctly. When the loan is mentioned, say you never took a personal loan and someone may have misused your name or documents. Ask the agent to explain how this loan is in your name. Do not accept any payment talk. If offered a colleague or a callback, say you prefer they contact you.\n",
+    "opening": "answers normally, turns worried once the loan is mentioned",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "dispute",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-04",
+      "G-05",
+      "G-08",
+      "R4"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v16",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते, हाँ बोलिए, मैं ही Sunita Patel हूँ."
+    },
+    {
+      "role": "agent",
+      "text": "नमस्ते Sunita जी, आपकी privacy के लिए, कोई भी detail बताने से पहले मुझे बस confirm करना होगा कि मैं आपसे ही बात कर रही हूँ। क्या आप अपने registered mobile number के आखिरी चार अंक बता सकती हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, मेरे number के आखिरी चार digits 1290 हैं."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद Sunita जी। आपके personal loan की अठारह हज़ार रुपये की EMI आठ नवंबर तक due है। क्या आप इसे आज ही clear कर पाएंगी? मैं आपको SMS या WhatsApp पर एक secure payment link भेज सकती हूँ।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Wait, what loan? मैंने कभी कोई personal loan नहीं लिया है, ये किसी ने मेरे नाम या documents का misuse किया है. आप मुझे explain करें कि ये loan मेरे नाम पर कैसे है?"
+    },
+    {
+      "role": "agent",
+      "text": "जी। आपने मुझे बताकर बिल्कुल सही किया Sunita जी। हमारे records में आपके नाम पर एक personal loan दिख रहा है। क्या आपने कभी हमारे यहाँ या किसी और app पर loan के लिए apply किया था?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "escalate_to_human"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "नहीं, मैंने कहीं भी कोई loan apply नहीं किया है. ये गलती किसी की है या fraud हुआ है, आप मुझे बताइए कि ये loan कब और कैसे मेरे नाम पर खुला?"
+    },
+    {
+      "role": "agent",
+      "text": "समझ गई Sunita जी, आपने कहीं apply नहीं किया। क्या आपको हाल ही में किसी ने loan की रकम भेजी है, या आपने किसी के साथ अपने documents या OTP share किए हैं?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "नहीं, मैंने किसी को कोई OTP या documents share नहीं किए, और मुझे कोई पैसे भी नहीं मिले. आप अपने records check करके मुझे बताइए कि ये loan मेरे नाम पर कैसे आया, और मुझे इसकी written complaint करनी होगी?"
+    },
+    {
+      "role": "agent",
+      "text": "मैंने note कर लिया है कि आपने कभी apply नहीं किया, कोई पैसा नहीं मिला और कोई document या OTP भी share नहीं किया। मैंने आपके account पर review के लिए flag कर दिया है। हमारी internal team आपकी बात check करके आपको callback arrange करेगी। क्या यह number आपसे बात करने के लिए ठीक रहेगा?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, इसी number पर बात कर लीजिए, लेकिन कोई payment की बात नहीं, जब तक ये पूरी तरह clear नहीं हो जाता कि ये loan मेरे नाम पर कैसे आया."
+    },
+    {
+      "role": "agent",
+      "text": "जी। मैं समझ गई Sunita जी, जब तक यह पूरी तरह clear नहीं हो जाता तब तक आप payment नहीं करेंगी। कृपया किसी के साथ अपना OTP या bank details share मत कीजिएगा। बात करने के लिए धन्यवाद, Sunita जी। आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "1290"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "अठारह हज़ार रुपये",
+          "due_date_spoken": "आठ नवंबर",
+          "loan_type": "personal loan"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.85,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "dispute"
+      },
+      "result": {
+        "escalated": true,
+        "message": "Special situation (not mine), step 1 of 4, from the call system. Take their fear seriously and say they did the right thing to tell you. Say what our records show in their name (the loan type), and ask only whether they ever applied for a loan with us or any app. Never say whether it is or is not fraud. Say only this step, in at most four short sentences, in the borrower's language. If they asked for a waiver, a lower amount, more time or a fee removal, say kindly that you can't change that yourself and that you have noted it for the team. If they asked something you have no detail for (how or when a loan was made, when exactly the team will call), say honestly that you don't have that detail and the team will check it. Never promise when the call back will come, a waiver or any change. Never ask \"Is there anything else?\"."
+      },
+      "attempts": 1,
+      "ms": 0.26,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "dispute",
+        "promise_to_pay_date": null,
+        "notes": "Borrower says she never applied for the loan, never received money, and never shared documents or OTP. She agreed to callback on the same number but refused to pay until the matter is fully resolved."
+      },
+      "result": {
+        "recorded": true,
+        "message": "Recorded. Now speak, in the borrower's language, unless you already said it this turn: First answer what they just said, in one or two short sentences: if they asked for something (a real person to call, a call back soon, no surprise charges, a time that suits them), say you have noted it and name what they asked, in their own words; if they said they won't pay until it is sorted, say you understand. Then close once with thanks (\"Thank you for talking with me, <name>. Have a good day.\"; in Hindi \"बात करने के लिए धन्यवाद, <name> जी। आपका दिन शुभ हो।\"). Do not repeat what you already said in the call."
+      },
+      "attempts": 1,
+      "ms": 0.16,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B004",
+    "verified": true,
+    "outcome": "dispute",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Borrower says she never applied for the loan, never received money, and never shared documents or OTP. She agreed to callback on the same number but refused to pay until the matter is fully resolved.",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793791005.3314393,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793791005.3314393,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793791005.3314393,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "escalate:dispute"
+  ],
+  "protected_phrases": [
+    "18,000",
+    "18000",
+    "aath November",
+    "atharah hazaar rupaye",
+    "eighteen thousand rupees",
+    "eighth November",
+    "personal loan",
+    "the eighth of November",
+    "अठारह हज़ार रुपये",
+    "आठ नवंबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 27804,
+      "output": 385,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 5178,
+      "output": 538
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 8
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 11.4
+}

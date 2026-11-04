@@ -1,0 +1,312 @@
+{
+  "scenario": {
+    "id": "S03",
+    "name": "financial_hardship",
+    "borrower_id": "B007",
+    "today": "2026-11-03",
+    "persona": "Deepa Nair, 42, recently lost her job, anxious and apologetic, speaks English. The loan is 14 days overdue and she knows it.\n",
+    "hidden_goal": "Verify correctly, then explain she lost her job and cannot pay right now. Ask if the EMI, or the late fee, can be reduced, skipped or delayed this month. Get a little emotional but stay civil. Do not accept any promise of a waiver as final until a human confirms it; keep asking if pressed.\n",
+    "opening": "answers cautiously, sounds stressed once the topic comes up",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "hardship",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-03",
+      "G-04",
+      "G-05",
+      "R3"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v16",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, this is the virtual assistant from Lumen Finance. Am I speaking with Deepa?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, this is Deepa speaking."
+    },
+    {
+      "role": "agent",
+      "text": "Great, thanks for confirming. For your privacy, I just need to verify it's you before I share any details. Could you tell me the last four digits of your registered mobile number?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, it's 6601."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you, Deepa. This is regarding your personal loan. The amount due is nine thousand five hundred rupees, and the due date was the twentieth of October. It is now fourteen days overdue, so as per your loan terms, a late payment charge of five hundred rupees has been added. Would you be able to clear it today? I can send you a secure payment link on SMS or WhatsApp.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "I... I'm really sorry, I know it's late, but I lost my job a few weeks ago and I just can't pay nine thousand five hundred rupees right now. Is there any way the EMI or the late fee can be reduced or postponed this month?"
+    },
+    {
+      "role": "agent",
+      "text": "I hear you. I am really sorry to hear that, Deepa, and thank you for sharing this with me. I can't change the amount or the charges myself, but I have noted it for our team. Is this something short-term, or is it hard to say right now?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "escalate_to_human"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "It's hard to say right now, honestly. I'm still looking for work, so I can't promise anything for next month either. Can your team actually reduce or waive the late fee, or delay this month's EMI? I really need some relief."
+    },
+    {
+      "role": "agent",
+      "text": "I have noted that you lost your job and are still looking for work, so it is hard to say when things will improve. I can't change the amount or the fees myself, but our internal team will check this and arrange a call back for you. Is this number the best one to reach you on?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, this number is fine. But can you tell me when they will call, and will they actually be able to confirm the waiver or EMI delay? I don't want to be surprised by more charges."
+    },
+    {
+      "role": "agent",
+      "text": "Okay. I can't confirm any waiver or delay myself, but I have noted everything for our team. Thank you for talking with me, Deepa. Have a good day.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "6601"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "nine thousand five hundred rupees",
+          "due_date_spoken": "the twentieth of October",
+          "loan_type": "personal loan",
+          "overdue_spoken": "fourteen days",
+          "late_fee_spoken": "five hundred rupees"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.86,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "hardship"
+      },
+      "result": {
+        "escalated": true,
+        "message": "Special situation (hardship), step 1 of 3, from the call system. In one sentence, say warmly, in their own terms, that you are really sorry to hear it and thank them for telling you. Then, only if they have not already said how long it may last or when they might manage, gently ask whether it is something short-term or hard to say right now. Say nothing after the question. Do not mention the amount, the late fee or paying. Say only this step, in at most three short sentences, in the borrower's language. If they asked for a waiver, a lower amount, more time or a fee removal, say kindly that you can't change that yourself and that you have noted it for the team. Never promise when the call back will come, a waiver or any change. Never ask \"Is there anything else?\"."
+      },
+      "attempts": 1,
+      "ms": 0.05,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "hardship",
+        "promise_to_pay_date": null,
+        "notes": "Borrower lost job a few weeks ago, cannot pay nine thousand five hundred rupees right now, unsure about next month, asked for waiver or delay."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.19,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B007",
+    "verified": true,
+    "outcome": "hardship",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Borrower lost job a few weeks ago, cannot pay nine thousand five hundred rupees right now, unsure about next month, asked for waiver or delay.",
+    "language_used": "en",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793790287.4977367,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793790287.4977367,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793790287.4977367,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793790287.4977367,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793790287.4977367,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "escalate:hardship"
+  ],
+  "protected_phrases": [
+    "9,500",
+    "9500",
+    "bees October",
+    "chaudah din",
+    "five hundred rupees",
+    "fourteen days",
+    "nau hazaar paanch sau rupaye",
+    "nine thousand five hundred rupees",
+    "paanch sau rupaye",
+    "personal loan",
+    "the twentieth of October",
+    "twentieth October",
+    "चौदह दिन",
+    "नौ हज़ार पाँच सौ रुपये",
+    "पाँच सौ रुपये",
+    "बीस अक्टूबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 23226,
+      "output": 367,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 2601,
+      "output": 221
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 7
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 9.1
+}

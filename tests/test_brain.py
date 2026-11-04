@@ -39,7 +39,7 @@ async def run(brain, text, lang_hint=None):
     return [s async for s in brain.respond(text, lang_hint)]
 
 
-@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14"])
+@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17"])
 @pytest.mark.parametrize("bid", sorted(BORROWERS))
 def test_system_prompt_has_no_loan_or_verification_data(bid, version, today, tmp_path):
     b = BORROWERS[bid]
@@ -431,6 +431,7 @@ async def test_escalation_without_recorded_outcome_records_the_reason(today, tmp
     for why in ("hardship", "dispute"):
         brain = make(ScriptedLLM([say("Thank you.")]), today, tmp_path)
         brain.state.verified = True
+        brain.state.heard.append("I lost my job and this amount is wrong")
         assert brain.tools.call("escalate_to_human", {"reason": why})["escalated"] is True
         record = brain.finish()
         assert record.outcome is Outcome(why) and record.escalate_to_human
@@ -548,7 +549,7 @@ async def test_code_wrong_last4_asks_for_dob_next(today, tmp_path):
 def test_v9_prompt_asks_last4_first():
     from emi_agent.context import system_prompt
     cfg = load()
-    assert cfg["behavior"]["prompt_version"] in ("v9", "v10", "v11", "v12", "v13", "v14")
+    assert cfg["behavior"]["prompt_version"] in ("v9", "v10", "v11", "v12", "v13", "v14", "v15", "v16", "v17")
     text = system_prompt(BORROWERS["B001"], cfg, "en", "Hello")
     assert "Ask first for only the last four digits" in text
 
@@ -598,6 +599,7 @@ async def test_bridge_alone_does_not_replace_the_closing(today, tmp_path):
                                                     "notes": "x"})), say("")], tool_start=True)
     brain = make(llm, today, tmp_path)
     brain.state.verified = True
+    brain.state.flags.add("asked_exact_date")  # the "by the due date?" question was already asked
     out = await run(brain, "Okay bye.")
     assert out[0].bridge and out[-1].text == context.closing("en", brain.script, "Arjun")
 
@@ -622,7 +624,7 @@ async def test_no_purpose_note_without_the_question(today, tmp_path):
 
 def test_v12_prompt_states_the_fee_once_and_asks_to_pay_online():
     from emi_agent.context import system_prompt
-    text = system_prompt(BORROWERS["B007"], load(), "en", "Hello")
+    text = system_prompt(BORROWERS["B007"], load(overrides=["behavior.prompt_version=v12"]), "en", "Hello")
     assert "late payment charge" in text and "never repeat it" in text and "after they describe hardship" in text
     assert "secure payment link on SMS or WhatsApp" in text and "how they would like to proceed" not in text
 
@@ -643,7 +645,7 @@ def test_v13_prompt_hardship_is_caring_with_one_handoff():
 
 def test_v14_prompt_helps_first_and_never_says_colleague():
     from emi_agent.context import system_prompt
-    text = system_prompt(BORROWERS["B004"], load(), "en", "Hello")
+    text = system_prompt(BORROWERS["B004"], load(overrides=["behavior.prompt_version=v14"]), "en", "Hello")
     assert "our internal team will check this and arrange a call back" in text
     assert "flagged it for review" in text and "ask what amount they expected" in text
     assert "a colleague will" not in text.lower() and 'Never say "a colleague"' in text
@@ -651,8 +653,8 @@ def test_v14_prompt_helps_first_and_never_says_colleague():
 
 async def test_hardship_drops_anything_else_and_repeated_warm_close(today, tmp_path):
     llm = ScriptedLLM([say("I'm so sorry, Deepa. A colleague from our team will call you. Is there anything else I can help with?"),
-                       say("I understand. Please take care, Deepa, and thank you for talking with me."),
-                       say("I've noted it. Please take care, Deepa, and thank you for talking with me.")])
+                       say("I understand. Thank you for talking with me, Deepa. Have a good day."),
+                       say("I've noted it. Thank you for talking with me, Deepa. Have a good day.")])
     brain = make(llm, today, tmp_path, "B007")
     brain.state.verified = True
     brain.state.flags.add("escalate:hardship")
@@ -660,7 +662,18 @@ async def test_hardship_drops_anything_else_and_repeated_warm_close(today, tmp_p
     second = [s.text for s in await run(brain, "When will they call?")]
     third = [s.text for s in await run(brain, "Please note it.")]
     assert not any("anything else" in x for x in first)
-    assert any("Please take care" in x for x in second) and not any("Please take care" in x for x in third)
+    assert any("good day" in x for x in second) and not any("good day" in x for x in third)
+
+
+async def test_comfortable_and_take_care_lines_never_spoken(today, tmp_path):
+    llm = ScriptedLLM([say("यह सुनकर सच में दुख हुआ, Deepa जी। क्या यह कुछ समय की बात है? आप जो comfortable हों, बस वही बताइए।"),
+                       say("जी, मैंने note कर लिया है। आप का ध्यान रखें। आपका दिन शुभ हो।")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    first = [s.text for s in await run(brain, "मेरी job चली गई है")]
+    second = [s.text for s in await run(brain, "शायद दो महीने")]
+    assert not any("comfortable" in x for x in first) and any("कुछ समय" in x for x in first)
+    assert not any("ध्यान रखें" in x for x in second) and any("दिन शुभ हो" in x for x in second)
 
 
 async def test_hand_off_is_said_once_per_call(today, tmp_path):
@@ -738,3 +751,186 @@ async def test_language_of_a_sentence_split_by_barge_ins(today, tmp_path):
         await gen.aclose()
     await run(brain, "the EMI or the late fee can be reduced?")
     assert brain.state.reply_language == "hi"
+
+
+def test_v15_prompt_closes_with_good_day_and_no_comfortable_line():
+    from emi_agent.context import system_prompt
+    text = system_prompt(BORROWERS["B007"], load(overrides=["behavior.prompt_version=v15"]), "en", "Hello")
+    assert "आपका दिन शुभ हो" in text and "what is comfortable;" not in text
+    assert "Please take care, <name>" not in text and "our internal team will check this" in text
+
+
+# Prompt v16: hardship as a code-owned flow (special.py). Code says which step comes next.
+def _notes(llm, i):
+    return " ".join(str(m["content"]) for m in llm.requests[i][1] if m["role"] == "system")
+
+
+async def test_hardship_flow_one_step_per_turn_then_hang_up(today, tmp_path):
+    llm = ScriptedLLM([say("", ("escalate_to_human", {"reason": "hardship"})),
+                       say("यह सुनकर सच में दुख हुआ, Deepa जी। क्या यह कुछ समय की बात है, या अभी कहना मुश्किल है?"),
+                       say("जी, मैंने note कर लिया है कि job चली गई है और दो-तीन महीने लग सकते हैं। हमारी internal team "
+                           "आपकी बात check करके आपको callback arrange करेगी। क्या यह number आपसे बात करने के लिए ठीक रहेगा?"),
+                       say("", ("record_outcome", {"outcome": "hardship", "promise_to_pay_date": None, "notes": "job loss"})),
+                       say("जी, शाम का समय note कर लिया। बात करने के लिए धन्यवाद, Deepa जी। आपका दिन शुभ हो।")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    await run(brain, "मेरी job चली गई है")
+    assert brain.hardship_voice and brain.state.special == "hardship" and brain.state.special_step == 1
+    await run(brain, "शायद दो-तीन महीने")
+    assert "step 2 of 3" in _notes(llm, 2) and brain.state.special_step == 2
+    last = [s.text for s in await run(brain, "हाँ, शाम को call कीजिए")]
+    assert "step 3 of 3" in _notes(llm, 3) and any("दिन शुभ हो" in x for x in last)
+    assert brain.should_hang_up and brain.state.outcome.outcome is Outcome.hardship
+
+
+async def test_hardship_step_is_given_again_when_the_reply_was_not_heard(today, tmp_path):
+    llm = ScriptedLLM([say("", ("escalate_to_human", {"reason": "hardship"})),
+                       say("यह सुनकर सच में दुख हुआ, Deepa जी। क्या यह कुछ समय की बात है?"),
+                       say("यह सुनकर सच में दुख हुआ। क्या यह कुछ समय की बात है?")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    gen = brain.respond("मेरी job चली गई है")
+    await gen.__anext__()          # bridge line out, then the borrower cuts in at once
+    brain.reply_unheard()
+    await gen.aclose()
+    assert brain.state.special_step == 0
+    await run(brain, "मतलब अभी पैसे का problem है")
+    assert "step 1 of 3" in _notes(llm, 2) and brain.state.special_step == 1
+
+
+async def test_close_step_hangs_up_even_without_record_outcome(today, tmp_path):
+    llm = ScriptedLLM([say("Thank you for talking with me, Deepa. Have a good day.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.special, brain.state.special_step = "hardship", 2
+    brain.state.flags.add("escalate:hardship")
+    await run(brain, "Okay, evenings are better.")
+    assert brain.should_hang_up
+    assert brain.finish().outcome is Outcome.hardship
+
+
+async def test_stop_request_skips_the_flow_step(today, tmp_path):
+    llm = ScriptedLLM([say("Okay, thank you.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.special, brain.state.special_step = "hardship", 1
+    await run(brain, "Please stop calling me.")
+    assert "Special situation" not in _notes(llm, 0)
+
+
+@pytest.mark.parametrize("text,cue", [("मेरी job चली गई है", True), ("I lost my job last month", True),
+                                      ("Papa hospital mein admit hain", True), ("मेरी तबीयत ठीक नहीं है", True),
+                                      ("salary nahi aayi abhi tak", False), ("Haan, main pay kar dungi", False),
+                                      ("I'll pay on the fifth", False)])
+def test_hardship_cue(text, cue):
+    from emi_agent.special import hardship_cue
+    assert hardship_cue(text) is cue
+
+
+def test_v16_prompt_leaves_the_steps_to_the_call_system():
+    from emi_agent.context import system_prompt
+    text = system_prompt(BORROWERS["B007"], load(overrides=["behavior.prompt_version=v16"]), "en", "Hello")
+    assert "one step at a time" in text and "our internal team will check this and arrange a call back" in text
+    assert "Is this something short-term" not in text and 'Never say "a colleague"' in text
+
+
+async def test_flow_step_says_what_was_already_said(today, tmp_path):
+    llm = ScriptedLLM([say("I'm really sorry to hear that. I can't change the amount myself, but I've noted it. "
+                           "Is this something short-term?"), say("Noted.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.special, brain.state.special_step = "hardship", 0
+    await run(brain, "I lost my job, can you reduce the EMI?")
+    await run(brain, "Hard to say.")
+    note = _notes(llm, 1)
+    assert "step 2 of 3" in note and "do not say again: that you are sorry; that you can't change it yourself" in note
+
+
+async def test_flow_close_bridge_is_not_a_bare_okay(today, tmp_path):
+    llm = ScriptedLLM([say("", ("record_outcome", {"outcome": "hardship", "promise_to_pay_date": None, "notes": "x"})),
+                       say("I've noted that you want a person to confirm it. Thank you for talking with me, Deepa. "
+                           "Have a good day.")], tool_start=True)
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.special, brain.state.special_step = "hardship", 2
+    out = [s.text for s in await run(brain, "Please make sure a person confirms it.")]
+    assert out[0] == "I understand." and "Okay." not in out
+    result = [m for m in llm.requests[1][1] if m["role"] == "user" and isinstance(m["content"], list)][-1]
+    assert "name what they asked" in result["content"][0]["content"]
+
+
+async def test_flow_question_ends_the_reply(today, tmp_path):
+    llm = ScriptedLLM([say("I'm really sorry to hear that, Deepa. Is this something short-term, or hard to say "
+                           "right now? Our internal team will check this and arrange a call back for you.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.special, brain.state.special_step = "hardship", 0
+    out = [s.text for s in await run(brain, "I lost my job.")]
+    assert out[-1].endswith("?") and not any("internal team" in x for x in out)
+
+
+# Live call B004 (2026-11-04): a loan due on 8 November with no charge.
+async def test_b004_invented_late_fee_is_replaced_by_the_true_policy(today, tmp_path):
+    llm = ScriptedLLM([say("आपके loan terms के अनुसार, five hundred rupees का late payment charge लग गया है। "
+                           "क्या आज payment हो पाएगा?")])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    out = await run(brain, "क्या आप मुझे बता सकते हैं कि what is the late payment?", "hi")
+    assert out[0].guard == "fee_not_added" and "नहीं लगा" in out[0].text and "five hundred rupees" in out[0].text
+
+
+async def test_amount_not_given_by_code_is_never_spoken(today, tmp_path):
+    llm = ScriptedLLM([say("The late payment charge is seven hundred rupees.")])
+    brain = make(llm, today, tmp_path, "B001")
+    brain.state.verified = True
+    out = await run(brain, "What is the late fee?")
+    assert out[0].guard == "unknown_amount" and "seven hundred" not in out[0].text
+
+
+async def test_split_sentence_is_given_to_the_model_whole(today, tmp_path):
+    llm = ScriptedLLM([say("Sure, one moment please. The late fee is"), say("Okay.")])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    gen = brain.respond("But can you tell me what is the late payment")
+    await gen.__anext__()          # the borrower goes on talking: the reply is cut (heard, not at once)
+    await gen.aclose()
+    await run(brain, "I need to pay")
+    assert "All together they said: \"But can you tell me what is the late payment I need to pay\"" in _notes(llm, 1)
+
+
+def test_verified_note_says_whether_the_emi_is_due_or_overdue(today):
+    from emi_agent.tools import loan_facts
+    upcoming = context.note_verified(loan_facts(BORROWERS["B004"], today, "hi-en", "devanagari"))
+    overdue = context.note_verified(loan_facts(BORROWERS["B007"], today, "en", "roman"))
+    assert "not yet due" in upcoming and "No late charge has been added" in upcoming
+    assert "overdue by" in overdue and "clear it today" in overdue
+
+
+# Owner, 2026-11-04 (v17): generic policy in the prompt, no "privacy", no verbatim example lines.
+def test_v17_prompt_has_the_policy_and_no_privacy_or_scripted_lines():
+    from emi_agent.context import system_prompt
+    text = system_prompt(BORROWERS["B004"], load(), "hi", "Namaste")
+    assert "a late payment charge of five hundred rupees applies" in text and "get_policy" in text
+    assert "For your privacy" not in text and "आपकी privacy" not in text and "account verification" in text
+    assert "Would you be able to clear it today? I can send you" not in text and "बता सकती हैं?" not in text
+    assert "{policy}" not in text
+
+
+def test_greeting_says_ai_assistant(today):
+    from emi_agent.context import greeting
+    assert "AI assistant" in greeting(BORROWERS["B004"], "Lumen Finance", "hi", "devanagari")
+    assert greeting(BORROWERS["B001"], "Lumen Finance", "en", "roman").startswith("Hello, I'm an AI assistant")
+
+
+def test_policy_bridge_rotates():
+    lines = [context.bridge("get_policy", "en", "roman", n=n) for n in range(3)]
+    assert len(set(lines)) == 3 and context.bridge("get_policy", "en", "roman", n=3) == lines[0]
+
+
+async def test_borrower_amount_can_be_read_back_in_another_language(today, tmp_path):
+    llm = ScriptedLLM([say("मैंने note कर लिया है कि आपको बारह हज़ार रुपये की उम्मीद है, जबकि हमारे records में "
+                           "eighteen thousand rupees हैं।")])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    out = await run(brain, "मेरी EMI twelve thousand rupees है, eighteen thousand नहीं।", "hi")
+    assert out[0].guard is None and "बारह हज़ार" in out[0].text

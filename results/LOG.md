@@ -325,3 +325,25 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 - 15:50 v13-hardship2 (S03 S11 x3): 6/6, 0 callbacks scheduled after escalation, hardship replies open with sorry + thanks. Model still added "Is there anything else?" (S03 2/3, S11 3/3) and repeated the warm close (S03 run 2): code now drops "anything else" in hardship and any second "Please take care". Known open: "the concerned team" mixed into 2/3 hardship calls. 761 tests.
 - 16:20 prompt v14 / D-39 / C18 special situations. v14-special (S03 S04 S04b S11 S15 x3): 15/15, 0 "colleague"/"concerned team". v14-special2/3 (S03 S04 S04b x2 each): all pass; fixed the not-my-loan question in amount disputes (code picks guidance from what was said), hand-off once, staged guidance (turns 5-7 -> 2-4 sentences), Hindi escalation bridge "जी।". Open: OTP advice leaked into one amount dispute (prompt rule added). 777 tests.
 - 16:45 owner live hardship call B007 (16:03): apology cut 250 ms in and never heard; reply repeated to a fragment; English flip; contact question twice; guard false positive ("can't promise or hint at any waiver"); bridge flag bug (C19-C21). Fixes: unheard replies (cut within 1 s) re-say their key point; unfinished wait 0.4 -> 0.7 s (she resumed 26 ms after 0.4 s); split-sentence language judged whole, Hinglish rule (3+ Devanagari words and a fifth); neutral words (yes/ok/thank you/PM); once-per-call apology/hand-off/contact/short-term/warm close, forgotten if unheard. Replay of the call (real Sarvam, text): Hindi throughout, apology once and heard, hand-off once. 791 tests. Not yet tried live.
+
+## 2026-11-04 16:30-16:50 prompt v15/v16: hardship and disputes as a code-owned flow (D-40)
+
+- v15: owner wording (no "whatever is comfortable" / "take care"; close "आपका दिन शुभ हो"), C22.
+- v16 / special.py: one step per turn by code. Runs, S03 S04 S04b S11 x3 each (Sarvam agent + glm5.3-flash simulator, ~Rs 4 each by the runner's estimate, not billed figures):
+  - v16-special (20261104-163436): 12/12; read: repeated "can't change", curt "Okay." close, waiver demand on the amount script, last request ignored.
+  - v16-special2 (20261104-163903): 11/11 + 1 infra (Sarvam timeout); found promise-guard false positives on read-backs (C25).
+  - v16-special3 (20261104-164251): 12/12; turns still ran past the question; model copied the example close line.
+  - v16-special4 (20261104-164548): 12/12, 0 leaks, escalation P 1.0 R 1.0; one "colleague" hit is the agent repeating the borrower's own words (scorer false positive).
+- Pace on bulbul:v4-flash (REST, same Hindi sentence): speech 4.1-4.5 s at 1.0, 4.7-5.1 s at 0.9, 5.6 s at 0.8; one 0.9 render had 4.3 s extra silence. n=3 per pace.
+- Not yet tried live: pace switch over the websocket, 1.2 s hardship wait, the whole flow by voice.
+
+## 2026-11-04 17:00-17:45 owner live call B004 and prompt v17 (D-41..D-43)
+
+- Live call B004 16:57 (logs/bot-B004.log): invented "five hundred rupees has been added" on a loan not yet due; "due थी"; split question, then closed on "I need to pay" as will_pay (C28-C30).
+- v17: generic policy (data/policy.yaml) in the prompt + get_policy tool; amount and fee-claim checks; due-status note; split-sentence note; already_paid / will_pay checks; hardship and dispute gates; greeting "AI assistant"; "account verification"; gender-neutral Hindi questions; everyday words. New scenarios S16-S18 (borrower questions).
+- Runs (Sarvam agent + glm5.3-flash simulator; rupee figures are the runner's estimates, not bills):
+  - v17-policy (20261104-171941) 11/11 + 1 infra; v17-policy2 (172312) 12/12; v17-policy3 (172539) 5/6 (S16: mild money worry escalated as hardship); v17-policy4 (172807) 9/10 (S17 already_paid).
+  - v17-dev2 (173050, all 15 dev scenarios x2, ~Rs 11): 27/30 as scored; S08 x2 hardship false positive (fixed: C33), S10 run 1 hedged loop (open, C34).
+  - v17-dev2-fix (173559), fix2 (173754): S08 still escalating (dispute, other), found E9.
+  - v17-gates (174021, S03 S04 S04b S08 S11 x2): 9/10 as scored, 10/10 re-scored after E10; escalation P 1.0 R 1.0.
+- Not yet: live voice call on v17; hold-out run; S10 hedged-answer loop.

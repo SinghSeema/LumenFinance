@@ -1,0 +1,335 @@
+{
+  "scenario": {
+    "id": "S16",
+    "name": "asks_late_fee_before_due",
+    "borrower_id": "B004",
+    "today": "2026-11-03",
+    "persona": "Sunita Patel, 35, polite, speaks Hindi with some English words.",
+    "hidden_goal": "Verify correctly with the last four digits. When reminded, say you may not manage to pay on time this month and ask how much late fee you would have to pay if you pay a few days late. Then ask whether you can pay part of it now and the rest later. Finally say you will try to pay the full amount by the due date, and accept a payment link if offered.\n",
+    "opening": "answers normally, a little worried about money this month",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "will_pay"
+      ],
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-08",
+      "F-04",
+      "Q-policy"
+    ],
+    "runs": 3,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते जी, हाँ मैं ही Sunita बोल रही हूँ। बताइए, क्या बात है?"
+    },
+    {
+      "role": "agent",
+      "text": "यह आपके Lumen Finance account के बारे में एक ज़रूरी बात है। account verification के लिए, क्या आप अपने registered mobile number के आखिरी चार अंक बता देंगी?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ जी, मेरे number के last four digits 1290 हैं।"
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद, verify हो गया है। आपके personal loan की eighteen thousand rupees की EMI आठवीं नवंबर को due है, और अभी कोई charge नहीं लगा है। due date से पहले payment करने के लिए क्या मैं आपको secure payment link SMS या WhatsApp पर भेज दूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "जी, दरअसल इस month मुझसे शायद time पर payment नहीं हो पाएगा। अगर मैं कुछ दिन late कर दूँ तो late fee कितनी लगेगी?"
+    },
+    {
+      "role": "agent",
+      "text": "एक second, मैं details check कर लेती हूँ। due date के बाद अगर payment पूरी नहीं होती है, तो पाँच सौ रुपये का एक flat charge लगता है, यह daily नहीं है और इस पर कोई extra interest नहीं लगता। due date के अगले दिन ही यह add हो जाता है। क्या आप बता पाएँगी कि payment कब तक हो पाएगा?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "get_policy"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "अच्छा, five hundred fixed है, समझ गई। क्या मैं अभी कुछ part payment कर दूँ और बाकी amount अगले हफ़्ते pay कर दूँ? ऐसा possible है क्या?"
+    },
+    {
+      "role": "agent",
+      "text": "जी, देखती हूँ। हाँ, part payment payment link से हो सकता है, लेकिन due date तक पूरी EMI नहीं भरी गई तो पाँच सौ रुपये का charge फिर भी लग जाएगा। बाकी amount आप उसी link से बाद में भी भर सकती हैं। क्या अगले हफ़्ते तक पूरा payment हो जाएगा?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "get_policy"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Theek hai जी, फिर मैं पूरी कोशिश करूँगी कि due date यानी आठवीं नवंबर तक full amount pay कर दूँ। हाँ, आप payment link भेज दीजिए।"
+    },
+    {
+      "role": "agent",
+      "text": "जी। payment link SMS पर भेज दिया है। payment हमारे records में चौबीस से अड़तालीस घंटे में show हो जाएगी। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome",
+        "send_payment_link"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "1290"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "eighteen thousand rupees",
+          "due_date_spoken": "eighth November",
+          "loan_type": "personal loan"
+        },
+        "status": "This EMI is not yet due: it is due on eighth November. Say \"is due\", never \"was due\" or \"overdue\". No late charge has been added. Offer the payment link so it is paid before the due date; do not ask them to pay today."
+      },
+      "attempts": 1,
+      "ms": 1.29,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "get_policy",
+      "args": {
+        "topic": "late_fee"
+      },
+      "result": {
+        "topic": "late_fee",
+        "policy": "The late payment charge is five hundred rupees, a flat amount added once for each EMI not paid in full by its due date. It is not a daily charge and there is no extra interest on it. It is added the day after the due date.",
+        "message": "Answer only what they asked, in one or two short sentences, from this text. Never add an amount, date or rule that is not in it."
+      },
+      "attempts": 1,
+      "ms": 0.11,
+      "stage": "intent"
+    },
+    {
+      "name": "get_policy",
+      "args": {
+        "topic": "part_payment"
+      },
+      "result": {
+        "topic": "part_payment",
+        "policy": "Any amount can be paid through the payment link. It goes first to the EMI due. If the full EMI is not paid by the due date, the late payment charge still applies once. The remaining amount can be paid later through the same link.",
+        "message": "Answer only what they asked, in one or two short sentences, from this text. Never add an amount, date or rule that is not in it."
+      },
+      "attempts": 1,
+      "ms": 0.18,
+      "stage": "intent"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "eighth November",
+        "notes": "Borrower promised to pay full amount by eighth November and requested payment link."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "eighth November"
+      },
+      "attempts": 1,
+      "ms": 0.95,
+      "stage": "closing"
+    },
+    {
+      "name": "send_payment_link",
+      "args": {
+        "channel": "sms"
+      },
+      "result": {
+        "sent": true,
+        "channel": "sms",
+        "url": "https://pay.lumenfinance.example/l/B004-****"
+      },
+      "attempts": 1,
+      "ms": 0.04,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B004",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-08",
+    "payment_link_sent": true,
+    "escalate_to_human": false,
+    "notes": "Borrower promised to pay full amount by eighth November and requested payment link.",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793794122.8668077,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793794122.8668077,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793794122.8668077,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [
+    {
+      "hits": [
+        "number_style"
+      ],
+      "original": "आपके personal loan की अठारह हज़ार रुपये की EMI आठवीं नवंबर को due है, और अभी कोई charge नहीं लगा है।",
+      "spoken": "आपके personal loan की eighteen thousand rupees की EMI आठवीं नवंबर को due है, और अभी कोई charge नहीं लगा है।",
+      "lang": "hi"
+    }
+  ],
+  "flags": [],
+  "protected_phrases": [
+    "18,000",
+    "18000",
+    "aath November",
+    "atharah hazaar rupaye",
+    "eighteen thousand rupees",
+    "eighth November",
+    "personal loan",
+    "the eighth of November",
+    "अठारह हज़ार रुपये",
+    "आठ नवंबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 30397,
+      "output": 353,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 3769,
+      "output": 366
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 8
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 10.5
+}

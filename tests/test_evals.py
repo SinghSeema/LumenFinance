@@ -26,7 +26,7 @@ class FakeSimulator:
 
 
 def test_scenario_sets_and_fields():
-    assert len(load_scenarios("dev")) == 12  # S04b 2026-11-03, S15 2026-11-04 (already paid, overdue)
+    assert len(load_scenarios("dev")) == 15  # S04b 2026-11-03, S15 2026-11-04; S16-S18 borrower questions (policy)
     assert {s["id"] for s in load_scenarios("holdout")} == {"S06", "S11", "S13", "S14a", "S14b"}
     valid = {o.value for o in Outcome}
     for s in SCENARIOS:
@@ -275,3 +275,17 @@ def test_far_apart_you_and_real_person_is_not_a_bot_question():
     t = ("Thank you... but can you tell me when someone will call me? I really need this sorted soon, "
          "and I want to make sure a real person confirms whatever is decided.")
     assert ai_disclosure({"turns": [{"role": "borrower", "text": t}, {"role": "agent", "text": "Okay."}]}) is None
+
+
+@pytest.mark.parametrize("text", ["[HANGUP]", "[हैंगअप]", "[कॉल समाप्त]", "ठीक है. [Call ended]"])
+def test_simulator_hangup_in_any_script(text):
+    from evals.simulator import _HANGUP_ANY
+    assert _HANGUP_ANY.search(text)
+
+
+@pytest.mark.parametrize("text,asks", [("Arre ye AI assistant wali baat chhodo, tum logo ka app hi itna kharab hai.", False),
+                                       ("Aap real person ho ya koi bot?", True), ("Are you a bot?", True),
+                                       ("तुम bot हो या कोई real person?", True)])
+def test_bot_question_must_be_a_question(text, asks):
+    from evals.score import _BOT_QUESTION
+    assert _BOT_QUESTION.search(text) is asks

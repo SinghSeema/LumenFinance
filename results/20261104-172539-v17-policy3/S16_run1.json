@@ -1,0 +1,313 @@
+{
+  "scenario": {
+    "id": "S16",
+    "name": "asks_late_fee_before_due",
+    "borrower_id": "B004",
+    "today": "2026-11-03",
+    "persona": "Sunita Patel, 35, polite, speaks Hindi with some English words.",
+    "hidden_goal": "Verify correctly with the last four digits. When reminded, say you may not manage to pay on time this month and ask how much late fee you would have to pay if you pay a few days late. Then ask whether you can pay part of it now and the rest later. Finally say you will try to pay the full amount by the due date, and accept a payment link if offered.\n",
+    "opening": "answers normally, a little worried about money this month",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "will_pay"
+      ],
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-08",
+      "F-04",
+      "Q-policy"
+    ],
+    "runs": 3,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते, जी हाँ, मैं ही Sunita बोल रही हूँ. बताइए, क्या बात है?"
+    },
+    {
+      "role": "agent",
+      "text": "यह आपके Lumen Finance account के बारे में एक ज़रूरी बात है। verification के लिए, क्या आप अपने registered mobile number के आखिरी चार अंक बता सकती हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "जी हाँ, मेरे number के last four digits 1290 हैं."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद, verify हो गया है। आपके personal loan की eighteen thousand rupees की EMI आठवीं नवंबर को due है। अभी कोई charge नहीं लगा है। क्या मैं payment link भेज दूँ ताकि due date से पहले payment हो जाए? SMS या WhatsApp, किस पर भेजूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "देखिए, इस महीने मुझसे शायद time पर payment न हो पाए, पैसे की थोड़ी दिक्कत है. अगर मैं कुछ दिन late कर दूँ तो late fee कितनी लगेगी?"
+    },
+    {
+      "role": "agent",
+      "text": "जी। मुझे सच में अफ़सोस है यह सुनकर, और बताने के लिए शुक्रिया। क्या यह कुछ समय की परेशानी है या अभी कुछ कहना मुश्किल है?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "escalate_to_human"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, बस कुछ हफ़्तों की temporary दिक्कत है, अगले महीने सब ठीक हो जाएगा. पर अभी ये बताइए, late fee कितनी लगेगी?"
+    },
+    {
+      "role": "agent",
+      "text": "मैंने note कर लिया है कि कुछ हफ़्तों की temporary दिक्कत है और अगले महीने तक सब ठीक हो जाएगा। मैं खुद fee या dates में कोई बदलाव नहीं कर सकती, पर मैंने team को बता दिया है। हमारी internal team आपकी बात check करके आपको callback arrange करेगी। क्या यह number आपसे बात करने के लिए ठीक रहेगा?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "ठीक है, यही number ठीक रहेगा. पर मुझे fee का amount बता दीजिए न, कितनी late fee लगेगी?"
+    },
+    {
+      "role": "agent",
+      "text": "जी। आपने fee का amount पूछा था, पर मेरे पास अभी उसकी detail नहीं है। बात करने के लिए धन्यवाद, Sunita जी। आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "1290"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "eighteen thousand rupees",
+          "due_date_spoken": "eighth November",
+          "loan_type": "personal loan"
+        },
+        "status": "This EMI is not yet due: it is due on eighth November. Say \"is due\", never \"was due\" or \"overdue\". No late charge has been added. Offer the payment link so it is paid before the due date; do not ask them to pay today."
+      },
+      "attempts": 1,
+      "ms": 1.46,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "hardship"
+      },
+      "result": {
+        "escalated": true,
+        "message": "Special situation (hardship), step 1 of 3, from the call system. In one sentence, say warmly, in their own terms, that you are really sorry to hear it and thank them for telling you. Then, only if they have not already said how long it may last or when they might manage, gently ask whether it is something short-term or hard to say right now. Say nothing after the question. Do not mention the amount, the late fee or paying. Say only this step, in at most four short sentences, in the borrower's language. If they asked for a waiver, a lower amount, more time or a fee removal, say kindly that you can't change that yourself and that you have noted it for the team. If they asked something you have no detail for (how or when a loan was made, when exactly the team will call), say honestly that you don't have that detail and the team will check it. Never promise when the call back will come, a waiver or any change. Never ask \"Is there anything else?\"."
+      },
+      "attempts": 1,
+      "ms": 0.04,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "hardship",
+        "promise_to_pay_date": null,
+        "notes": "Borrower Sunita reported temporary financial difficulty for a few weeks, expecting resolution by next month. Asked about late fee amount and confirmed this number is best for callback."
+      },
+      "result": {
+        "recorded": true,
+        "message": "Recorded. Now speak, in the borrower's language, unless you already said it this turn: First answer what they just said, in one or two short sentences: if they asked for something (a real person to call, a call back soon, no surprise charges, a time that suits them), say you have noted it and name what they asked, in their own words; if they said they won't pay until it is sorted, say you understand. Then close once with thanks (\"Thank you for talking with me, <name>. Have a good day.\"; in Hindi \"बात करने के लिए धन्यवाद, <name> जी। आपका दिन शुभ हो।\"). Do not repeat what you already said in the call."
+      },
+      "attempts": 1,
+      "ms": 0.14,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B004",
+    "verified": true,
+    "outcome": "hardship",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Borrower Sunita reported temporary financial difficulty for a few weeks, expecting resolution by next month. Asked about late fee amount and confirmed this number is best for callback.",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793793360.8173892,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793793360.8173892,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793793360.8173892,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [
+    {
+      "category": "dropped_filler",
+      "original": "हमारी internal team check करके आपको callback arrange करेगी।",
+      "spoken": "",
+      "stage": "closing",
+      "verified": true
+    }
+  ],
+  "speech_hits": [
+    {
+      "hits": [
+        "number_style"
+      ],
+      "original": "आपके personal loan की अठारह हज़ार रुपये की EMI आठवीं नवंबर को due है।",
+      "spoken": "आपके personal loan की eighteen thousand rupees की EMI आठवीं नवंबर को due है।",
+      "lang": "hi"
+    }
+  ],
+  "flags": [
+    "escalate:hardship"
+  ],
+  "protected_phrases": [
+    "18,000",
+    "18000",
+    "aath November",
+    "atharah hazaar rupaye",
+    "eighteen thousand rupees",
+    "eighth November",
+    "personal loan",
+    "the eighth of November",
+    "अठारह हज़ार रुपये",
+    "आठ नवंबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 27565,
+      "output": 323,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 3706,
+      "output": 367
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 7
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 8.5
+}

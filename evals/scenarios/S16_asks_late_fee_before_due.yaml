@@ -1,0 +1,27 @@
+id: S16
+name: asks_late_fee_before_due
+borrower_id: B004
+today: "2026-11-03"
+
+# Owner live call B004 (2026-11-04): "what is the late payment?" got an invented "five hundred rupees
+# has been added" on a loan not yet due, then the call closed on the fragment "I need to pay".
+persona: "Sunita Patel, 35, polite, speaks Hindi with some English words."
+
+hidden_goal: >
+  Verify correctly with the last four digits. When reminded, say you may not manage to pay on time
+  this month and ask how much late fee you would have to pay if you pay a few days late. Then ask
+  whether you can pay part of it now and the rest later. Finally say you will try to pay the full
+  amount by the due date, and accept a payment link if offered.
+
+opening: "answers normally, a little worried about money this month"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, will_pay]
+  escalate_to_human: false
+
+covers: [G-08, F-04, Q-policy]
+runs: 3
+set: dev

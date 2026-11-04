@@ -7,13 +7,14 @@ from datetime import date, datetime
 
 from pydantic import ValidationError
 
-from emi_agent import context, dates
+from emi_agent import context, dates, policy, special
 from emi_agent.heard import digits_were_said, dob_was_said, find_dob, find_last4
 from emi_agent.outcome import Outcome, OutcomeRecord
 from emi_agent.speech_format import amount_to_words, date_to_words, days_to_words, number_lang
 from emi_agent.state import Borrower, CallState, LoanFacts, Stage
 
-GATED = {"get_loan_details", "send_payment_link"}
+# get_policy too: talking about late fees tells a stranger there is a loan (G-01).
+GATED = {"get_loan_details", "send_payment_link", "get_policy"}
 # One fixed refusal for every gated tool, so a refusal tells the model nothing (G-11).
 NOT_VERIFIED = {"error": "not_verified", "message": "Identity must be verified first."}
 NOT_YET_SAID = ("Not checked: pass only a value the borrower has said in this call. "
@@ -55,6 +56,10 @@ TOOL_SCHEMAS = [
     _tool("escalate_to_human",
           "Flag the call for our internal team to check and call back: dispute, hardship, the borrower asked, or other.",
           {"reason": {"type": "string", "enum": _REASONS}}),
+    _tool("get_policy",
+          "Our repayment policy in detail, the same for every account, for a follow-up question the short "
+          "policy in your instructions does not answer. Works only after verification.",
+          {"topic": {"type": "string", "enum": policy.topics()}}),
     _tool("record_outcome",
           "Record how the call ended. will_pay: they agree to pay but name no date. "
           "promise_to_pay: they name a specific date (the due date counts); pass their words for "
@@ -133,31 +138,10 @@ _YES = re.compile(r"^\W*(?:yes|yeah|yep|sure|ok|okay|please|haan|han|ha|ji|jee|t
 # Never "a colleague" or "the concerned team"; never a time, a ticket number or a change.
 _HANDOFF = ("then say our internal team will check this and arrange a call back. Never say a colleague or "
             "the concerned team will call; never promise when, a waiver or any change.")
-# "Not my loan" vs "wrong amount" need different questions; both are escalated as "dispute", so code
-# picks by what the borrower said (v14 S04: "did you ever apply?" asked twice in an amount dispute).
-_NOT_MINE = re.compile(r"not my loan|never (?:took|taken|applied|borrowed)|didn'?t (?:take|apply)|not mine|misuse|"
-                       r"kabhi (?:koi )?loan nahi|loan nahi liya|mera nahi|नहीं लिया|मेरा नहीं|misuse|कभी .{0,20}apply नहीं",
-                       re.IGNORECASE)
-# Staged, one step per turn: listing every step at once made the model say them all in one long
-# turn (v14-special2 S04 run 1: seven sentences). This turn / after their answer.
-_DISPUTE_NOT_MINE = ("This is a 'not my loan' concern. THIS TURN, in two or three short sentences: take their fear "
-                     "seriously, say what our records show in their name, and ask only whether they ever applied "
-                     "for a loan with us or any app. LATER TURNS, one step each: ask whether they received loan "
-                     "money or shared documents or an OTP (if not answered yet); then read back what you noted, "
-                     "say you have flagged it for review, advise them not to share an OTP, PIN or bank details, ")
-_DISPUTE_AMOUNT = ("This is an amount or date dispute, not 'not my loan': never ask whether they applied. THIS "
-                   "TURN, in two short sentences: say you understand, say what our records show, and ask what "
-                   "amount they expected (skip the question if they already said). NEXT TURN: read back both "
-                   "amounts, say a sanction letter or past receipt will help, ")
 _ESCALATION_LINE = {
-    "dispute": _DISPUTE_AMOUNT,
-    "hardship": ("THIS TURN, in two or three short sentences: say you are sorry and thank them for telling "
-                 "you, say you can't change the amount or dates yourself, and gently ask whether it is "
-                 "short-term (only what is comfortable). NEXT TURN: note what they said, " + _HANDOFF),
     "requested": "Acknowledge the request; " + _HANDOFF,
     "other": "Acknowledge what they said and note it; " + _HANDOFF,
 }
-_TEAM = _DISPUTE_AMOUNT + _HANDOFF
 
 _DATE_HELP = {
     "ambiguous_phrase": "They gave only a vague time. Ask one clear question: which date exactly "
@@ -168,6 +152,14 @@ _DATE_HELP = {
 # Escalations whose call back our internal team arranges (D-35, v14): no schedule_callback, no time.
 # "other" too: a waiver demand escalated as "other" scheduled its own callback for "tomorrow" (v13 S11 run 2).
 _TEAM_CALLS_BACK = {"escalate:dispute", "escalate:hardship", "escalate:payment_check", "escalate:other"}
+
+# v17-policy4 S17 run 2: "I'll make sure it's paid by the due date" was recorded as already_paid.
+# Past tense only: "I'll make sure it is paid by the due date" is not a payment.
+_PAID = re.compile(r"\balready\b|\b(?:i|i've|we|we've|have|has|had|just)\s+(?:already\s+)?paid\b|"
+                   r"\bpaid (?:it |this |that |the emi )?(?:yesterday|today|last|on|already|ago|by upi|through|via|online)|"
+                   r"pay kar (?:diya|di)|bhar (?:diya|di)|jama kar (?:diya|di)|"
+                   r"भर दिया|भर दी|जमा कर दिया|जमा कर दी|pay कर दिया|pay कर दी|payment (?:हो गया|हो गई|कर दिया|कर दी)|"
+                   r"कर दिया है|कर दी है|ho gaya hai", re.IGNORECASE)
 
 # Calls that never reached the borrower: a dispute or hardship escalation makes no sense (D-30).
 _NOT_THE_BORROWER = {Outcome.wrong_number, Outcome.third_party}
@@ -258,7 +250,7 @@ class Tools:
             facts = self.facts()
             s.loan_facts = facts
             s.disclose(facts)
-            return {"verified": True, "loan_facts": facts.as_dict()}
+            return {"verified": True, "loan_facts": facts.as_dict(), "status": context.status_note(facts)}
         s.verify_attempts += 1
         left = self.max_attempts - s.verify_attempts
         if left == 0:
@@ -273,6 +265,11 @@ class Tools:
         facts = self.facts()
         self.state.disclose(facts)
         return facts.as_dict()
+
+    def _get_policy(self, topic: str) -> dict:
+        return {"topic": topic, "policy": policy.detailed(topic, self._nlang, self.script),
+                "message": "Answer only what they asked, in one or two short sentences, from this text. "
+                           "Never add an amount, date or rule that is not in it."}
 
     def _send_payment_link(self, channel: str) -> dict:
         mode = self.config["faults"]["payment_link_fail"]
@@ -331,15 +328,38 @@ class Tools:
             return {"escalated": False, "error": "not_requested",
                     "message": "The borrower has not clearly asked for a person. Ask if they would "
                                "like our internal team to arrange a call back; call this again only if they say yes."}
+        if s.special:  # already in the flow: never restart it (the steps come from the call system)
+            return {"escalated": True, "message": "Already noted for our internal team. Do only the step the "
+                    "call system gave you this turn."}
+        # v17-dev2 S08: "salary abhi aayi nahi, kal call kar lena" was escalated as hardship. With no sign
+        # of a real setback in what they said, the first call is sent back; a second call goes through,
+        # so a hardship told in words code does not know is delayed by one check, never refused.
+        if (reason == "hardship" and "hardship_checked" not in s.flags
+                and not any(special.hardship_cue(u) for u in s.heard[-3:])):
+            s.flags.add("hardship_checked")
+            return {"escalated": False, "error": "not_hardship",
+                    "message": "They have not described a real setback (job loss, illness, an emergency, no income). "
+                               "Salary arriving late or money being tight is not hardship: answer what they asked and "
+                               "help them pick a payment date or a call back time. Only if they really describe "
+                               "hardship, call this again."}
+        # v17-dev2-fix2 S08: "pagal ho kya, five hundred ka late fee? app crash hota hai" was escalated as
+        # an amount dispute. A dispute is a claim that something is wrong; anger at a correct charge is not.
+        if (reason == "dispute" and "dispute_checked" not in s.flags
+                and not special.dispute_cue(s.heard[-3:])):
+            s.flags.add("dispute_checked")
+            return {"escalated": False, "error": "not_a_dispute",
+                    "message": "They have not said the amount, date or loan is wrong, or that it is not theirs. A "
+                               "complaint that a charge is unfair or that the app failed is not a dispute: acknowledge "
+                               "it, say the charge is as per their loan terms, note the complaint, and help them pay "
+                               "or pick a date. Only if they really dispute it, call this again."}
         self.state.escalate_to_human = True
         self.state.flags.add(f"escalate:{reason}")
         self._enter_action()
-        line = _ESCALATION_LINE.get(reason, _ESCALATION_LINE["other"])
-        if reason == "dispute":
-            line = (_DISPUTE_NOT_MINE if any(_NOT_MINE.search(u) for u in s.heard[-3:]) else _DISPUTE_AMOUNT)
-        if reason in ("dispute", "hardship", "other"):
-            line += _HANDOFF if not line.endswith(_HANDOFF) else ""
-        return {"escalated": True, "message": line}
+        # Hardship and disputes: code-owned steps, one per turn (special.py, prompt v16).
+        if situation := special.situation_for(reason, s.heard):
+            s.special, s.special_step = situation, 0
+            return {"escalated": True, "message": special.instruction(situation, 0)}
+        return {"escalated": True, "message": _ESCALATION_LINE.get(reason, _ESCALATION_LINE["other"])}
 
     def _record_outcome(self, outcome: str, promise_to_pay_date: str | None, notes: str) -> dict:
         s = self.state
@@ -350,6 +370,13 @@ class Tools:
                     "message": "Only the system records verification_failed, after three failed "
                                "checks. Record what actually happened, e.g. callback_requested "
                                "or unresolved."}
+        if (s.special and not special.is_last(s.special, s.special_step)
+                and not {"stop_requested", "time_up"} & s.flags):
+            return {"error": "not_yet", "message": "Not yet: the call is still going. Do only the step the "
+                    "call system gave you this turn; you will be told when to record the outcome."}
+        if outcome == Outcome.already_paid.value and not any(_PAID.search(u) for u in s.heard):
+            return {"error": "not_paid", "message": "They have not said they already paid. Record what they "
+                    "actually said, for example promise_to_pay with the due date if they will pay by then."}
         if outcome == Outcome.stop_requested.value and "stop_requested" not in s.flags:
             return {"error": "no_stop_request",
                     "message": "stop_requested is only for a borrower who asked not to be called "
@@ -368,6 +395,14 @@ class Tools:
             return {"error": "vague_date", "message": _DATE_HELP["ambiguous_phrase"].format(
                 today=self._today_words()) + " Record promise_to_pay with that date; if they still "
                 "cannot name one, record will_pay."}
+        # Live call B004 (2026-11-04): the fragment "I need to pay" was recorded as will_pay with no date
+        # and the call closed. On a loan not yet due, ask once whether they will pay by the due date.
+        if (Outcome(outcome) is Outcome.will_pay and not promise_to_pay_date and self.borrower.days_overdue == 0
+                and s.verified and "asked_exact_date" not in s.flags):
+            s.flags.add("asked_exact_date")
+            return {"error": "no_date", "message": "Ask once, kindly, whether they will pay by the due date ("
+                    + self.facts().due_date_spoken + "). If yes, record promise_to_pay with the due date; if "
+                    "they can't say, record will_pay."}
         # An escalated dispute or hardship is the outcome, not a callback: the team arranges the
         # callback (v10 eval S04b run 4 recorded callback_requested and promised "today").
         if Outcome(outcome) is Outcome.callback_requested:
@@ -398,6 +433,8 @@ class Tools:
         s.outcome = record
         s.stage = Stage.CLOSING
         result: dict = {"recorded": True}
+        if s.special:
+            result["message"] = special.AFTER_RECORD
         if payment_check:
             result |= {"team_will_check": True, "message": "Thank them; say our internal team will check the "
                        "payment and arrange a call back. Never promise when."}

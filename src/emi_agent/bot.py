@@ -21,7 +21,8 @@ from loguru import logger
 from pipecat.frames.frames import (
     AggregatedTextFrame, BotStartedSpeakingFrame, BotStoppedSpeakingFrame, EndTaskFrame,
     InterimTranscriptionFrame, InterruptionFrame, LLMFullResponseEndFrame,
-    LLMFullResponseStartFrame, TranscriptionFrame, TTSSpeakFrame, VADUserStartedSpeakingFrame,
+    LLMFullResponseStartFrame, TranscriptionFrame, TTSSpeakFrame, TTSUpdateSettingsFrame,
+    VADUserStartedSpeakingFrame,
     VADUserStoppedSpeakingFrame,
 )
 from pipecat.pipeline.pipeline import Pipeline
@@ -32,7 +33,7 @@ from pipecat.utils.text.base_text_aggregator import AggregationType
 
 from emi_agent import config as config_mod
 from emi_agent.turn_gate import make_smart_turn
-from emi_agent import latency, providers
+from emi_agent import latency, providers, special
 from emi_agent.brain import _ASK_DOB, _ASK_LAST4, Brain, is_stop_request
 from emi_agent.data import load_borrowers
 from emi_agent.heard import has_number_or_month
@@ -104,6 +105,11 @@ class BrainProcessor(FrameProcessor):
         # Setup B: Smart Turn already judged the turn, so the punctuation rule stays off.
         self.unfinished_wait = (0.0 if config["turn"]["detector"] == "smart_turn"
                                 else config["turn"]["unfinished_wait_secs"])
+        # Hardship heard (special.py): wait longer for the rest of a sentence, and speak a little slower.
+        self.hardship_wait = (0.0 if config["turn"]["detector"] == "smart_turn"
+                              else config["turn"]["hardship_unfinished_wait_secs"])
+        self.slow_pace = providers.pace_delta(config, config["tts"]["hardship_pace"])
+        self.slowed = False            # the slower pace was sent to TTS (kept for the rest of the call)
         self.min_words = config["turn"]["min_words_interrupt"]
         self.latency_path = latency_path
         self.heard: list[str] = []      # final transcript pieces of the borrower's current turn
@@ -233,16 +239,19 @@ class BrainProcessor(FrameProcessor):
         await self._start_reply()
 
     async def _reply_now_or_after_pause(self) -> None:
-        if self.unfinished_wait and looks_unfinished(" ".join(self.heard)):
-            logger.info(f"sounds unfinished, waiting {self.unfinished_wait}s: {' '.join(self.heard)}")
-            self.wait = self.create_task(self._start_after_pause())
+        so_far = " ".join(self.heard)
+        wait = (self.hardship_wait if self.brain.hardship_voice or special.hardship_cue(so_far)
+                else self.unfinished_wait)
+        if wait and looks_unfinished(so_far):
+            logger.info(f"sounds unfinished, waiting {wait}s: {so_far}")
+            self.wait = self.create_task(self._start_after_pause(wait))
         else:
             await self._start_reply()
 
-    async def _start_after_pause(self) -> None:
+    async def _start_after_pause(self, wait: float) -> None:
         """The words so far look cut off mid-sentence: give the borrower a moment to go on.
         If they start speaking again, VAD start cancels this task and the turn continues."""
-        await asyncio.sleep(self.unfinished_wait)
+        await asyncio.sleep(wait)
         self.wait = None
         if not self.user_speaking:
             await self._start_reply()
@@ -285,6 +294,7 @@ class BrainProcessor(FrameProcessor):
                     logger.info(f"  pre-TTS {list(s.speech)}")
                 if spoken:
                     if not started:
+                        await self._maybe_slow_down()
                         await self.push_frame(LLMFullResponseStartFrame())
                         started = True
                     # Already a whole, guarded sentence: skip Pipecat's own sentence aggregator.
@@ -294,6 +304,14 @@ class BrainProcessor(FrameProcessor):
         if self.brain.should_hang_up:
             await self._wait_until_quiet()
             await self.end_call()
+
+    async def _maybe_slow_down(self) -> None:
+        """Hardship heard: a slightly slower voice from this reply on, as a person would speak (owner,
+        2026-11-04). Sent before the reply's text, so its first sentence is already slower."""
+        if self.slow_pace is not None and self.brain.hardship_voice and not self.slowed:
+            self.slowed = True
+            logger.info(f"hardship heard: TTS pace {self.slow_pace.pace}")
+            await self.push_frame(TTSUpdateSettingsFrame(delta=self.slow_pace))
 
     async def _barge_in(self, text: str = "", source: str = "") -> None:
         heard_ms = (time.monotonic() - self.speech_started) * 1000 if self.user_speaking else None

@@ -19,6 +19,7 @@ class FakeBrain:
     def __init__(self, reply="Theek hai.", delay=0.0):
         self.turns, self.reply, self.delay = [], reply, delay
         self.should_hang_up = False
+        self.hardship_voice = False
         self.greeting = "Namaste, kya meri baat Priya ji se ho rahi hai?"
         self.cut = 0
 
@@ -43,9 +44,10 @@ class FakeBrain:
 def make(tmp_path, monkeypatch):
     monkeypatch.setattr(FrameProcessor, "process_frame", lambda self, f, d: _noop())
 
-    def _make(brain, stt_wait=0.2, unfinished_wait=0.05, silence=(0.2, 0.3, 0.3)):
+    def _make(brain, stt_wait=0.2, unfinished_wait=0.05, silence=(0.2, 0.3, 0.3), hardship_wait=0.05):
         cfg = load(overrides=[f"turn.stt_wait_secs={stt_wait}",
                               f"turn.unfinished_wait_secs={unfinished_wait}",
+                              f"turn.hardship_unfinished_wait_secs={hardship_wait}",
                               f"turn.silence_after_barge_in_secs={silence[0]}",
                               f"turn.silence_prompts_secs={silence[1]}",
                               f"turn.silence_close_secs={silence[2]}"])
@@ -305,3 +307,35 @@ def test_confidence_note_shows_languages_deepgram_detected():
     r = NS(channel=NS(alternatives=[NS(confidence=0.9, languages=["hi", "en"],
                                        words=[NS(word="bies", punctuated_word="Bies.", confidence=0.59)])]))
     assert confidence_note([r]) == "confidence 0.90 | langs en,hi | low words: Bies.(0.59)"
+
+
+# Hardship heard (owner, 2026-11-04): wait longer mid-sentence and speak a little slower.
+async def test_hardship_words_get_the_longer_wait(make):
+    brain = FakeBrain()
+    p = make(brain, unfinished_wait=0.05, hardship_wait=0.4)
+    await feed(p, VADUserStartedSpeakingFrame(), final("मेरी job चली गई है और"), VADUserStoppedSpeakingFrame(),
+               settle=0.15)
+    assert brain.turns == []  # the normal 0.05 s wait would have replied already
+    await feed(p, VADUserStartedSpeakingFrame(), final("पैसे का problem है."), VADUserStoppedSpeakingFrame())
+    assert brain.turns == ["मेरी job चली गई है और पैसे का problem है."]
+
+
+async def test_slower_pace_sent_once_before_the_reply(make):
+    from pipecat.frames.frames import TTSUpdateSettingsFrame
+    brain = FakeBrain()
+    brain.hardship_voice = True
+    p = make(brain)
+    for text in ("मेरी job चली गई है.", "हाँ."):
+        await feed(p, VADUserStartedSpeakingFrame(), final(text), VADUserStoppedSpeakingFrame(), settle=0.2)
+    kinds = [type(f).__name__ for f in p.pushed]
+    assert kinds.count("TTSUpdateSettingsFrame") == 1
+    assert kinds.index("TTSUpdateSettingsFrame") < kinds.index("LLMFullResponseStartFrame")
+    assert next(f for f in p.pushed if isinstance(f, TTSUpdateSettingsFrame)).delta.pace == 0.9
+
+
+async def test_no_pace_change_without_hardship(make):
+    brain = FakeBrain()
+    p = make(brain)
+    await feed(p, VADUserStartedSpeakingFrame(), final("Haan, main pay kar dungi."), VADUserStoppedSpeakingFrame(),
+               settle=0.2)
+    assert not any(type(f).__name__ == "TTSUpdateSettingsFrame" for f in p.pushed)

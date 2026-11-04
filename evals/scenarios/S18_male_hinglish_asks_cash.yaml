@@ -1,0 +1,24 @@
+id: S18
+name: male_hinglish_asks_cash
+borrower_id: B006
+today: "2026-11-03"
+
+persona: "Amit Kumar, 42, shopkeeper, friendly, speaks Hinglish (Hindi with English words), male."
+
+hidden_goal: >
+  Verify correctly. Ask how much the late fee is if you pay late. Then ask whether you can pay in
+  cash to someone who comes to collect it, because you are not comfortable with online payment.
+  When told how to pay, agree to try the payment link and say you will pay before the due date.
+
+opening: "answers normally, busy at the shop"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, will_pay]
+  escalate_to_human: false
+
+covers: [G-08, F-04, Q-policy, language]
+runs: 3
+set: dev

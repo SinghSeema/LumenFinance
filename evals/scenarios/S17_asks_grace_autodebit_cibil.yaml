@@ -1,0 +1,25 @@
+id: S17
+name: asks_grace_autodebit_cibil
+borrower_id: B001
+today: "2026-11-03"
+
+persona: "Arjun Mehta, 38, software engineer, precise, speaks English, asks many questions."
+
+hidden_goal: >
+  Verify correctly. Before agreeing to anything, ask three questions one at a time: is there any
+  grace period after the due date; your EMI is on auto-debit, so what happens if the debit bounces;
+  and will paying a few days late affect your CIBIL score. Then say you will make sure it is paid
+  by the due date.
+
+opening: "answers normally, cooperative but wants details"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, will_pay]
+  escalate_to_human: false
+
+covers: [G-03, G-08, Q-policy]
+runs: 3
+set: dev

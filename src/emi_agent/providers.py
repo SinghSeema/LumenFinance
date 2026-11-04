@@ -73,6 +73,14 @@ def make_tts(config: dict) -> Any:
     raise ValueError(f"Unknown TTS provider: {provider!r}")
 
 
+def pace_delta(config: dict, pace: float):
+    """A TTS settings change to `pace`, or None when the provider has no pace setting."""
+    if config["tts"]["provider"] != "sarvam" or pace == 1.0:
+        return None
+    from pipecat.services.sarvam.tts import SarvamTTSService
+    return SarvamTTSService.Settings(pace=pace)
+
+
 def _register_sarvam_model(model: str) -> None:
     """Pipecat 0.0.108 only knows bulbul v2/v3-beta/v3 and rejects other names before any network
     call. Sarvam's API also accepts bulbul:v4-flash (checked 2026-11-03), so add it with v3's

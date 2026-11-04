@@ -88,6 +88,8 @@ class CallState:
     tool_calls: list[dict] = field(default_factory=list)
     heard: list[str] = field(default_factory=list)  # borrower utterances, for grounding checks
     last_agent: str = ""  # what the agent said last turn, for the escalation check
+    special: str | None = None  # hardship | dispute_amount | not_mine: the code-owned flow (special.py)
+    special_step: int = 0  # the step the model is told to do next; moves on only once heard
 
     def disclose(self, facts: LoanFacts) -> None:
         now = time.time()

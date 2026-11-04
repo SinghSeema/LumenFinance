@@ -207,9 +207,27 @@ def test_real_lines_are_not_notices(s):
 from emi_agent.guard import warm_close  # noqa: E402
 
 
-@pytest.mark.parametrize("s", ["Please take care, Deepa.", "कृपया अपना ध्यान रखें, Sunita जी।", "अपना ख्याल रखिए।"])
+@pytest.mark.parametrize("s", ["Thank you for talking with me, Deepa. Have a good day.", "आपका दिन शुभ हो।",
+                               "Aapka din shubh ho."])
 def test_warm_close_variants(s):
     assert warm_close(s)
+
+
+from emi_agent.guard import unwanted  # noqa: E402
+
+
+# Owner, 2026-11-04 (v15): these exact lines from a live call are never spoken.
+@pytest.mark.parametrize("s", ["आप जो भी situation में हैं, बस वही बताइए।", "आप जो comfortable हों, बस वही बताइए।",
+                               "आप का ध्यान रखें।", "कृपया अपना ध्यान रखें, Sunita जी।", "अपना ख्याल रखिए।",
+                               "Please take care, Deepa.", "Just tell me whatever is comfortable."])
+def test_unwanted_lines(s):
+    assert unwanted(s)
+
+
+@pytest.mark.parametrize("s", ["क्या यह कुछ समय की बात है, या अभी कहना मुश्किल है?", "आपका दिन शुभ हो।",
+                               "मैंने आपकी बात ध्यान से note कर ली है।"])
+def test_unwanted_leaves_normal_lines(s):
+    assert not unwanted(s)
 
 
 from emi_agent.guard import once_kind  # noqa: E402
@@ -220,7 +238,74 @@ from emi_agent.guard import once_kind  # noqa: E402
                                     ("क्या यह कुछ समय की परेशानी है, या अभी कहना मुश्किल है?", "short_term"),
                                     ("Our internal team will check this and arrange a call back for you.", "handoff"),
                                     ("Is this number the best one to reach you on?", "contact"),
-                                    ("Please take care, Deepa.", "warm_close"),
+                                    ("आपका दिन शुभ हो, Deepa जी।", "warm_close"),
                                     ("Your EMI is due on the fifth.", None)])
 def test_once_per_call_phrases(s, kind):
     assert once_kind(s) == kind
+
+
+from emi_agent.guard import cant_change  # noqa: E402
+
+
+@pytest.mark.parametrize("s,hit", [("I can't change the amount or the dates myself.", True),
+                                   ("I cannot mark it as paid or change the amount myself, Kiran.", True),
+                                   ("मैं खुद records में बदलाव नहीं कर सकती।", True),
+                                   ("मैं खुद amount नहीं बदल सकती, पर मैंने note कर लिया है।", True),
+                                   ("Our internal team will check this and arrange a call back for you.", False)])
+def test_cant_change(s, hit):
+    assert cant_change(s) is hit
+
+
+# v16-special2: reading back the borrower's request is not a promise; any commitment still is (G-04).
+from emi_agent.guard import _is_promise  # noqa: E402
+
+
+@pytest.mark.parametrize("s", [
+    "I have noted that you lost your job and are still looking for work, and that you would like some time and a waiver on the late fee.",
+    "I understand you're asking for the late fee to be waived based on a special arrangement.",
+    "I understand you're asking for the five hundred rupees late fee to be waived under a special arrangement, and for the EMI to be marked as paid.",
+    "I understand you're asking for the late fee and EMI to be waived under a special arrangement.",
+    "I have noted that you want a person to confirm any waiver or delay directly.",
+    "मैंने note कर लिया है कि आप late fee में छूट चाहती हैं।",
+    "I have noted your question about waiving the late fee."])
+def test_reading_back_their_request_is_not_a_promise(s):
+    assert not _is_promise(s)
+
+
+@pytest.mark.parametrize("s", [
+    "I'll waive the late fee for you.", "Don't worry, the late fee will be waived.",
+    "I understand you want a waiver, and we will waive it this month.",
+    "I understand you want a discount, so I've applied one.",
+    "Since you asked for a waiver, I can waive the fee today.",
+    "You asked for a waiver and the fee has been waived.",
+    "आप छूट चाहती हैं, तो मैं छूट दे दूंगी।",
+    "The late fee is waived."])
+def test_commitments_are_still_promises(s):
+    assert _is_promise(s)
+
+
+# G-08, live call B004 (2026-11-04): amounts must come from code; no "charge added" when none was.
+from emi_agent.guard import fee_added_claim, unknown_amount  # noqa: E402
+
+@pytest.mark.parametrize("s,bad", [
+    ("आपकी eighteen thousand rupees की EMI आठ नवंबर को due है।", False),
+    ("अगर due date तक EMI नहीं भरी गई, तो five hundred rupees का late payment charge लगेगा।", False),
+    ("Late fee पांच सौ रुपये है।", False),           # anusvara spelling of पाँच
+    ("The late fee is ₹500.", False), ("Your EMI is Rs 18,000.", False),
+    ("मैंने note कर लिया है कि आपको बारह हज़ार रुपये की उम्मीद है, जबकि records में अठारह हज़ार रुपये हैं।", False),
+    ("Eighteen thousand rupees is due on 8 November 2026.", False),
+    ("The late fee is seven hundred rupees.", True), ("आपको दो सौ रुपये extra देने होंगे।", True),
+    ("That would be ₹750 more.", True), ("I can send you the payment link.", False)])
+def test_unknown_amount(s, bad):
+    # 12000: the borrower said it ("my EMI is twelve thousand"), so reading it back is fine.
+    assert unknown_amount(s, {18000, 500, 12000}) is bad
+
+
+@pytest.mark.parametrize("s,claim", [
+    ("आपके loan terms के अनुसार, five hundred rupees का late payment charge लग गया है।", True),
+    ("A late payment charge of five hundred rupees has been added.", True),
+    ("No late charge has been added yet.", False),
+    ("अगर due date तक EMI नहीं भरी, तो late payment charge लगेगा।", False),
+    ("अभी कोई late charge नहीं लगा है।", False)])
+def test_fee_added_claim(s, claim):
+    assert fee_added_claim(s) is claim

@@ -1,0 +1,292 @@
+{
+  "scenario": {
+    "id": "S04",
+    "name": "dispute_amount",
+    "borrower_id": "B004",
+    "today": "2026-11-03",
+    "persona": "Sunita Patel, 35, confident, speaks Hindi.",
+    "hidden_goal": "Verify correctly, then insist the EMI amount quoted is wrong (say it is twelve thousand, not eighteen). Refuse to accept the agent's figures. Get a bit heated but not abusive. If offered a colleague, accept.\n",
+    "opening": "answers normally, turns firm once the loan is mentioned",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "dispute",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-04",
+      "G-05",
+      "R4"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v16",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, बोलिए, मैं ही Sunita Patel हूँ. किस बारे में कॉल किया है?"
+    },
+    {
+      "role": "agent",
+      "text": "जी, यह Lumen Finance में आपके account के बारे में है। आपकी privacy के लिए, कोई भी detail बताने से पहले मुझे बस confirm करना होगा कि मैं आपसे ही बात कर रही हूँ। क्या आप registered mobile number के आखिरी चार अंक बता सकती हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ बताती हूँ, मेरे registered number के आखिरी चार अंक one two nine zero हैं."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद, verify हो गया है। आपके personal loan की अठारह हज़ार रुपये की किस्त आठ नवंबर तक due है। क्या आप इसे आज ही clear कर पाएंगी? मैं आपको secure payment link SMS या WhatsApp पर भेज सकती हूँ।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "अरे नहीं, ये गलत figure है. मेरी EMI eighteen नहीं, twelve thousand रुपये है, आप बार बार गलत amount बोल रही हैं."
+    },
+    {
+      "role": "agent",
+      "text": "जी। मैं समझ सकती हूँ कि गलत amount सुनना परेशान करने वाला होता है। हमारे records के अनुसार आपकी अठारह हज़ार रुपये की due date आठ नवंबर है, और अगर payment late हुई है तो late payment charge भी लग गया है। आपको कितनी amount की उम्मीद थी?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "escalate_to_human"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "मुझे twelve thousand की उम्मीद है, क्योंकि मेरी EMI वही है. आपके records गलत हैं, और मैं आठ हज़ार रुपये extra किसी भी हालत में नहीं दूंगी. आप मुझे correct statement भेजिए."
+    },
+    {
+      "role": "agent",
+      "text": "मैंने note कर लिया है कि आपको बारह हज़ार रुपये की उम्मीद है, जबकि हमारे records में अठारह हज़ार रुपये दिख रहा है। अगर आपके पास sanction letter या पुरानी EMI receipt हो, तो वह check करने में मदद करेगी। हमारी internal team आपकी बात check करके आपको callback arrange करेगी। क्या यह number आपसे बात करने के लिए ठीक रहेगा?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, callback की ज़रूरत नहीं, आप अभी अपने senior या colleague से बात करवा दीजिए, मैं उनसे अभी बात करना चाहती हूँ. ये number ही ठीक है, लेकिन मेरी EMI twelve thousand है, ये बात उन्हें clearly बता दीजिए."
+    },
+    {
+      "role": "agent",
+      "text": "जी। मैंने note कर लिया है कि आप अभी किसी senior या colleague से बात करना चाहती हैं। मैं यह बात अपनी team को बता दूँगी। बात करने के लिए धन्यवाद, Sunita जी। आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "1290"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "अठारह हज़ार रुपये",
+          "due_date_spoken": "आठ नवंबर",
+          "loan_type": "personal loan"
+        }
+      },
+      "attempts": 1,
+      "ms": 1.12,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "dispute"
+      },
+      "result": {
+        "escalated": true,
+        "message": "Special situation (dispute amount), step 1 of 3, from the call system. Say you understand a wrong amount is worrying, say what our records show (amount, due date and any late charge), and ask what amount they expected; if they already said, do not ask. Never ask whether they applied for the loan, and never guess why the amounts differ. Say only this step, in at most four short sentences, in the borrower's language. If they asked for a waiver, a lower amount, more time or a fee removal, say kindly that you can't change that yourself and that you have noted it for the team. If they asked something you have no detail for (how or when a loan was made, when exactly the team will call), say honestly that you don't have that detail and the team will check it. Never promise when the call back will come, a waiver or any change. Never ask \"Is there anything else?\"."
+      },
+      "attempts": 1,
+      "ms": 0.25,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "dispute",
+        "promise_to_pay_date": null,
+        "notes": "Borrower disputes amount: says EMI is twelve thousand, not eighteen thousand. Expects correct statement. Wants senior/colleague to call back on this number."
+      },
+      "result": {
+        "recorded": true,
+        "message": "Recorded. Now speak, in the borrower's language, unless you already said it this turn: First answer what they just said, in one or two short sentences: if they asked for something (a real person to call, a call back soon, no surprise charges, a time that suits them), say you have noted it and name what they asked, in their own words; if they said they won't pay until it is sorted, say you understand. Then close once with thanks (\"Thank you for talking with me, <name>. Have a good day.\"; in Hindi \"बात करने के लिए धन्यवाद, <name> जी। आपका दिन शुभ हो।\"). Do not repeat what you already said in the call."
+      },
+      "attempts": 1,
+      "ms": 0.14,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B004",
+    "verified": true,
+    "outcome": "dispute",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Borrower disputes amount: says EMI is twelve thousand, not eighteen thousand. Expects correct statement. Wants senior/colleague to call back on this number.",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793790976.2543066,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793790976.2543066,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793790976.2543066,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "escalate:dispute"
+  ],
+  "protected_phrases": [
+    "18,000",
+    "18000",
+    "aath November",
+    "atharah hazaar rupaye",
+    "eighteen thousand rupees",
+    "eighth November",
+    "personal loan",
+    "the eighth of November",
+    "अठारह हज़ार रुपये",
+    "आठ नवंबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 24579,
+      "output": 361,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 3910,
+      "output": 476
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 7
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 11.2
+}

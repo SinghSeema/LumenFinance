@@ -11,12 +11,13 @@ from datetime import date
 from pathlib import Path
 from typing import AsyncIterator
 
-from emi_agent import context, guard, speakable
+from emi_agent import context, guard, policy, speakable, special
 from emi_agent.heard import find_dob, find_last4, partial_digits
 from emi_agent.language import LanguageTracker, detect, language_words, says_hindi_numbers
 from emi_agent.llm import LLMError
 from emi_agent.outcome import Outcome, OutcomeRecord, append_record
 from emi_agent.state import Borrower, CallState, Stage
+from emi_agent.speech_format import amount_to_words
 from emi_agent.tools import TOOL_SCHEMAS, Tools, loan_facts, protected_phrases
 
 MAX_TOOL_ROUNDS = 4
@@ -116,17 +117,24 @@ class Brain:
         self._said_closing = False  # the last words before hanging up were actually spoken
         self._first_name = borrower.first_name
         self._protected = protected_phrases(borrower, today)
+        # Rupee amounts the agent may say once verified: the EMI, a charge already added, the policy (G-08).
+        self._amounts = [borrower.emi_amount] + ([borrower.late_fee] if borrower.days_overdue and borrower.late_fee
+                                                 else []) + list(policy.amounts().values())
+        self._fee_added = bool(borrower.days_overdue and borrower.late_fee)
         self._pending_notes: list[str] = []
         self._dob_pending = False  # a partial date of birth was given; the next answer completes it
         self._last4_pending = False  # fewer than four digits were given ("It's double" | "7 4 3")
         self._attempts_at_turn_start = 0  # a verify result may be stated only if this went up
         self._muted = False  # rest of this reply dropped after an invented verify result
         self._bridges, self._bridge_noted = 0, False
+        self._bridge_counts: dict[str, int] = {}  # per tool, to rotate bridge lines over the call
         self._said_once: set[str] = set()  # apology / hand-off / contact question / warm close said
         self._once_this_turn: set[str] = set()  # ...of which in the reply being spoken now
         self._cut_chain: list[str] = []  # borrower fragments since the last reply they heard in full
         self._unheard = False  # the reply being cut now was cut within a second: not heard
         self._last_reply_cut = False  # the previous reply was cut by a barge-in
+        self._asked_this_turn = False
+        self.hardship_voice = False  # hardship heard: the bot slows the voice and waits longer (special.py)
         self._clock = clock
         self._started = clock()
 
@@ -148,6 +156,7 @@ class Brain:
             self._pending_notes = []
 
         self._attempts_at_turn_start = attempts_before
+        self._asked_this_turn = False  # in a special-situation step, a question ends the reply
         self._muted = False  # set when an invented verification result was replaced
         self._bridges, self._bridge_noted = 0, False  # bridge lines said this turn (no dead air)
         spoken: list[str] = []
@@ -198,7 +207,10 @@ class Brain:
                     continue
                 if kind == "tool_start":
                     if not spoken and not buf.strip() and not self._muted and bridge is None:
-                        bridge = context.bridge(value, self.state.reply_language, self.script)
+                        n = self._bridge_counts.get(value, 0)
+                        self._bridge_counts[value] = n + 1
+                        bridge = context.bridge(value, self.state.reply_language, self.script,
+                                                special=bool(self.state.special), n=n)
                         self._bridges += 1
                         spoken.append(bridge)
                         yield Sentence(bridge, bridge=True)
@@ -237,6 +249,9 @@ class Brain:
     def _end_turn(self, spoken: list[str], finished: bool) -> None:
         s = self.state
         said = " ".join(spoken)
+        heard_it = bool(spoken) and (finished or not self._unheard)
+        if s.special and heard_it:
+            self._next_special_step()
         if not finished:
             # Interrupted: the reply never reached history, so record what was said and that it was cut (LLD 9).
             if self._unheard:
@@ -260,6 +275,15 @@ class Brain:
             self.should_hang_up = True
         if self.should_hang_up and finished and spoken:
             self._said_closing = True
+
+    def _next_special_step(self) -> None:
+        """The borrower heard this step, so the next one comes; after the close, the call ends.
+        A reply cut at once was not heard, so its step is given again (live call 16:03)."""
+        s = self.state
+        if not special.is_last(s.special, s.special_step):
+            s.special_step += 1
+        elif "warm_close" in self._said_once or s.outcome is not None:
+            self.should_hang_up = True
 
     def _add_turn_notes(self, user_text: str, lang_hint: str | None) -> None:
         s = self.state
@@ -296,6 +320,12 @@ class Brain:
             s.flags.add("time_up")
             self._pending_notes.append(context.NOTE_TIME_UP)
         self._code_verify()
+        if self._cut_chain:  # the borrower's sentence was split by barge-ins (live call B004)
+            self._pending_notes.append(context.note_split(lang_text))
+        if special.hardship_cue(lang_text) or s.special == "hardship":
+            self.hardship_voice = True
+        if s.special and not {"stop_requested", "time_up"} & s.flags:
+            self._pending_notes.append(special.instruction(s.special, s.special_step, self._said_once))
 
     def _code_verify(self) -> None:
         """Check identity in code when the borrower answers the question, so the model needs one
@@ -362,15 +392,25 @@ class Brain:
         s = self.state
         if self._muted:
             return None
+        if s.special and self._asked_this_turn:
+            # A person stops after a question: "Is this short-term? ... They will arrange a call back."
+            # crammed the next step into this one (v16-special3 S03 run 1, S04 run 1).
+            s.guard_hits.append({"category": "after_question", "original": sentence, "spoken": "",
+                                 "stage": s.stage.value, "verified": s.verified})
+            return None
         upset = any(f in s.flags for f in ("escalate:hardship", "escalate:dispute"))  # v14 special situations
         once = guard.once_kind(sentence)  # apology, hand-off, contact question, warm close: once per call
-        if (upset and guard.anything_else(sentence)) or (once and once in self._said_once):
+        if ((upset and guard.anything_else(sentence)) or guard.unwanted(sentence)
+                or (once and once in self._said_once)):
             s.guard_hits.append({"category": "dropped_filler", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})
             return None
         if once:
             self._said_once.add(once)
             self._once_this_turn.add(once)
+        if guard.cant_change(sentence):  # tracked so the flow can say "already said" (never dropped)
+            self._said_once.add("cant_change")
+            self._once_this_turn.add("cant_change")
         if guard.invented_notice(sentence):
             s.guard_hits.append({"category": "invented_notice", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})
@@ -387,6 +427,8 @@ class Brain:
                                  "stage": s.stage.value, "verified": s.verified})
             self._pending_notes.append(context.note_guard(line))
             return Sentence(line, "invented_verify")
+        if s.verified and (line := self._money_check(sentence)):
+            return line
         r = guard.check(sentence, verified=s.verified, protected=self._protected,
                         lang=s.reply_language, script=self.script, heard=s.heard)
         if r.category and guard.handoff(r.text):  # the safe line carries the hand-off: once per call
@@ -403,7 +445,24 @@ class Brain:
         if hits:
             s.speech_hits.append({"hits": hits, "original": r.text, "spoken": text,
                                   "lang": s.reply_language})
+        if s.special and text.rstrip().endswith("?"):
+            self._asked_this_turn = True
         return Sentence(text, r.category, speech=tuple(hits))  # keyword: a positional third arg was "bridge"
+
+    def _money_check(self, sentence: str) -> Sentence | None:
+        """G-08: a late charge said to be added when none was, or a rupee amount code never gave."""
+        s = self.state
+        if not self._fee_added and guard.fee_added_claim(sentence):
+            fee = amount_to_words(policy.amounts()["late_fee"], self.tools._nlang, self.script)
+            line, category = context.fee_not_added(s.reply_language, self.script, fee), "fee_not_added"
+        elif guard.unknown_amount(sentence, set(self._amounts) | {n for u in s.heard for n in guard.amounts_in(u)}):
+            line, category = context.no_amount(s.reply_language, self.script), "unknown_amount"
+        else:
+            return None
+        s.guard_hits.append({"category": category, "original": sentence, "spoken": line,
+                             "stage": s.stage.value, "verified": s.verified})
+        self._pending_notes.append(context.note_guard(line))
+        return Sentence(line, category)
 
     def reply_unheard(self) -> None:
         """The bot cut the agent within a second of playing: the borrower did not hear the reply."""

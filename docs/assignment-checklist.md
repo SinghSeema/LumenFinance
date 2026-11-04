@@ -60,10 +60,10 @@ Every item in the brief mapped to where it is handled. Status: **Specified** (in
 
 | Deliverable | Where | Status |
 | --- | --- | --- |
-| Repo with README (run agent and evals, conversation structure, design decisions) | DL-1 | Open |
-| Demo recording, 3 to 5 min, 2 or 3 calls, one difficult | DL-2 | Open |
-| Eval suite and results | DL-3 | Open |
-| Mock data and tools | DL-4 | Open |
+| Repo with README (run agent and evals, conversation structure, design decisions) | DL-1 | Done 2026-11-04: key decisions and mock data sections added, v17 results |
+| Demo recording, 3 to 5 min, 2 or 3 calls, one difficult | DL-2 | Script ready (`docs/demo-script.md`); recording is the owner's |
+| Eval suite and results | DL-3 | Done 2026-11-04: v17 unseen stress run + fixes, `docs/eval-report.md`, `results/dashboard.html` |
+| Mock data and tools | DL-4 | Done: `data/`, `src/emi_agent/tools.py`; README section "Mock data and tools" |
 
 ## Demo plan
 

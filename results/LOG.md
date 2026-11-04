@@ -371,3 +371,16 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 
 - v17-stop (20261104-184730) S12 x3: 2/3; the model ignored the new note (no apology) and missed "call मत करो" (C41).
 - v17-stop2 (184832) S12 x3: 3/3; every close apologises; the two verified calls add the gentle reminder line, the unverified one does not.
+
+## 2026-11-04 20:50 v17 unseen hold-out (stress S21-S30) + original hold-out, x3
+
+- 20261104-204947-v17-holdout-stress: 38/45 (hold-out 14/15, stress 24/30), 0 leaks, escalation precision 0.75 recall 1.0, process checks 15/15, 2 language mismatches.
+- Tokens: agent 992,443 in / 11,661 out; simulator 105,686 / 10,474. About Rs 34 at list price; the runner estimated Rs 17 (E13, estimate updated).
+- Judge glm5.3-flash: politeness 4.76, empathy 3.00, firmness 4.96, clarity 4.93, naturalness 3.87 (57k in / 20k out); 1 flag kept (S21 run 3, confirmed the borrower's wrong remaining sum).
+- Real defects: S24 x3 callback said not recorded (C54), S27 run 2 child escalated + named (C55), S30 run 1 conditional stop (C56), S14b run 1 silent retry (C57). Test-side: S30 run 2 simulator said stop first.
+- Guard: all 6 unverified_disclosure replacements were refusals, not leaks (C59, open).
+
+## 2026-11-04 21:02 fixes C54-C57 re-run (S14b, S24, S27, S30 x3)
+
+- 20261104-210209-v17-holdout-fix: 10/12; S24 3/3, S27 3/3, S14b 3/3, S30 1/3 (2 test-side: simulator said stop in turn 1). 0 leaks. About Rs 6 (agent 181,840 / 1,951; simulator 13,275 / 1,200).
+- New open: C58 (callback offered after failed link without asking when). 1034 tests.

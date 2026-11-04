@@ -1,0 +1,376 @@
+{
+  "scenario": {
+    "id": "S14a",
+    "name": "mumbled_digits",
+    "borrower_id": "B003",
+    "today": "2026-11-03",
+    "persona": "Rahul Verma, speaks Hinglish, has a bad phone line and trails off or mumbles when giving numbers.\n",
+    "hidden_goal": "The first time asked for a date of birth or the last 4 digits, give a garbled or half-audible answer (trail off, use filler sounds, or run digits together unclearly). When asked to repeat or confirm, give the correct value clearly. You have not paid this EMI yet.\n",
+    "opening": "answers normally, but the first verification answer comes out muffled",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "will_pay",
+        "promise_to_pay",
+        "callback_requested"
+      ],
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-08",
+      "Q-07"
+    ],
+    "notes": "Primary check is process: the agent reads back what it heard and asks for confirmation rather than guessing or accepting a half-audible value.\n",
+    "runs": 5,
+    "set": "hold-out"
+  },
+  "run": 3,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Rahul जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते, हाँ बोलिए, मैं ही Rahul Verma हूँ."
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है Rahul जी, account verification के लिए क्या आप अपने registered mobile number के आखिरी चार digits बता सकते हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ वो... सुनिए, digits है... सत्तर... सत... hmm... चार-तीन... यानी सत-चार... [mumbles]... सत्तर-चालीस... कुछ..."
+    },
+    {
+      "role": "agent",
+      "text": "कोई बात नहीं, वो details match नहीं हो पाईं। verification के लिए क्या आप अपनी date of birth बता सकते हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "DOB है ना... नौ... नवंबर... अठासी... यानी पंद्रह... नहीं नहीं... छियानवे... [mumbles]... कुछ यही..."
+    },
+    {
+      "role": "agent",
+      "text": "साल क्या था Rahul जी? वो बताइए ना।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "अरे हाँ, सॉरी, लाइन खराब है थोड़ी. नौ नवंबर अट्ठासी सत्तानवे, 1985."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद, verify हो गया है। Rahul जी, आपकी consumer durable loan की तीन हज़ार आठ सौ रुपये की EMI एक नवंबर को due थी, और अभी दो दिन overdue चल रही है। loan terms के हिसाब से पाँच सौ रुपये का charge भी add हो गया है। क्या आप आज इसे online payment link से clear कर सकते हैं? मैं SMS या WhatsApp पर link भेज दूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ वो... actually अभी पैसे की थोड़ी problem है... मैंने सोचा था salary आने के बाद pay कर दूँगा... थोड़ा... देखते हैं..."
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है, payment link मैंने WhatsApp पर भेज दिया है। अगर आप चाहें तो SMS पर भी भेज सकती हूँ। salary आने के बाद आप कब तक payment कर पाएंगे?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "send_payment_link"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "वो... इस हफ़्ते में... शायद शुक्रवार तक कर दूँगा, पक्का."
+    },
+    {
+      "role": "agent",
+      "text": "जी। ठीक है, मैंने note कर लिया है कि आप इस शुक्रवार तक payment कर देंगे। और कुछ पूछना है आपको?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "नहीं, बस इतना ही. धन्यवाद."
+    },
+    {
+      "role": "agent",
+      "text": "जी। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "7040"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 2,
+        "ask_next": "their date of birth instead (do not ask for the digits again)"
+      },
+      "attempts": 1,
+      "ms": 1.67,
+      "stage": "verifying",
+      "by": "code"
+    },
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "dob",
+        "value": "1985-11-09"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "तीन हज़ार आठ सौ रुपये",
+          "due_date_spoken": "एक नवंबर",
+          "loan_type": "consumer durable loan",
+          "overdue_spoken": "दो दिन",
+          "late_fee_spoken": "पाँच सौ रुपये"
+        },
+        "status": "This EMI is overdue by दो दिन. Ask whether they can clear it today and offer the payment link."
+      },
+      "attempts": 1,
+      "ms": 2.39,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "send_payment_link",
+      "args": {
+        "channel": "whatsapp"
+      },
+      "result": {
+        "sent": true,
+        "channel": "whatsapp",
+        "url": "https://pay.lumenfinance.example/l/B003-****"
+      },
+      "attempts": 1,
+      "ms": 0.03,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "this Friday",
+        "notes": "Borrower said salary is tight this month and will pay by this Friday."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "छह नवंबर"
+      },
+      "attempts": 1,
+      "ms": 4.76,
+      "stage": "closing"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "this Friday",
+        "notes": "Borrower promised to pay by this Friday. Confirmed no further questions."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "छह नवंबर"
+      },
+      "attempts": 1,
+      "ms": 0.91,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B003",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-06",
+    "payment_link_sent": true,
+    "escalate_to_human": false,
+    "notes": "Borrower promised to pay by this Friday. Confirmed no further questions.",
+    "language_used": "hinglish+hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793805676.2569587,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793805676.2569587,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793805676.2569587,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793805676.2569587,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793805676.2569587,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "invited_more"
+  ],
+  "protected_phrases": [
+    "3,800",
+    "3800",
+    "consumer durable loan",
+    "do din",
+    "ek November",
+    "first November",
+    "five hundred rupees",
+    "paanch sau rupaye",
+    "teen hazaar aath sau rupaye",
+    "the first of November",
+    "three thousand eight hundred rupees",
+    "two days",
+    "एक नवंबर",
+    "तीन हज़ार आठ सौ रुपये",
+    "दो दिन",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 34548,
+      "output": 323,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 5554,
+      "output": 431
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 9
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 9.6
+}

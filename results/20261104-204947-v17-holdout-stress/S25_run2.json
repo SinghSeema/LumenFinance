@@ -1,0 +1,316 @@
+{
+  "scenario": {
+    "id": "S25",
+    "name": "foreclosure_amount",
+    "borrower_id": "B001",
+    "today": "2026-11-03",
+    "persona": "The borrower, speaks English, financially comfortable, thinking of closing the loan early.\n",
+    "hidden_goal": "Verify when asked. Ask how much you would need to pay to close the whole loan today, and whether there is a foreclosure charge. Insist on a number once. Then agree to pay this month's EMI by the due date.\n",
+    "opening": "answers in English, businesslike",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "will_pay"
+      ]
+    },
+    "covers": [
+      "G-09",
+      "G-04"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, I'm an AI assistant calling from Lumen Finance. Am I speaking with Arjun?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, this is Arjun Mehta speaking. What is this regarding?"
+    },
+    {
+      "role": "agent",
+      "text": "It is about an important matter on your account with Lumen Finance. For account verification, could you share the last four digits of your registered mobile number?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Sure, it's 4821."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you, Arjun. Your personal loan EMI of twelve thousand five hundred rupees is due the day after tomorrow. There is no late charge yet. Should I send you a secure payment link by SMS or WhatsApp so you can complete it before the due date?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Actually, before that — I'm thinking of closing the entire loan early. Can you tell me how much I'd need to pay to settle it in full today, and whether there's any foreclosure charge?"
+    },
+    {
+      "role": "agent",
+      "text": "One moment, let me check the details for you. I don't have the exact closure amount on this call. Our internal team can check it and arrange a call back for you. Would you like me to send the payment link for your upcoming EMI, or shall we wait until after that discussion?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "get_policy"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "I'd rather have a number now, not a callback — can you check the system and give me the exact foreclosure amount today?"
+    },
+    {
+      "role": "agent",
+      "text": "I understand you would like that now, but I genuinely don't have access to the exact foreclosure figure on this call. Would you like me to send the payment link for your EMI instead?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Fine, I'll wait for the callback on the closure amount. For now, yes, send me the payment link — I'll pay this month's EMI by the due date."
+    },
+    {
+      "role": "agent",
+      "text": "Sure, I'm sending the link now. Thank you for your time, have a good day.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "send_payment_link",
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "4821"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "twelve thousand five hundred rupees",
+          "due_date_spoken": "the day after tomorrow",
+          "loan_type": "personal loan"
+        },
+        "status": "This EMI is not yet due: it is due on the day after tomorrow. Say \"is due\", never \"was due\" or \"overdue\". No late charge has been added. Offer the payment link so it is paid before the due date; do not ask them to pay today."
+      },
+      "attempts": 1,
+      "ms": 0.46,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "get_policy",
+      "args": {
+        "topic": "early_closure"
+      },
+      "result": {
+        "topic": "early_closure",
+        "policy": "Paying off the loan early is possible. The exact closure amount comes from our internal team, who can arrange a call back; it is not given on this call.",
+        "message": "Answer only what they asked, in one or two short sentences, from this text. Never add an amount, date or rule that is not in it."
+      },
+      "attempts": 1,
+      "ms": 0.13,
+      "stage": "intent"
+    },
+    {
+      "name": "send_payment_link",
+      "args": {
+        "channel": "sms"
+      },
+      "result": {
+        "sent": true,
+        "channel": "sms",
+        "url": "https://pay.lumenfinance.example/l/B001-****"
+      },
+      "attempts": 1,
+      "ms": 0.04,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "the day after tomorrow",
+        "notes": "Borrower agreed to pay EMI by due date. Also requested early closure amount which will be handled by internal team callback. Payment link sent via SMS."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the day after tomorrow"
+      },
+      "attempts": 1,
+      "ms": 0.61,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B001",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-05",
+    "payment_link_sent": true,
+    "escalate_to_human": false,
+    "notes": "Borrower agreed to pay EMI by due date. Also requested early closure amount which will be handled by internal team callback. Payment link sent via SMS.",
+    "language_used": "en",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793805808.2223625,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793805808.2223625,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793805808.2223625,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [
+    {
+      "category": "dropped_filler",
+      "original": "Our internal team will check this and arrange a call back.",
+      "spoken": "",
+      "stage": "intent",
+      "verified": true
+    }
+  ],
+  "speech_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "12,500",
+    "12500",
+    "barah hazaar paanch sau rupaye",
+    "parson",
+    "personal loan",
+    "the day after tomorrow",
+    "twelve thousand five hundred rupees",
+    "परसों",
+    "बारह हज़ार पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 30751,
+      "output": 305,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 2247,
+      "output": 195
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 8
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 6.9
+}

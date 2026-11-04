@@ -11,7 +11,7 @@ from datetime import date
 from pathlib import Path
 from typing import AsyncIterator
 
-from emi_agent import context, guard, policy, speakable, special
+from emi_agent import context, dates, guard, policy, speakable, special
 from emi_agent.heard import find_dob, find_last4, partial_digits
 from emi_agent.language import _NEGATION, LanguageTracker, asks_numbers_in, detect, language_words, says_hindi_numbers
 from emi_agent.llm import LLMError
@@ -94,9 +94,15 @@ _NO_PAY = re.compile(
     re.IGNORECASE)
 
 
+# "I will pay on 20th November, so stop calling me before that" is a promise with a condition, not
+# a stop (v17 hold-out S30 run 1: the verification and the date given in the same turn were lost).
+_UNTIL_THEN = _words(r"before (?:that|then)", r"till then", r"until then", r"until i pay", r"tab tak",
+                     r"uske pehle", r"usse pehle", "तब तक", "उससे पहले", "उसके पहले")
+
+
 def is_stop_request(text: str) -> bool:
     t = text.strip().replace("’", "'")
-    if _STOP_STRONG.search(t):
+    if _STOP_STRONG.search(t) and not (_UNTIL_THEN.search(t) and not _PERMANENT.search(t)):
         return True
     # Sentence by sentence, as D-24 says: "8834. Aur suniye, is topic pe mujhe call mat karo." was not a
     # stop because the digits of the previous sentence counted as "not now" (v17-dev3 S12 run 2).
@@ -104,6 +110,13 @@ def is_stop_request(text: str) -> bool:
         if _STOP_WEAK.search(s) and (_PERMANENT.search(s) or not _NOT_NOW.search(_NO_PAY.sub(" ", s))):
             return True
     return False
+
+
+# The borrower asks to be called later ("call me back", "do ghante baad call kar lijiye").
+_CALL_LATER = re.compile(
+    r"call (?:me )?(?:back|later)|call back|(?:call|phone|fon|कॉल|फ़ोन|फोन) (?:kar|कर) (?:lijiye|lijie|lena|dena|"
+    r"लीजिए|लीजिये|लेना|दीजिए|देना)|baad (?:me|mein|main) (?:call|baat)|बाद में (?:call|कॉल|फ़ोन|फोन|बात)",
+    re.IGNORECASE)
 
 
 # "What's this about?" before verification (owner, 2026-11-04): answered first, without the loan.
@@ -161,6 +174,7 @@ class Brain:
         self._bridges, self._bridge_noted = 0, False
         self._filler: str | None = None
         self._invited = False
+        self._tool_failed = False
         self._bridge_counts: dict[str, int] = {}  # per tool, to rotate bridge lines over the call
         self._said_once: set[str] = set()  # apology / hand-off / contact question / warm close said
         self._once_this_turn: set[str] = set()  # ...of which in the reply being spoken now
@@ -195,6 +209,7 @@ class Brain:
         self._bridges, self._bridge_noted = 0, False  # bridge lines said this turn (no dead air)
         self._filler = None  # the slow-model filler bot.py had code say this turn (C47)
         self._invited = False  # this reply invited more questions: stop there and wait (C51)
+        self._tool_failed = False  # a tool failed this turn: the model must say so, no code close (C57)
         spoken: list[str] = []
         finished = False
         held = 0  # 1 once the hold line was said
@@ -217,14 +232,14 @@ class Brain:
                     await asyncio.sleep(HOLD_RETRY_SECS)
             # A bridge line ("I understand.") is not a reply: the closing is still owed.
             if len(spoken) == held + self._bridges and (s.stage is Stage.CLOSING or "stop_requested" in s.flags):
-                line = context.closing(s.reply_language, self.script, self._first_name)
+                line = context.closing(s.reply_language, self.script, self._close_name())
                 spoken.append(line)
                 yield Sentence(line)
             finished = True
         except LLMError:
             s.flags.add("llm_failed")
             # Outcome already recorded: the call's work is done, so thank them instead of apologising.
-            line = (context.closing(s.reply_language, self.script, self._first_name)
+            line = (context.closing(s.reply_language, self.script, self._close_name())
                     if s.outcome is not None else context.apology(s.reply_language, self.script))
             spoken.append(line)
             self.should_hang_up = True
@@ -331,6 +346,10 @@ class Brain:
         s = self.state
         if len(calls) != 1 or calls[0].name != "record_outcome":
             return False
+        # v17 hold-out S14b run 1: the retry of a failed link was announced ("Sure, I'm sending the link
+        # now"), failed again, and the code close followed, so the borrower never heard it failed.
+        if self._tool_failed:
+            return False
         if json.loads(results[0]["content"]) != {"recorded": True}:
             return False
         if len(spoken) != self._bridges or (s.heard and s.heard[-1].rstrip().endswith("?")):
@@ -338,8 +357,12 @@ class Brain:
         s.flags.add("code_closed")
         return True
 
+    def _close_name(self) -> str | None:
+        """The borrower's name only once verified: before that the listener may be someone else (C55)."""
+        return self._first_name if self.state.verified else None
+
     def _closing_line(self) -> Sentence:
-        line = context.closing(self.state.reply_language, self.script, self._first_name)
+        line = context.closing(self.state.reply_language, self.script, self._close_name())
         self._said_closing = True
         self.transcript.append(("agent", line))
         return Sentence(line)
@@ -492,7 +515,10 @@ class Brain:
             s.tool_calls.append({"name": name, "args": args, "result": result, "attempts": 0,
                                  "ms": 0, "stage": s.stage.value, "by": "blocked"})
             return result
-        return self.tools.call(name, args)
+        result = self.tools.call(name, args)
+        if isinstance(result, dict) and result.get("error") == "tool_failed":
+            self._tool_failed = True
+        return result
 
     def _guarded(self, sentence: str) -> Sentence | None:
         """The sentence as it will be spoken, or None to drop it."""
@@ -651,6 +677,14 @@ class Brain:
             for reason in ("hardship", "dispute"):
                 if f"escalate:{reason}" in s.flags and fallback is Outcome.unresolved:
                     fallback = Outcome(reason)
+            # v17 hold-out S24 x3: "driving hoon, do ghante baad call kar lijiye" got "I'll call you back in
+            # two hours" in words, but no tool was called. The borrower's request is the outcome.
+            asked = next((u for u in reversed(s.heard) if _CALL_LATER.search(u)), None)
+            if fallback is Outcome.unresolved and asked and not s.callback_time:
+                fallback = Outcome.callback_requested
+                when = dates.normalize(asked, self.tools.today, s.reply_language)
+                if when.date:
+                    s.callback_time = f"{when.date.isoformat()} ({asked})"
             outcome, promise, notes = fallback, None, "recorded by code: model did not record an outcome"
         else:
             # Rebuild so actions taken after record_outcome (e.g. a link sent) are reflected.

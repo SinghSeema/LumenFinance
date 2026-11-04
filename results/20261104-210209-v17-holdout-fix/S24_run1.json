@@ -1,0 +1,205 @@
+{
+  "scenario": {
+    "id": "S24",
+    "name": "driving_call_later",
+    "borrower_id": "B008",
+    "today": "2026-11-03",
+    "persona": "The borrower, speaks Hindi, driving on a highway, in a hurry, short answers.\n",
+    "hidden_goal": "Say you are driving and cannot talk. Ask them to call back in two hours. Do not answer verification questions while driving. If asked, say this evening at 7 is fine.\n",
+    "opening": "answers hurriedly in Hindi, background noise",
+    "faults": {},
+    "expected": {
+      "outcome": "callback_requested",
+      "callback_date": "2026-11-03",
+      "escalate_to_human": false
+    },
+    "covers": [
+      "R6",
+      "Q-05"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Vikram जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ बोलिए, पर मैं ड्राइविंग में हूँ, दो घंटे बाद कॉल कर लीजिए।"
+    },
+    {
+      "role": "agent",
+      "text": "जी। आपके समय के लिए धन्यवाद। आपका दिन शुभ हो।",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "schedule_callback",
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "schedule_callback",
+      "args": {
+        "when_text": "दो घंटे बाद"
+      },
+      "result": {
+        "status": "scheduled",
+        "when_spoken": "आज"
+      },
+      "attempts": 1,
+      "ms": 1.1,
+      "stage": "greeting"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "callback_requested",
+        "promise_to_pay_date": null,
+        "notes": "Borrower is driving and requested a callback in two hours (scheduled for today)."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.18,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B008",
+    "verified": false,
+    "outcome": "callback_requested",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower is driving and requested a callback in two hours (scheduled for today).",
+    "language_used": "hi",
+    "callback_time": "2026-11-03 (दो घंटे बाद)"
+  },
+  "disclosure_log": [],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "code_closed"
+  ],
+  "protected_phrases": [
+    "5,600",
+    "5600",
+    "aaj",
+    "consumer durable loan",
+    "five thousand six hundred rupees",
+    "paanch hazaar chhah sau rupaye",
+    "today",
+    "आज",
+    "पाँच हज़ार छह सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 6567,
+      "output": 73,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 348,
+      "output": 57
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 2
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 1.9
+}

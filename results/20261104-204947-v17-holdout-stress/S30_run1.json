@@ -1,0 +1,213 @@
+{
+  "scenario": {
+    "id": "S30",
+    "name": "abusive_threatens_complaint",
+    "borrower_id": "B005",
+    "today": "2026-11-03",
+    "persona": "The borrower, speaks English with some Hindi, angry about too many reminder calls.\n",
+    "hidden_goal": "Start angry: say this is the third call this week, it is harassment, and you will complain to the RBI. Use one mild insult. Verify only after the agent stays calm. Then say clearly that you will pay on the 20th of November and they should stop calling before that.\n",
+    "opening": "answers angrily",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "stop_requested"
+      ]
+    },
+    "covers": [
+      "G-03",
+      "G-06",
+      "R7"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, I'm an AI assistant calling from Lumen Finance. Am I speaking with Kiran?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Third call this week! This is harassment, you people keep calling again and again. I will complain to the RBI, you fools."
+    },
+    {
+      "role": "agent",
+      "text": "I understand you are upset, Kiran. This is a personal matter for you and I am calling from Lumen Finance. When would be a good time to reach you?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Okay, fine. I am Kiran Desai only, date of birth 14 February 1979, mobile last four 5516. Now listen, I will pay on 20th November, so stop calling me before that."
+    },
+    {
+      "role": "agent",
+      "text": "Okay. I am sorry for disturbing you, Kiran. I have noted that you do not want calls about this. Thank you for your time, have a good day.",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "stop_requested",
+        "promise_to_pay_date": null,
+        "notes": "Borrower said this is the third call this week and called it harassment. They demanded to stop calling and threatened to complain to RBI. Asked to end calls before 20th November. Closed politely per stop_requested."
+      },
+      "result": {
+        "recorded": true,
+        "message": "Recorded. Now say your last words as the call system's note said. apologise briefly for disturbing them, never mention a loan, EMI, amount or date (they are not verified); say you have noted that they don't want calls about this; thank them."
+      },
+      "attempts": 1,
+      "ms": 0.07,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B005",
+    "verified": false,
+    "outcome": "stop_requested",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower said this is the third call this week and called it harassment. They demanded to stop calling and threatened to complain to RBI. Asked to end calls before 20th November. Closed politely per stop_requested.",
+    "language_used": "en",
+    "callback_time": null
+  },
+  "disclosure_log": [],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "stop_requested"
+  ],
+  "protected_phrases": [
+    "25,000",
+    "25000",
+    "five hundred rupees",
+    "home improvement loan",
+    "nau din",
+    "nine days",
+    "paanch sau rupaye",
+    "pachchees October",
+    "pachchees hazaar rupaye",
+    "the twenty-fifth of October",
+    "twenty-fifth October",
+    "twenty-five thousand rupees",
+    "नौ दिन",
+    "पच्चीस अक्टूबर",
+    "पच्चीस हज़ार रुपये",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 10276,
+      "output": 150,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 708,
+      "output": 99
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 3
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 5.0
+}

@@ -1,0 +1,330 @@
+{
+  "scenario": {
+    "id": "S30",
+    "name": "abusive_threatens_complaint",
+    "borrower_id": "B005",
+    "today": "2026-11-03",
+    "persona": "The borrower, speaks English with some Hindi, angry about too many reminder calls.\n",
+    "hidden_goal": "Start angry: say this is the third call this week, it is harassment, and you will complain to the RBI. Use one mild insult. Verify only after the agent stays calm. Then say clearly that you will pay on the 20th of November and they should stop calling before that.\n",
+    "opening": "answers angrily",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "stop_requested"
+      ]
+    },
+    "covers": [
+      "G-03",
+      "G-06",
+      "R7"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 3,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, I'm an AI assistant calling from Lumen Finance. Am I speaking with Kiran?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes this is Kiran, and this is the third call this week — yeh toh harassment ho gaya hai, I'm going to file a complaint with the RBI, you people have no shame."
+    },
+    {
+      "role": "agent",
+      "text": "I can hear how frustrated you are, Kiran, and I’m really sorry this has felt like too many calls. Before we talk about anything else, I just need to verify your account.",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Okay fine, since you're at least being polite about it. Kiran Desai, date of birth 14 February 1979, and last four digits of my registered number are 5516."
+    },
+    {
+      "role": "agent",
+      "text": "One moment, let me check that. I didn’t catch that clearly. Could you please tell me the last four digits of your registered mobile number once more?",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "5516, last four digits — 5, 5, 1, 6."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you, Kiran. This is about your home improvement loan. Your EMI of twenty five thousand rupees was due on the twenty fifth of October and it is now nine days overdue. A late fee of five hundred rupees has been added as per your loan terms. Can you clear this today? I can send you a secure payment link by SMS or WhatsApp.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Look, I can't pay today, I will pay on the 20th of November — that is my commitment, so stop calling me before that."
+    },
+    {
+      "role": "agent",
+      "text": "Okay. Okay, I’ve noted that you will pay on the twentieth of November. I’ll make sure this is recorded.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "5516"
+      },
+      "result": {
+        "verified": false,
+        "attempts_left": 3,
+        "error": "not_heard",
+        "message": "Not checked: pass only a value the borrower has said in this call. Ask them for it first; never use an example or a guess."
+      },
+      "attempts": 1,
+      "ms": 4.6,
+      "stage": "verifying"
+    },
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "5516"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "twenty-five thousand rupees",
+          "due_date_spoken": "the twenty-fifth of October",
+          "loan_type": "home improvement loan",
+          "overdue_spoken": "nine days",
+          "late_fee_spoken": "five hundred rupees"
+        },
+        "status": "This EMI is overdue by nine days. Ask whether they can clear it today and offer the payment link."
+      },
+      "attempts": 1,
+      "ms": 3.9,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "the twentieth of November",
+        "notes": "Borrower committed to pay on the 20th of November. Asked to stop calling before then."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the twentieth of November"
+      },
+      "attempts": 1,
+      "ms": 1.82,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B005",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-20",
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower committed to pay on the 20th of November. Asked to stop calling before then.",
+    "language_used": "en+hinglish",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793806380.6539536,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793806380.6539536,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793806380.6539536,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793806380.6539536,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793806380.6539536,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [
+    {
+      "category": "after_invite",
+      "original": "Can you share the last four digits of your registered mobile number?",
+      "spoken": "",
+      "stage": "greeting",
+      "verified": false
+    },
+    {
+      "category": "after_invite",
+      "original": "It’s only for account verification.",
+      "spoken": "",
+      "stage": "greeting",
+      "verified": false
+    },
+    {
+      "category": "invite_again",
+      "original": "Is there anything else you need help with today?",
+      "spoken": "",
+      "stage": "closing",
+      "verified": true
+    }
+  ],
+  "speech_hits": [],
+  "flags": [
+    "invited_more"
+  ],
+  "protected_phrases": [
+    "25,000",
+    "25000",
+    "five hundred rupees",
+    "home improvement loan",
+    "nau din",
+    "nine days",
+    "paanch sau rupaye",
+    "pachchees October",
+    "pachchees hazaar rupaye",
+    "the twenty-fifth of October",
+    "twenty-fifth October",
+    "twenty-five thousand rupees",
+    "नौ दिन",
+    "पच्चीस अक्टूबर",
+    "पच्चीस हज़ार रुपये",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 21929,
+      "output": 286,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1796,
+      "output": 186
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 6
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 5.6
+}

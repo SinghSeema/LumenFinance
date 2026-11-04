@@ -55,6 +55,14 @@ _DAY_WORD = r"(?:tarikh|tareekh|तारीख)"
 _L = r"(?<![a-z0-9ऀ-ॿ])"
 _R = r"(?![a-z0-9ऀ-ॿ])"
 
+# A time later today with no day named ("in two hours", "this evening at 7", "शाम को तीन-चार बजे"):
+# today. S24/S27 v17 hold-out: callbacks for these were refused as unrecognized, so none was recorded.
+_SAME_DAY = re.compile(
+    _L + r"(?:(?:\d+|one|two|three|four|a couple of|an?|ek|do|teen|char|एक|दो|तीन|चार|डेढ़|आधे)\s*"
+    r"(?:hours?|hrs?|ghante|ghanta|घंटे|घंटा)|tonight|this (?:morning|afternoon|evening)|later today|"
+    r"evening|afternoon|shaam|sham|dopahar|raat|शाम|दोपहर|रात|\d{1,2}\s*(?:baje|बजे|pm|am|o'clock))" + _R,
+    re.IGNORECASE)
+
 _ORD_ONES = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth"]
 _ORD_WORDS = dict(zip(_ORD_ONES + ["tenth", "eleventh", "twelfth", "thirteenth", "fourteenth",
                                    "fifteenth", "sixteenth", "seventeenth", "eighteenth",
@@ -163,6 +171,8 @@ def normalize(text: str, today: date, lang: str | None = None) -> DateResult:
     # "मैं after 1 week करूंगी" (owner call B004 17:59): vague like "next week", so ask which day.
     if next_month or _has(t, _NEXT_WEEK) or _AFTER_WEEKS.search(t):
         return _unclear("ambiguous_phrase")
+    if _SAME_DAY.search(t):
+        return _ok(today)
     return _unclear("unrecognized")
 
 

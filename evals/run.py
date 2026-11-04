@@ -27,8 +27,9 @@ RESULTS_DIR = Path(__file__).parent.parent / "results"
 _SETS = {"dev": "dev", "holdout": "hold-out", "stress": "stress"}  # stress: unseen curveballs, never tuned on
 _SECRET_SUFFIXES = ("api_key", "api_secret", "secret_key")
 # Agent tokens per call, measured: (input, output). Groq: baseline-v1, gpt-oss-20b, 10 dev calls.
-# Sarvam: sarvam-v3-smoke, sarvam-105b-conversations, 11 dev calls (101,402 / 2,278 in total).
-_TOKENS_PER_RUN = {"groq": (14500, 1000), "sarvam": (9200, 210)}
+# Sarvam: v17-holdout-stress, sarvam-105b-conversations, 45 calls (992,443 / 11,661 in total); the v17
+# prompt and policy made each request ~3.3k tokens, so the older 9,200 per call was half the real cost.
+_TOKENS_PER_RUN = {"groq": (14500, 1000), "sarvam": (22100, 260)}
 _REQUESTS_PER_RUN = 7  # rough guess, not a measurement
 # Sarvam list price in rupees per 1M tokens (docs price sheet for sarvam-105b; not the dashboard).
 _SARVAM_INR_PER_M = (29.28, 73.2)

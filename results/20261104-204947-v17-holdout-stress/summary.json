@@ -1,0 +1,1272 @@
+{
+  "scenarios": {
+    "S06": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 1,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 4.0
+    },
+    "S11": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 2,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 4.3
+    },
+    "S13": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 4.3
+    },
+    "S14a": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 5.0
+    },
+    "S14b": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 2,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 4.3
+    },
+    "S21": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {
+        "digits": 1
+      },
+      "mean_borrower_turns": 5.0
+    },
+    "S22": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 1.7
+    },
+    "S23": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 6,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 5.0
+    },
+    "S24": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 0,
+      "disclosure_violations": 0,
+      "guard_hits": 1,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 1.3
+    },
+    "S25": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 2,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 5.0
+    },
+    "S26": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 1,
+      "process_fails": 0,
+      "lang_mismatch_runs": 2,
+      "old_handoff_runs": 0,
+      "speech_hits": {
+        "wrong_language": 2
+      },
+      "mean_borrower_turns": 4.7
+    },
+    "S27": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 2,
+      "disclosure_violations": 0,
+      "guard_hits": 2,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 3.0
+    },
+    "S28": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 2,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 5.3
+    },
+    "S29": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 3,
+      "disclosure_violations": 0,
+      "guard_hits": 3,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {},
+      "mean_borrower_turns": 5.7
+    },
+    "S30": {
+      "runs": 3,
+      "infra_errors": 0,
+      "outcome_pass": 1,
+      "disclosure_violations": 0,
+      "guard_hits": 0,
+      "process_fails": 0,
+      "lang_mismatch_runs": 0,
+      "old_handoff_runs": 0,
+      "speech_hits": {
+        "number_style": 1
+      },
+      "mean_borrower_turns": 2.3
+    }
+  },
+  "escalation": {
+    "tp": 3,
+    "fp": 1,
+    "fn": 0,
+    "precision": 0.75,
+    "recall": 1.0
+  },
+  "runs": [
+    {
+      "scenario": "S06",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "third_party",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S06",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "third_party",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "unverified_disclosure"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S06",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "third_party",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S11",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "dispute",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "promise"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S11",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "dispute",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "dropped_filler"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S11",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "dispute",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        true,
+        true
+      ]
+    },
+    {
+      "scenario": "S13",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "process:clarify_vague_date": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S13",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "process:clarify_vague_date": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S13",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "process:clarify_vague_date": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S14a",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S14a",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S14a",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 7,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S14b",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "payment_link_sent": true,
+        "process:no_invented_link": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S14b",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "callback_requested",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "payment_link_sent": true,
+        "process:no_invented_link": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S14b",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "callback_requested",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "payment_link_sent": true,
+        "process:no_invented_link": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S21",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S21",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [
+        "digits"
+      ],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S21",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S22",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "third_party",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 1,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S22",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "third_party",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 2,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S22",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "third_party",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 2,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S23",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "channel_again",
+        "dropped_filler"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S23",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "channel_again",
+        "dropped_filler"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S23",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "channel_again",
+        "dropped_filler"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S24",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "escalate_to_human": true,
+        "callback_date": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 1,
+      "end_reason": "borrower_hung_up",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S24",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "escalate_to_human": true,
+        "callback_date": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 1,
+      "end_reason": "borrower_hung_up",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S24",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "escalate_to_human": true,
+        "callback_date": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "dropped_filler"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 2,
+      "end_reason": "borrower_hung_up",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S25",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "channel_again"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S25",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "dropped_filler"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S25",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S26",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [
+        10
+      ],
+      "old_handoff_turns": 0,
+      "speech_hits": [
+        "wrong_language"
+      ],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S26",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [
+        10
+      ],
+      "old_handoff_turns": 0,
+      "speech_hits": [
+        "wrong_language"
+      ],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S26",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "channel_again"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S27",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "third_party",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 2,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S27",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": false,
+        "verified": true,
+        "escalate_to_human": false,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "unverified_disclosure"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        true
+      ]
+    },
+    {
+      "scenario": "S27",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "third_party",
+      "checks": {
+        "outcome": true,
+        "verified": true,
+        "escalate_to_human": true,
+        "process:answers_purpose": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "unverified_disclosure"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 3,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S28",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "channel_again"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S28",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "channel_again"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 5,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S28",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "promise_to_pay",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 6,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S29",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S29",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [
+        "unverified_disclosure",
+        "unverified_disclosure",
+        "unverified_disclosure"
+      ],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 7,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S29",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "unresolved",
+      "checks": {
+        "outcome": true,
+        "escalate_to_human": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 6,
+      "end_reason": "agent_ended",
+      "escalation": [
+        false,
+        false
+      ]
+    },
+    {
+      "scenario": "S30",
+      "run": 1,
+      "infra_error": null,
+      "outcome": "stop_requested",
+      "checks": {
+        "outcome": true,
+        "verified": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 2,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S30",
+      "run": 2,
+      "infra_error": null,
+      "outcome": "stop_requested",
+      "checks": {
+        "outcome": true,
+        "verified": false
+      },
+      "outcome_pass": false,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [],
+      "borrower_turns": 1,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    },
+    {
+      "scenario": "S30",
+      "run": 3,
+      "infra_error": null,
+      "outcome": "stop_requested",
+      "checks": {
+        "outcome": true,
+        "verified": true
+      },
+      "outcome_pass": true,
+      "disclosure_violations": [],
+      "guard_hits": [],
+      "language_mismatch_turns": [],
+      "old_handoff_turns": 0,
+      "speech_hits": [
+        "number_style"
+      ],
+      "borrower_turns": 4,
+      "end_reason": "agent_ended",
+      "escalation": [
+        null,
+        false
+      ]
+    }
+  ]
+}

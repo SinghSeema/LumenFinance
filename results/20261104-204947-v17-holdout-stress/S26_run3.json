@@ -1,0 +1,314 @@
+{
+  "scenario": {
+    "id": "S26",
+    "name": "unsupported_language",
+    "borrower_id": "B002",
+    "today": "2026-11-03",
+    "persona": "The borrower's account is in Hindi, but the person answering is the borrower, a Tamil speaker with only basic English and almost no Hindi.\n",
+    "hidden_goal": "First ask in simple broken English whether they can speak Tamil. When told they cannot, manage in simple English: verify when asked, listen, then say you will pay by the end of this week, on Friday.\n",
+    "opening": "answers 'Hello? Tamil? Tamil theriyuma?' then simple English",
+    "faults": {},
+    "expected": {
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "will_pay",
+        "callback_requested",
+        "unresolved"
+      ],
+      "escalate_to_human": false
+    },
+    "covers": [
+      "Q-08",
+      "G-07"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 3,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Priya जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Hello? Tamil? Tamil theriyuma?"
+    },
+    {
+      "role": "agent",
+      "text": "मुझे तमिल नहीं आती। मैं अभी हिंदी में बात कर सकती हूँ, क्या ठीक रहेगा? क्या मेरी बात Priya जी से हो रही है?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Hindi little little. English okay? I am Priya."
+    },
+    {
+      "role": "agent",
+      "text": "Sure, we can continue in English. Before we discuss anything, I need to verify your account. Could you please share the last four digits of your registered mobile number? It is just for account verification.",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "3-3-6-7."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you, Priya. This is regarding your two-wheeler loan. Your EMI of four thousand two hundred rupees was due on the twenty-eighth of October, and it is now six days overdue. A late fee of five hundred rupees has been added as per your loan terms. Can you clear this today through the secure payment link? I can send it to you by SMS or WhatsApp.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Sorry, money problem now. I will pay Friday, end of this week. Full amount."
+    },
+    {
+      "role": "agent",
+      "text": "Okay. I understand, Priya. Friday works. I have noted that down.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome",
+        "escalate_to_human"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "3367"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "four thousand two hundred rupees",
+          "due_date_spoken": "the twenty-eighth of October",
+          "loan_type": "two-wheeler loan",
+          "overdue_spoken": "six days",
+          "late_fee_spoken": "five hundred rupees"
+        },
+        "status": "This EMI is overdue by six days. Ask whether they can clear it today and offer the payment link."
+      },
+      "attempts": 1,
+      "ms": 0.89,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "Friday",
+        "notes": "Borrower promised to pay full amount by end of this Friday. Mentioned money problem now."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the sixth of November"
+      },
+      "attempts": 1,
+      "ms": 0.62,
+      "stage": "closing"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "hardship"
+      },
+      "result": {
+        "escalated": false,
+        "error": "not_hardship",
+        "message": "They have not described a real setback (job loss, illness, an emergency, no income). Salary arriving late or money being tight is not hardship: answer what they asked and help them pick a payment date or a call back time. Only if they really describe hardship, call this again."
+      },
+      "attempts": 1,
+      "ms": 0.13,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B002",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-06",
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower promised to pay full amount by end of this Friday. Mentioned money problem now.",
+    "language_used": "hi+en",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793805840.596833,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793805840.596833,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793805840.596833,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793805840.596833,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793805840.596833,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [
+    {
+      "category": "channel_again",
+      "original": "Would you like me to send the payment link to your WhatsApp, or would you prefer SMS?",
+      "spoken": "",
+      "stage": "closing",
+      "verified": true
+    }
+  ],
+  "speech_hits": [],
+  "flags": [
+    "hardship_checked"
+  ],
+  "protected_phrases": [
+    "4,200",
+    "4200",
+    "atthaees October",
+    "chaar hazaar do sau rupaye",
+    "chhah din",
+    "five hundred rupees",
+    "four thousand two hundred rupees",
+    "paanch sau rupaye",
+    "six days",
+    "the twenty-eighth of October",
+    "twenty-eighth October",
+    "two-wheeler loan",
+    "अट्ठाईस अक्टूबर",
+    "चार हज़ार दो सौ रुपये",
+    "छह दिन",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 21281,
+      "output": 262,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 2007,
+      "output": 57
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 6
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 5.2
+}

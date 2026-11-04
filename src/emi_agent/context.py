@@ -6,6 +6,7 @@ so the history stays append-only. Loan facts arrive only in verify_identity's re
 """
 from __future__ import annotations
 
+import re
 from pathlib import Path
 
 from emi_agent import policy
@@ -174,8 +175,12 @@ def hold(lang: str, script: str) -> str:
     return _HOLD[_key(lang, script)]
 
 
-def closing(lang: str, script: str, name: str) -> str:
-    return _CLOSING[_key(lang, script)].format(name=name)
+def closing(lang: str, script: str, name: str | None) -> str:
+    """No name when the listener may not be the borrower: a child was thanked as "Sunita जी" (S27, C55)."""
+    line = _CLOSING[_key(lang, script)]
+    if name is None:
+        return re.sub(r",? \{name\} (?:ji|जी)", "", line)
+    return line.format(name=name)
 
 
 def system_prompt(borrower: Borrower, config: dict, lang: str, opening: str) -> str:

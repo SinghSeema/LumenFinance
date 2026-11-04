@@ -143,3 +143,16 @@ def test_ordinal_word_without_a_month_is_not_a_date():
 def test_after_a_week_is_vague(text):
     # Owner call B004 17:59: ask which day, never guess.
     assert normalize(text, date(2026, 11, 4)).reason == "ambiguous_phrase"
+
+
+# v17 hold-out S24/S27 (C54): a time later today, with no day named, is today.
+@pytest.mark.parametrize("text", ["दो घंटे बाद", "in two hours", "this evening at 7", "शाम 7 बजे",
+                                  "शाम को तीन-चार बजे के आसपास", "tonight", "do ghante baad"])
+def test_same_day_times_are_today(text):
+    assert normalize(text, date(2026, 11, 3)).date == date(2026, 11, 3)
+
+
+@pytest.mark.parametrize("text,expected", [("kal shaam", date(2026, 11, 4)),
+                                           ("friday evening", date(2026, 11, 6))])
+def test_a_named_day_wins_over_the_time_of_day(text, expected):
+    assert normalize(text, date(2026, 11, 3)).date == expected

@@ -5,7 +5,7 @@ import re
 
 HANGUP = "[HANGUP]"
 # v17-dev2-fix2 S08: the simulator hung up as "[हैंगअप]" and "[कॉल समाप्त]"; the call went on.
-_HANGUP_ANY = re.compile(r"\[\s*(?:hang ?up|हैंगअप|हैंग अप|कॉल समाप्त|call (?:ended|end)|फ़ोन कट|फोन कट)[^\]]*\]", re.IGNORECASE)
+_HANGUP_ANY = re.compile(r"\[\s*\W*(?:hang ?up|हैंगअप|हैंग अप|कॉल समाप्त|call (?:ended|end)|फ़ोन कट|फोन कट)[^\]]*\]", re.IGNORECASE)
 
 _PROMPT = """You are role-playing a person who has just answered a phone call. The caller is a voice agent.
 

@@ -382,7 +382,7 @@ STOP_OUTCOME = ("record_outcome", {"outcome": "stop_requested", "promise_to_pay_
 async def test_closing_turn_with_no_words_gets_a_closing_line(today, tmp_path):
     brain = make(ScriptedLLM([say("", STOP_OUTCOME), say("")]), today, tmp_path)
     out = await run(brain, "stop calling me")
-    assert [s.text for s in out] == [context.closing("en", "roman", "Arjun")]
+    assert [s.text for s in out] == [context.closing("en", "roman", None)]
     assert brain.should_hang_up
 
 
@@ -395,7 +395,7 @@ async def test_closing_cut_off_is_said_on_the_next_turn_once(today, tmp_path):
     await gen.aclose()  # barge-in cancels the turn
     assert brain.should_hang_up
     out = await run(brain, "Are you there?")
-    assert [s.text for s in out] == [context.closing("en", "roman", "Arjun")]
+    assert [s.text for s in out] == [context.closing("en", "roman", None)]
     assert await run(brain, "Hello?") == []
 
 
@@ -403,7 +403,7 @@ async def test_llm_failure_after_outcome_recorded_thanks_not_apology(today, tmp_
     """Live call 2026-11-03: promise recorded, then rate limits -> 'technical problem'."""
     brain = make(ScriptedLLM([say("", STOP_OUTCOME), say(fail=True), say(fail=True)]), today, tmp_path)
     out = await run(brain, "stop calling me")
-    assert out[-1].text == context.closing("en", "roman", "Arjun")
+    assert out[-1].text == context.closing("en", "roman", None)
     assert brain.should_hang_up
 
 
@@ -1239,3 +1239,55 @@ async def test_stop_request_never_waits_on_an_invitation(today, tmp_path):
     brain = make(llm, today, tmp_path)
     await run(brain, "Please stop calling me.")
     assert brain.should_hang_up
+
+
+# v17 hold-out S14b run 1 (C57): a failed tool is never followed by the code close.
+async def test_failed_link_retry_keeps_the_model_round(today, tmp_path):
+    llm = ScriptedLLM([say("", ("send_payment_link", {"channel": "whatsapp"})), say("", RECORD_WILL_PAY),
+                       say("Sorry, the link still did not go through.")], tool_start=True)
+    brain = make(llm, today, tmp_path)
+    brain.config["faults"]["payment_link_fail"] = "always"
+    brain.state.verified = True
+    out = await run(brain, "Could you try sending it once more?")
+    assert len(llm.requests) == 3 and "code_closed" not in brain.state.flags
+    assert out[-1].text == "Sorry, the link still did not go through."
+
+
+# v17 hold-out S24 (C54): a callback asked for but never recorded by the model.
+async def test_callback_asked_in_words_is_the_outcome_when_the_model_records_nothing(tmp_path):
+    today = date(2026, 11, 3)
+    brain = make(ScriptedLLM([say("Ji, main do ghante baad call kar lungi.")]), today, tmp_path, "B008")
+    await run(brain, "Main driving kar raha hoon, do ghante baad call kar lijiye.")
+    record = brain.finish()
+    assert record.outcome is Outcome.callback_requested
+    assert record.callback_time.startswith("2026-11-03")
+
+
+async def test_no_callback_request_still_falls_back_to_unresolved(today, tmp_path):
+    brain = make(ScriptedLLM([say("Ji, theek hai.")]), today, tmp_path)
+    await run(brain, "Haan, kaun?")
+    assert brain.finish().outcome is Outcome.unresolved
+
+
+# v17 hold-out S27 (C55): before verification the close names nobody.
+async def test_closing_names_the_borrower_only_once_verified(today, tmp_path):
+    brain = make(ScriptedLLM([]), today, tmp_path, "B004")
+    assert brain._close_name() is None
+    brain.state.verified = True
+    assert brain._close_name() == "Sunita"
+    assert "Sunita" not in context.closing("hi", "devanagari", None)
+    assert "जी" not in context.closing("hi", "devanagari", None)
+
+
+# v17 hold-out S30 run 1 (C56): a stop with "before that" and a payment date is a promise.
+@pytest.mark.parametrize("text", [
+    "Now listen, I will pay on 20th November, so stop calling me before that.",
+    "20 tarikh ko pay kar dunga, tab tak pareshan mat karo",
+    "I'll pay on the 15th, don't bother me until then",
+])
+def test_conditional_stop_is_not_a_stop(text):
+    assert not is_stop_request(text)
+
+
+def test_stop_with_never_again_and_until_is_still_a_stop():
+    assert is_stop_request("Stop calling me, never again, not even before that")

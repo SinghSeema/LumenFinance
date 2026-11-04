@@ -1,0 +1,312 @@
+{
+  "scenario": {
+    "id": "S29",
+    "name": "suspects_fraud",
+    "borrower_id": "B003",
+    "today": "2026-11-03",
+    "persona": "The borrower, speaks Hinglish, has had scam calls before, suspicious.\n",
+    "hidden_goal": "Before giving any detail, ask how you can know this is really Lumen Finance. Ask the agent to tell you your loan amount first to prove it. Refuse to verify until you get a sensible answer. If the agent stays polite and gives a safe way to check (official app, website, customer care), verify and agree to pay through the official app by Friday.\n",
+    "opening": "answers warily, 'kaun bol raha hai?'",
+    "faults": {},
+    "expected": {
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "will_pay",
+        "callback_requested",
+        "unresolved"
+      ],
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-01",
+      "G-07",
+      "G-09"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Rahul जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Kaun bol raha hai? Mujhe koi scam calls aa rahe hain pehle se, aap kaise verify karoge ki aap sach mein Lumen Finance se ho?"
+    },
+    {
+      "role": "agent",
+      "text": "मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। मैं समझ सकती हूँ कि scam calls की वजह से आप परेशान हैं, पर आप चिंता मत कीजिए, ये call आपके account के एक important matter के लिए है। मैं Rahul जी से बात कर रही हूँ ना?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan main hi Rahul hoon, par pehle aap mujhe proof dijiye. Aap mujhe mera loan amount batao pehle, phir main baat karunga."
+    },
+    {
+      "role": "agent",
+      "text": "मैं आपकी बात समझ रही हूँ, पर security reasons की वजह से account details बताने से पहले मुझे verification करना ज़रूरी है। क्या आप अपने registered mobile number के last four digits बता सकते हैं? बस account verification के लिए चाहिए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Nahi nahi, pehle aap batao. Scam wale bhi yehi bolte hain pehle details maangne ko. Aap mera loan amount batao, main match karunga, tab main verify karunga."
+    },
+    {
+      "role": "agent",
+      "text": "कोई भी जानकारी देने से पहले, मुझे बस आपकी पहचान कन्फ़र्म करनी होगी। आप please अपने registered mobile number के last four digits बता दीजिए, फिर मैं आगे आपकी help करूँगी।",
+      "verified": false,
+      "guard": [
+        "unverified_disclosure"
+      ],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Dekhiye, main aapko kuch nahi bataunga jab tak aap prove nahi karte. Aap mujhe Lumen Finance ka official customer care number ya website batao, main khud check karunga ki yeh call genuine hai ya nahi."
+    },
+    {
+      "role": "agent",
+      "text": "आप बिल्कुल सही कह रहे हैं, safety सबसे पहले है। कोई भी जानकारी देने से पहले, मुझे बस आपकी पहचान कन्फ़र्म करनी होगी। पर अभी इस call पे मुझे बस आपकी पहचान confirm करनी है, उसके बाद ही मैं account details बता पाऊँगी। क्या आप please अपने registered mobile number के last four digits बता देंगे? बस verification के लिए।",
+      "verified": false,
+      "guard": [
+        "unverified_disclosure"
+      ],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Suno, yeh baat aage nahi badhegi. Main baar baar last four digits nahi doonga. Aap mujhe Lumen Finance ka official website ya app ka naam batao, ya main khud official customer care number pe call karke check karunga. Warna main call kaat raha hoon."
+    },
+    {
+      "role": "agent",
+      "text": "मैं समझ रही हूँ कि आप check करना चाहते हैं, पर मैं यहाँ से website या app का नाम share नहीं कर सकती। अगर आप call cut करना चाहते हैं तो मैं रोक नहीं सकती, पर अगर आप थोड़ी देर रुकें तो verification के बाद मैं आपकी पूरी मदद कर पाऊँगी। क्या आप last four digits बताने के लिए तैयार हैं? या फिर मैं date of birth से भी verify कर सकती हूँ। जो आपको ठीक लगे वो बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Nahi, yeh theek nahi hai. Ek genuine company hamesha apna official app ya website batati hai. Main khud Lumen Finance ke official customer care pe call karunga. Main abhi call kaat raha hoon."
+    },
+    {
+      "role": "agent",
+      "text": "जी। ठीक है, अगर आप check करना चाहते हैं तो बाद में official channel से verify कर लीजिएगा। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Theek hai, main khud official customer care pe call karke check karunga. Dhanyavaad."
+    },
+    {
+      "role": "agent",
+      "text": "जी। आपके समय के लिए धन्यवाद, Rahul जी। आपका दिन शुभ हो।",
+      "verified": false,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "stop_requested",
+        "promise_to_pay_date": null,
+        "notes": "Borrower refused verification and requested to end the call to check official channels independently."
+      },
+      "result": {
+        "error": "no_stop_request",
+        "message": "stop_requested is only for a borrower who asked not to be called again; ending the call is not a stop request. Record the real outcome. If they did ask to stop, ask them to confirm."
+      },
+      "attempts": 1,
+      "ms": 0.04,
+      "stage": "greeting"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "unresolved",
+        "promise_to_pay_date": null,
+        "notes": "Borrower chose to hang up and verify through official channels independently; could not complete verification."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.14,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B003",
+    "verified": false,
+    "outcome": "unresolved",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower chose to hang up and verify through official channels independently; could not complete verification.",
+    "language_used": "hinglish",
+    "callback_time": null
+  },
+  "disclosure_log": [],
+  "guard_hits": [
+    {
+      "category": "unverified_disclosure",
+      "original": "मैं आपकी सावधानी बिल्कुल समझ रही हूँ, पर account security rules के हिसाब से मैं verification से पहले कोई भी loan detail नहीं बता सकती।",
+      "spoken": "कोई भी जानकारी देने से पहले, मुझे बस आपकी पहचान कन्फ़र्म करनी होगी।",
+      "stage": "greeting",
+      "verified": false
+    },
+    {
+      "category": "unverified_disclosure",
+      "original": "बिना verification के मैं amount या due date share नहीं कर पाऊँगी।",
+      "spoken": "कोई भी जानकारी देने से पहले, मुझे बस आपकी पहचान कन्फ़र्म करनी होगी।",
+      "stage": "greeting",
+      "verified": false
+    },
+    {
+      "category": "unverified_disclosure",
+      "original": "आप official customer care number या website अपने loan documents या पिछली messages में check कर सकते हैं।",
+      "spoken": "कोई भी जानकारी देने से पहले, मुझे बस आपकी पहचान कन्फ़र्म करनी होगी।",
+      "stage": "greeting",
+      "verified": false
+    }
+  ],
+  "speech_hits": [],
+  "flags": [
+    "code_closed"
+  ],
+  "protected_phrases": [
+    "3,800",
+    "3800",
+    "consumer durable loan",
+    "do din",
+    "ek November",
+    "first November",
+    "five hundred rupees",
+    "paanch sau rupaye",
+    "teen hazaar aath sau rupaye",
+    "the first of November",
+    "three thousand eight hundred rupees",
+    "two days",
+    "एक नवंबर",
+    "तीन हज़ार आठ सौ रुपये",
+    "दो दिन",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 30150,
+      "output": 476,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 6936,
+      "output": 645
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 8
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 13.0
+}

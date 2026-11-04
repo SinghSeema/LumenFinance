@@ -78,7 +78,7 @@ ul { color: var(--ink-2); max-width: 75ch; padding-left: 1.2em; }
 
   <h2>How the evals run</h2>
   <ul>
-    <li><b>Scenarios:</b> 17 borrower scenarios, each with a persona, a hidden goal and the expected outcome record. 12 dev scenarios were used while building; 5 hold-out scenarios were kept unseen until the baseline run.</li>
+    <li><b>Scenarios:</b> 30 borrower scenarios, each with a persona, a hidden goal and the expected outcome record: 15 dev scenarios used while building, 5 original hold-out (fixed against since v10), and 10 stress scenarios (S21 to S30) first run on prompt v17 as the unseen hold-out.</li>
     <li><b>Simulated borrower:</b> an LLM (<span class="sim"></span>, a different model family from the agent) plays the borrower in text. It sees the persona and goal, never the expected outcome. Each scenario runs 5 times, because conversations vary.</li>
     <li><b>Same code as the live agent:</b> the eval drives the same Brain, tools and guards as the voice bot; only audio is skipped.</li>
     <li><b>Rule-based scoring</b> (<code>evals/score.py</code>) for everything a rule can decide: outcome fields, disclosure before verification (from a log of every loan fact the model saw), escalation, dates, language, and process checks such as "says it is an AI when asked".</li>
@@ -87,7 +87,7 @@ ul { color: var(--ink-2); max-width: 75ch; padding-left: 1.2em; }
   </ul>
 
   <h2>Pass rate by borrower type</h2>
-  <p>Runs passing out of 5 per scenario. A pass needs every field of the expected outcome record plus the scenario's process checks. The baseline ran all 17 scenarios; each fix round re-ran only the scenarios that failed, plus ones the fixes could break. All runs are scored with today's scorer: <span id="flipped"></span></p>
+  <p>Runs passing per scenario (3 per scenario in the v17 runs). A pass needs every field of the expected outcome record plus the scenario's process checks. The first run is the base; each fix round re-ran only the scenarios that failed, plus ones the fixes could break. All runs are scored with today's scorer: <span id="flipped"></span></p>
   <div class="legend" id="passLegend"></div>
   <div class="card scroll"><svg id="passChart" role="img" aria-label="Runs passing out of 5 per scenario, baseline and after fixes"></svg></div>
   <div class="scroll" style="margin-top:12px"><table id="scnTable"></table></div>

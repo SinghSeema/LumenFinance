@@ -448,6 +448,9 @@ class Tools:
         result: dict = {"recorded": True}
         if s.special:
             result["message"] = special.AFTER_RECORD
+        elif Outcome(outcome) is Outcome.stop_requested:  # the model writes its last words after this
+            result["message"] = "Recorded. Now say your last words as the call system's note said. " + context.note_stop(
+                s.verified, s.loan_facts if s.verified else None).split("Close now, in this one reply: ")[-1].split(" Ask nothing")[0]
         if payment_check:
             result |= {"team_will_check": True, "message": "Thank them; say our internal team will check the "
                        "payment and arrange a call back. Never promise when."}

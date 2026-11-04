@@ -970,3 +970,35 @@ def test_stop_request_is_judged_per_sentence(text):
 
 def test_not_now_in_the_same_sentence_still_softens_a_stop():
     assert not is_stop_request("Abhi call mat karo, shaam ko 6 baje karna.")
+
+
+# Owner, 2026-11-04 (labelling S12 run 1): apologise, one gentle reminder line, then stop.
+def test_stop_note_names_the_emi_only_when_verified(today):
+    from emi_agent.tools import loan_facts
+    facts = loan_facts(BORROWERS["B006"], today, "hi-en", "devanagari")
+    v = context.note_stop(True, facts)
+    assert "apologise" in v and facts.due_date_spoken in v and "no late fee" in v and "no request to pay" in v
+    u = context.note_stop(False)
+    assert "never mention a loan" in u and "late fee" not in u
+
+
+async def test_stop_after_verification_gets_the_gentle_note(today, tmp_path):
+    llm = ScriptedLLM([say("माफ़ कीजिए, आपको परेशान किया।")])
+    brain = make(llm, today, tmp_path, "B006")
+    brain.state.verified = True
+    brain.state.loan_facts = brain.tools.facts()
+    await run(brain, "mujhe call mat karo, is bare mein.", "hi")
+    assert "gentle reminder" in _notes(llm, 0) and "stop_requested" in _notes(llm, 0)
+
+
+def test_mixed_script_stop_request():
+    assert is_stop_request("देखो, मुझे इस बारे में call मत करो. Payment मैं खुद कर दूँगा.")
+
+
+def test_stop_outcome_result_carries_the_closing_words(today, tmp_path):
+    brain = make(ScriptedLLM([]), today, tmp_path, "B006")
+    brain.state.verified = True
+    brain.state.loan_facts = brain.tools.facts()
+    brain.state.flags.add("stop_requested")
+    r = brain.tools.call("record_outcome", {"outcome": "stop_requested", "promise_to_pay_date": None, "notes": "x"})
+    assert "apologise briefly" in r["message"] and "gentle reminder" in r["message"]

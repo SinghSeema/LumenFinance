@@ -67,6 +67,8 @@ _STOP_STRONG = re.compile(
 _STOP_WEAK = re.compile(
     r"don'?t call|do not call|^\W*stop\W*$|"
     r"(?:call|phone|fon) (?:mat|na) (?:kar|kij)|mat karo call|band karo|bas karo|"
+    # Mixed script, as Deepgram writes it: "मुझे इस बारे में call मत करो" (v17-stop S12 run 2)
+    r"(?:call|phone|कॉल|फ़ोन|फोन) (?:मत|ना) (?:कर|कीज)|"
     r"कॉल मत|फ़ोन मत|फोन मत|बंद करो",
     re.IGNORECASE,
 )
@@ -359,7 +361,7 @@ class Brain:
             self._pending_notes.append(context.NOTE_PURPOSE.format(name=self._first_name))
         if is_stop_request(user_text):
             s.flags.add("stop_requested")
-            self._pending_notes.append(context.NOTE_STOP)
+            self._pending_notes.append(context.note_stop(s.verified, s.loan_facts))
         elapsed = self._clock() - self._started
         if elapsed > self.config["behavior"]["max_call_secs"] and "time_up" not in s.flags:
             s.flags.add("time_up")

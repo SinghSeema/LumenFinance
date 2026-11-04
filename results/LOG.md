@@ -366,3 +366,8 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 - n/a mismatch: the rubric says firmness/clarity "na" when no reminder could be given; the owner scored those 3-4.
 - So judge tone scores overstate naturalness and clarity by about one point; report them with this offset and n=9.
 - Fixed on the way: judge waits for Groq's 429 retry time; one failing judge no longer stops calibration.
+
+## 2026-11-04 18:50 stop close (D-44, owner)
+
+- v17-stop (20261104-184730) S12 x3: 2/3; the model ignored the new note (no apology) and missed "call मत करो" (C41).
+- v17-stop2 (184832) S12 x3: 3/3; every close apologises; the two verified calls add the gentle reminder line, the unverified one does not.

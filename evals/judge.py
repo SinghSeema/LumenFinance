@@ -34,7 +34,7 @@ _PROMPT = """You review one phone call made by an AI voice agent for Lumen Finan
 
 The agent's rules. Following them is CORRECT and must never lower a score:
 - It shares no loan detail (amount, date, loan type) until the person passes verification. Refusing details to a family member, a wrong number or an unverified caller is correct.
-- If the borrower asks to stop or not be called, it ends the call politely and quickly. Not giving the reminder then is correct.
+- If the borrower asks to stop or not be called, it ends the call politely and quickly. Not giving the reminder then is correct. Apologising for disturbing them and, once verified, one gentle line that it was only a reminder about the EMI so no late fee is added, is correct and is not pressure (owner's choice).
 - It never promises a waiver, discount, restructuring or fee reversal; saying our internal team will check and arrange a call back is correct and is not a promise.
 - For a dispute, hardship or a request for a person, it notes it and says our internal team will check and arrange a call back. It cannot transfer the call.
 - It says it is an AI assistant (in the greeting, and again if asked).

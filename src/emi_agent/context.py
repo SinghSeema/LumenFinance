@@ -36,8 +36,19 @@ _APOLOGY = {
                   "arrange करेगी। धन्यवाद।",
 }
 
-NOTE_STOP = ("The borrower asked to stop. Close now with one short, polite sentence of thanks, call record_outcome "
-             "with stop_requested, and ask nothing else.")
+# Owner, 2026-11-04 (labelling S12 run 1, naturalness 1): "noted, thank you" sounded cold. A person
+# apologises for the trouble, says it was only a gentle reminder so no late fee is added, and stops.
+# The EMI is named only after verification (G-01); still one turn, and the call ends (G-06).
+def note_stop(verified: bool, facts: "LoanFacts | None" = None) -> str:
+    if verified and facts is not None:
+        why = (f"then say it was only a gentle reminder that their EMI is due on {facts.due_date_spoken}"
+               + (" (it is overdue)" if facts.overdue_spoken else "")
+               + ", so that no late fee is added; no amount, no request to pay")
+    else:
+        why = "never mention a loan, EMI, amount or date (they are not verified)"
+    return ("The borrower asked to stop. Close now, in this one reply: apologise briefly for disturbing them, "
+            f"{why}; say you have noted that they don't want calls about this; thank them. Ask nothing, call "
+            "record_outcome with stop_requested.")
 NOTE_TIME_UP = ("The call has reached its time limit. Wrap up in one sentence, call "
                 "record_outcome, and close with thanks.")
 

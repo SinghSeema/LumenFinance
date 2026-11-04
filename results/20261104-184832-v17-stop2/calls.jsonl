@@ -1,0 +1,3 @@
+{"borrower_id":"B006","verified":true,"outcome":"stop_requested","promise_to_pay_date":null,"payment_link_sent":false,"escalate_to_human":false,"notes":"Borrower explicitly asked to stop calls about this EMI.","language_used":"hinglish+hi","callback_time":null}
+{"borrower_id":"B006","verified":false,"outcome":"stop_requested","promise_to_pay_date":null,"payment_link_sent":false,"escalate_to_human":false,"notes":"Borrower asked to stop calls.","language_used":"hinglish+hi","callback_time":null}
+{"borrower_id":"B006","verified":true,"outcome":"stop_requested","promise_to_pay_date":null,"payment_link_sent":false,"escalate_to_human":false,"notes":"Borrower asked to stop calls about the EMI reminder.","language_used":"hinglish+hi","callback_time":null}

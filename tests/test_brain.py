@@ -1,4 +1,5 @@
 """Brain: context assembly (G-01, G-02, G-10), disclosure log, stop, language, guard wiring."""
+import asyncio
 import json
 from datetime import date
 
@@ -1002,3 +1003,239 @@ def test_stop_outcome_result_carries_the_closing_words(today, tmp_path):
     brain.state.flags.add("stop_requested")
     r = brain.tools.call("record_outcome", {"outcome": "stop_requested", "promise_to_pay_date": None, "notes": "x"})
     assert "apologise briefly" in r["message"] and "gentle reminder" in r["message"]
+
+
+# C45, live call B004 19:31: the fixed goodbye cost one more model request after record_outcome.
+RECORD_WILL_PAY = ("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+
+
+async def test_plain_record_closes_with_the_code_line_and_no_more_model_requests(today, tmp_path):
+    llm = ScriptedLLM([say("", RECORD_WILL_PAY)], tool_start=True)  # a second request would fail the script
+    brain = make(llm, today, tmp_path)
+    brain.state.verified = True
+    out = await run(brain, "No. Thank you.")
+    assert len(llm.requests) == 1
+    assert out[0].bridge and out[-1].text == context.closing("en", brain.script, "Arjun")
+    assert brain.should_hang_up and "code_closed" in brain.state.flags
+
+
+async def test_record_with_something_still_owed_keeps_the_model_round(today, tmp_path):
+    for owed in ["question", "model_spoke", "promise", "stop"]:
+        words, first = "No. Thank you.", say("", RECORD_WILL_PAY)
+        if owed == "question":
+            words = "Will the link work on UPI?"
+        elif owed == "model_spoke":
+            first = say("Sure, the link works with UPI.", RECORD_WILL_PAY)
+        elif owed == "promise":
+            first = say("", ("record_outcome", {"outcome": "promise_to_pay", "promise_to_pay_date": "5 November",
+                                                "notes": "x"}))
+        elif owed == "stop":
+            words = "Please stop calling me."
+            first = say("", ("record_outcome", {"outcome": "stop_requested", "promise_to_pay_date": None,
+                                                "notes": "x"}))
+        llm = ScriptedLLM([first, say("Thank you for your time, have a good day.")], tool_start=True)
+        brain = make(llm, today, tmp_path / owed)
+        brain.state.verified = True
+        brain.state.flags.add("asked_exact_date")
+        await run(brain, words)
+        assert brain.state.tool_calls[-1]["result"].get("recorded"), owed  # recorded, so only the rule held it
+        assert len(llm.requests) == 2, owed
+        assert "code_closed" not in brain.state.flags, owed
+
+
+# C44, live call B004 19:31: one sentence mixed number styles.
+async def test_hindi_ordinal_due_date_is_spoken_in_the_calls_number_style(today, tmp_path):
+    llm = ScriptedLLM([say("Sunita जी, आपकी personal loan की EMI अठारह हज़ार रुपये है, जो आठवीं November को due है।")])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    out = await run(brain, "जी, बताइए")
+    assert "eighteen thousand rupees" in out[0].text and "eighth November" in out[0].text
+    assert "आठवीं" not in out[0].text and "अठारह" not in out[0].text
+
+
+async def test_overdue_due_date_in_hindi_is_mapped_too(today, tmp_path):
+    b = BORROWERS["B002"]
+    from emi_agent.speech_format import hindi_date_forms
+    llm = ScriptedLLM([say(f"आपकी EMI {hindi_date_forms(b.due_date)[0]} को due थी।")])
+    brain = make(llm, today, tmp_path, "B002")
+    brain.state.verified = True
+    out = await run(brain, "जी")
+    assert date_to_words(b.due_date, today, "hi-en", brain.script) in out[0].text
+
+
+async def test_borrower_can_ask_for_numbers_in_hindi_then_english(today, tmp_path):
+    llm = ScriptedLLM([say("जी।"), say("जी।"), say("जी।")])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    await run(brain, "Amount हिंदी में बताइए")
+    note = [m["content"] for m in llm.requests[0][1] if m["role"] == "system"][-1]
+    assert brain.state.numbers == "hindi" and "asked for numbers in Hindi" in note and "अठारह हज़ार रुपये" in note
+    await run(brain, "English mein bataiye please")
+    note = [m["content"] for m in llm.requests[1][1] if m["role"] == "system"][-1]
+    assert brain.state.numbers == "english" and "repeat it now" in note and "eighteen thousand rupees" in note
+    await run(brain, "मैं पाँच तारीख को दूँगी")  # their own Hindi number words no longer flip the choice
+    assert brain.state.numbers == "english"
+
+
+async def test_hindi_number_words_still_switch_when_nothing_was_asked(today, tmp_path):
+    llm = ScriptedLLM([say("जी।")])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    await run(brain, "मैं पाँच तारीख को दूँगी")
+    assert brain.state.numbers == "hindi"
+
+
+# C47: the slow-model filler (said by bot.py) is part of the turn, and nothing repeats it.
+class HeldLLM:
+    """The model answers only after `release`: like a slow request, so bot.py's filler comes first."""
+    def __init__(self, inner):
+        self.inner, self.release = inner, asyncio.Event()
+
+    async def stream(self, system, messages, tools):
+        await self.release.wait()
+        async for item in self.inner.stream(system, messages, tools):
+            yield item
+
+
+async def _turn_with_filler(brain, llm, words):
+    """Run one turn; the filler fires while the model is still silent. Returns (filler, sentences)."""
+    task = asyncio.ensure_future(run(brain, words))
+    await asyncio.sleep(0.01)  # the turn has started and waits for the model
+    filler = brain.slow_filler()
+    assert brain.slow_filler() is None  # once per turn
+    llm.release.set()
+    return filler, await task
+
+
+async def test_after_a_filler_no_tool_bridge_and_it_is_in_the_transcript(today, tmp_path):
+    llm = HeldLLM(ScriptedLLM([say("", ("send_payment_link", {"channel": "whatsapp"})), say("Sent it on WhatsApp.")],
+                              tool_start=True))
+    brain = make(llm, today, tmp_path)
+    brain.state.verified = True
+    filler, out = await _turn_with_filler(brain, llm, "Yes, send it.")
+    assert filler == "One moment."
+    assert not any(s.bridge for s in out) and [s.text for s in out] == ["Sent it on WhatsApp."]
+    assert brain.transcript[-1] == ("agent", "One moment. Sent it on WhatsApp.")
+
+
+async def test_after_a_filler_a_failed_request_gets_no_hold_line(today, tmp_path, monkeypatch):
+    import emi_agent.brain as brain_mod
+    monkeypatch.setattr(brain_mod, "HOLD_RETRY_SECS", 0)
+    llm = HeldLLM(ScriptedLLM([say(fail=True), say("Thank you.")]))
+    brain = make(llm, today, tmp_path)
+    _, out = await _turn_with_filler(brain, llm, "Yes, speaking.")
+    assert [s.text for s in out] == ["Thank you."]  # not "One moment, please." after "One moment."
+
+
+async def test_fillers_rotate_and_reset_each_turn(today, tmp_path):
+    seen = []
+    inner = ScriptedLLM([say("Okay."), say("Okay.")])
+    brain = make(inner, today, tmp_path)
+    for _ in range(2):
+        llm = HeldLLM(inner)
+        brain.llm = llm
+        filler, _ = await _turn_with_filler(brain, llm, "Yes.")
+        seen.append(filler)
+    assert seen == ["One moment.", "Just a second."]
+
+
+# C48, live call B004 19:51: the channel question was asked four times.
+OFFER_HI = "due date से पहले payment करने के लिए क्या मैं link भेज दूँ SMS या WhatsApp पर?"
+
+
+async def _after_offer(today, tmp_path, said, reply="जी, link WhatsApp पर भेज दिया है।"):
+    llm = ScriptedLLM([say(reply)])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    brain.state.last_agent = OFFER_HI
+    out = await run(brain, said)
+    return brain, llm, out
+
+
+async def test_plain_yes_to_the_link_offer_sends_it_on_whatsapp(today, tmp_path):
+    for i, said in enumerate(["जी भेज दीजिए.", "हाँ जी", "Yes please", "भेज दीजिए", "okay send it"]):
+        brain, llm, _ = await _after_offer(today, tmp_path / str(i), said)
+        sent = [c for c in brain.state.tool_calls if c["name"] == "send_payment_link"]
+        assert sent and sent[0]["args"] == {"channel": "whatsapp"} and brain.state.payment_link_sent, said
+        notes = [m["content"] for m in llm.requests[0][1] if m["role"] == "system"]
+        assert any("just sent the payment link on WhatsApp" in n for n in notes), said
+
+
+async def test_no_auto_send_when_a_channel_is_named_or_something_is_asked(today, tmp_path):
+    for i, said in enumerate(["SMS pe bhej dijiye", "WhatsApp.", "What's it?", "जी, पर fee कितनी है?",
+                              "नहीं, अभी नहीं", "No, not now"]):
+        brain, _, _ = await _after_offer(today, tmp_path / str(i), said, reply="ठीक है।")
+        assert not brain.state.payment_link_sent, said
+
+
+async def test_no_auto_send_without_an_offer_or_before_verification(today, tmp_path):
+    brain, _, _ = await _after_offer(today, tmp_path / "a", "जी")
+    assert brain.state.payment_link_sent  # control: the offer was there
+    llm = ScriptedLLM([say("ठीक है।")])
+    brain = make(llm, today, tmp_path / "b", "B004")
+    brain.state.verified = True
+    brain.state.last_agent = "आपकी EMI eighteen thousand rupees है।"
+    await run(brain, "जी")
+    assert not brain.state.payment_link_sent
+    brain = make(ScriptedLLM([say("ठीक है।")]), today, tmp_path / "c", "B004")
+    brain.state.last_agent = OFFER_HI  # not verified
+    await run(brain, "जी भेज दीजिए")
+    assert not brain.state.payment_link_sent
+
+
+async def test_channel_question_is_not_asked_again(today, tmp_path):
+    # Asked in the previous turn: the repeat is dropped, the rest of the reply stays.
+    brain, _, out = await _after_offer(today, tmp_path / "a", "Can you please tell me the EMI amount in English?",
+                                       reply="EMI amount eighteen thousand rupees है। क्या link भेज दूँ SMS या WhatsApp पर?")
+    assert [s.text for s in out] == ["EMI amount eighteen thousand rupees है।"]
+    assert brain.state.guard_hits[-1]["category"] == "channel_again"
+    # After the link went: never.
+    llm = ScriptedLLM([say("आपको SMS चाहिए या WhatsApp?")])
+    brain = make(llm, today, tmp_path / "b", "B004")
+    brain.state.verified, brain.state.payment_link_sent = True, True
+    out = [s async for s in brain.respond("ठीक है")]
+    assert not any("SMS" in s.text for s in out)
+    assert brain.state.guard_hits and brain.state.guard_hits[-1]["category"] == "channel_again"
+
+
+async def test_first_channel_question_is_kept(today, tmp_path):
+    llm = ScriptedLLM([say(OFFER_HI)])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    out = await run(brain, "जी, बताइए")
+    assert any("SMS" in s.text for s in out)
+
+
+# C51, live call B004 20:13: invited more questions, then said goodbye and hung up in one breath.
+RECORD_PROMISE = ("record_outcome", {"outcome": "promise_to_pay", "promise_to_pay_date": "8 November", "notes": "x"})
+CLOSE_WITH_INVITE = ("समझ गई, eighth November को payment कर देंगी। यदि कोई और सवाल हो तो बताइए। "
+                     "समय देने के लिए धन्यवाद, आपका दिन शुभ हो।")
+
+
+async def test_invitation_at_the_close_waits_for_the_answer(today, tmp_path):
+    llm = ScriptedLLM([say("", RECORD_PROMISE), say(CLOSE_WITH_INVITE),
+                       say("जी, समय देने के लिए धन्यवाद, आपका दिन शुभ हो।")])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    out = await run(brain, "No. No. I said 8th November.")
+    assert [s.text for s in out][-1] == "यदि कोई और सवाल हो तो बताइए।"  # stops after the invitation
+    assert not brain.should_hang_up                                     # and waits
+    out = await run(brain, "नहीं, धन्यवाद")
+    assert "दिन शुभ हो" in out[-1].text and brain.should_hang_up
+
+
+async def test_second_invitation_is_dropped_and_the_call_closes(today, tmp_path):
+    llm = ScriptedLLM([say("", RECORD_PROMISE), say(CLOSE_WITH_INVITE),
+                       say("और कुछ पूछना है आपको? समय देने के लिए धन्यवाद, आपका दिन शुभ हो।")])
+    brain = make(llm, today, tmp_path, "B004")
+    brain.state.verified = True
+    await run(brain, "8th November.")
+    out = await run(brain, "ठीक है")
+    assert [s.text for s in out] == ["समय देने के लिए धन्यवाद, आपका दिन शुभ हो।"] and brain.should_hang_up
+
+
+async def test_stop_request_never_waits_on_an_invitation(today, tmp_path):
+    llm = ScriptedLLM([say("Sorry to disturb you. Any other questions? Thank you, have a good day.")])
+    brain = make(llm, today, tmp_path)
+    await run(brain, "Please stop calling me.")
+    assert brain.should_hang_up

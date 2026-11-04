@@ -62,3 +62,24 @@ def test_providers_module_importable():
     assert hasattr(providers, "make_stt")
     assert hasattr(providers, "make_tts")
     assert hasattr(providers, "make_transport")
+
+
+async def test_sarvam_tts_flushes_on_flush_frame(monkeypatch):
+    """The Sarvam subclass sends a flush for FlushTTSFrame and passes every frame to Pipecat first."""
+    from pipecat.processors.frame_processor import FrameDirection
+    from pipecat.services.sarvam.tts import SarvamTTSService
+    from emi_agent import providers
+    seen, flushed = [], []
+
+    async def parent(self, frame, direction):
+        seen.append(frame)
+
+    async def flush(self, context_id=None):
+        flushed.append(True)
+    monkeypatch.setattr(SarvamTTSService, "process_frame", parent)
+    monkeypatch.setattr(SarvamTTSService, "flush_audio", flush)
+    tts = providers.make_tts({"tts": {"provider": "sarvam", "sarvam_api_key": "x", "model": "bulbul:v4-flash",
+                                      "voice": "simran", "language": "hi-IN", "sample_rate": 16000}})
+    frame = providers.FlushTTSFrame()
+    await tts.process_frame(frame, FrameDirection.DOWNSTREAM)
+    assert seen == [frame] and flushed == [True]

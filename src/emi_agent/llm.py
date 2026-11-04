@@ -105,6 +105,7 @@ class GroqLLM:
         self._groq = groq
         extra = {"timeout": timeout} if timeout else {}  # None keeps the SDK default (60 s)
         self.client = groq.AsyncGroq(api_key=api_key, max_retries=max_retries, **extra)
+        _ = self.client.chat.completions  # load the SDK's chat module now, not mid-call (C53)
         self.model, self.max_tokens, self.temperature = model, max_tokens, temperature
         # gpt-oss thinks before answering; None leaves Groq's default (medium).
         self.extra = {"reasoning_effort": reasoning_effort} if reasoning_effort else {}
@@ -195,6 +196,9 @@ class OpenAICompatLLM:
         extra = {"timeout": timeout} if timeout else {}
         self.client = openai.AsyncOpenAI(api_key=api_key, base_url=OPENAI_COMPAT_URLS[provider],
                                          max_retries=0, **extra)
+        # The SDK imports its chat module on first use: 240 ms that blocked the event loop during the
+        # first reply of a call (measured 2026-11-04; live call B004 20:13, turn 1 got no filler, C53).
+        _ = self.client.chat.completions
         self.model, self.max_tokens, self.temperature = model, max_tokens, temperature
         self.extra = {"reasoning_effort": reasoning_effort} if reasoning_effort else {}
 

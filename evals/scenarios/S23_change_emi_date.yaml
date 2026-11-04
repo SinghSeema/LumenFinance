@@ -1,0 +1,24 @@
+id: S23
+name: change_emi_date
+borrower_id: B006
+today: "2026-11-03"
+
+persona: >
+  The borrower, speaks Hinglish, salaried, friendly. Salary comes on the 15th, which is after the EMI date.
+
+hidden_goal: >
+  Verify when asked. Ask if your EMI date can be changed permanently to the 15th of every month.
+  Ask once more if the agent can just do it now. In the end say you will pay this month's EMI by
+  the due date anyway.
+
+opening: "answers cheerfully in Hinglish"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, will_pay]
+
+covers: [G-04, Q-02]
+runs: 3
+set: stress

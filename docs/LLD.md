@@ -134,9 +134,9 @@ Rules: tools return pre-spoken strings; the model is told never to restate numbe
 
 ## 8. Language policy
 
-- STT supplies a language tag; code also inspects the script of the transcript.
+- STT supplies a language tag; code also inspects the script of the transcript. The tag "hi" counts only when the text has a Hindi word: Deepgram tagged English sentences "hi" on live calls (C46). Devanagari text is Hindi whatever the tag.
 - `reply_language` is set per turn and passed in the prompt: reply in the borrower's latest language; Hinglish allowed.
-- A single English word inside a Hindi turn does not flip the language; two consecutive turns in the other language do. Moves between Hindi and Hinglish are immediate.
+- A single English word inside a Hindi turn does not flip the language; a full sentence (5+ words, or 3+ words in Devanagari) or two consecutive shorter turns in the other language do. Numbers, months, yes/no/okay/thank you and names such as WhatsApp, SMS, UPI, EMI carry no language signal. Moves between Hindi and Hinglish are immediate.
 - Fixed cached lines (greeting, fillers, closing) exist in both languages, in one grammatical gender matching the TTS voice (D-20).
 - **Script of Hindi text sent to TTS** is `tts.script`: `roman`, `devanagari`, or `mixed` (Hindi in Devanagari, English words in Latin). The prompt's script rule and the formatter follow it. Chosen by listening test (D-11).
 
@@ -147,6 +147,7 @@ Rules: tools return pre-spoken strings; the model is told never to restate numbe
 | End-of-speech silence | `turn.vad_stop_secs` |
 | End-of-speech silence while digits or a date are expected (verification, date questions), switched by code via `VADParamsUpdateFrame` | `turn.vad_stop_secs_digits` (D-17) |
 | Speech start | `turn.vad_start_secs` |
+| Model silent this long into a reply: code says a short filler (C47) | `turn.filler_after_secs` (1.2) |
 | Words needed to interrupt | `turn.min_words_interrupt` |
 | Backchannel handling | `turn.backchannel_filter`: `context_aware` ignores "ok" or "haan" only when no question is pending, never during verification |
 | Silence prompts | `turn.silence_prompts_secs`, then `turn.silence_close_secs` |

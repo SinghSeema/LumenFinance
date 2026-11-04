@@ -39,3 +39,11 @@ def test_reference_lines_parse_correctly():
     from bakeoff.stt_keyterms import LINES, score
     bad = [(lid, text) for lid, kind, exp, text in LINES if not score(kind, exp, text)[0]]
     assert not bad
+
+
+def test_channel_names_are_keyterms():
+    """C50: "WhatsApp" was heard as "What's it?"."""
+    from emi_agent import keyterms
+    for name in ("dates", "full"):
+        assert {"WhatsApp", "SMS"} <= set(keyterms.for_call(name))
+    assert len(keyterms.for_call("full", "Sunita")) <= 100  # Deepgram's keyterm limit

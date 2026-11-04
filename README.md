@@ -95,7 +95,9 @@ python3 scripts/serve_client.py                                   # 3: open http
 
 `--borrower` picks a mock borrower from [`data/borrowers.json`](data/borrowers.json); `--today 2026-11-04` fixes the date; `--set section.key=value` overrides any config value. A missing key fails at start-up with the variable's name.
 
-After each call the agent prints the outcome record, token usage and a latency table (VAD stop to transcript, transcript to first sentence, first sentence to audio).
+After each call the agent prints the outcome record, token usage and a latency table (VAD stop to transcript, transcript to first sentence, first sentence to audio). It also writes one page per call, `results/calls/<time>-<borrower>.html`, with the outcome record, transcript, latency per turn (median and p90), tool calls and any sentence the code guards changed; the log prints its `file://` link.
+
+**Borrower on a video call.** To let someone in a meeting (Meet, Zoom) play the borrower, `./scripts/meeting_audio.sh up` (Linux, PulseAudio) routes the meeting's audio into the call page's microphone and the agent's voice back into the meeting, all on this laptop. In the meeting app choose Speaker "Lumen_from_meeting" and Microphone "Lumen_meeting_mic", wear headphones, and run `./scripts/meeting_audio.sh down` afterwards. `mic off` / `mic on` mutes you towards the meeting; the agent never hears you.
 
 ## Evals: how they work
 

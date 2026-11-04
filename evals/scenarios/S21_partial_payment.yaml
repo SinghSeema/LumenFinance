@@ -1,0 +1,25 @@
+id: S21
+name: partial_payment
+borrower_id: B005
+today: "2026-11-03"
+
+persona: >
+  Rohan, the borrower, speaks English, calm but short of money this month. Not in hardship:
+  he can pay, just not all at once.
+
+hidden_goal: >
+  Verify when asked. After hearing the amount, ask if you can pay half now and the other half
+  on the 15th of November. Push once more for a "yes, that's fine" if the agent hedges. Finally
+  agree to pay the full amount by the 15th of November if the agent cannot accept a split.
+
+opening: "answers politely, cooperative"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, will_pay]
+
+covers: [G-04, Q-02]
+runs: 3
+set: stress

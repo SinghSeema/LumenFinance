@@ -15,12 +15,16 @@
   button.end { background: var(--danger); }
   button:disabled { opacity: .5; cursor: default; }
   #status { margin-top: 20px; font-size: .9rem; color: var(--muted); min-height: 1.5em; }
+  .dev { display: grid; grid-template-columns: 5.5em 1fr; gap: 8px; align-items: center; margin: 0 0 12px; text-align: left; font-size: .9rem; color: var(--muted); }
+  select { font: inherit; padding: 6px; border-radius: 8px; background: var(--bg); color: var(--fg); border: 1px solid var(--muted); min-width: 0; }
 </style>
 </head>
 <body>
 <main>
   <h1>Lumen Finance: test call</h1>
   <p>You are the borrower. Start the agent first, then press Call.</p>
+  <label class="dev">Microphone <select id="mic"></select></label>
+  <label class="dev">Speaker <select id="spk"></select></label>
   <button id="btn">Call</button>
   <div id="status">Not connected</div>
 </main>
@@ -29,6 +33,24 @@
   const { Room, RoomEvent, Track } = LivekitClient;
   const btn = document.getElementById("btn"), status = document.getElementById("status");
   let room = null;
+  const mic = document.getElementById("mic"), spk = document.getElementById("spk");
+
+  // List devices; prefer the meeting-routing devices from scripts/meeting_audio.sh when they exist.
+  async function listDevices() {
+    try { (await navigator.mediaDevices.getUserMedia({ audio: true })).getTracks().forEach((t) => t.stop()); }
+    catch (e) { status.textContent = "Microphone permission needed"; return; }
+    const devs = await navigator.mediaDevices.enumerateDevices();
+    for (const [sel, kind, prefer] of [[mic, "audioinput", "Lumen_agent_ears"], [spk, "audiooutput", "Lumen_agent_out"]]) {
+      const keep = sel.value;
+      sel.innerHTML = "";
+      for (const d of devs.filter((d) => d.kind === kind)) sel.add(new Option(d.label || d.deviceId, d.deviceId));
+      const lumen = [...sel.options].find((o) => o.text.includes(prefer));
+      if (keep && [...sel.options].some((o) => o.value === keep)) sel.value = keep;
+      else if (lumen) sel.value = lumen.value;
+    }
+  }
+  navigator.mediaDevices.addEventListener("devicechange", listDevices);
+  listDevices();
 
   function idle(msg) {
     room = null; btn.textContent = "Call"; btn.className = ""; btn.disabled = false; status.textContent = msg;
@@ -38,7 +60,10 @@
     btn.disabled = true; status.textContent = "Connecting…";
     try {
       const { url, token } = await (await fetch("/token")).json();
-      room = new Room({ audioCaptureDefaults: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+      room = new Room({
+        audioCaptureDefaults: { deviceId: mic.value || undefined, echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        audioOutput: { deviceId: spk.value || undefined },
+      });
       room.on(RoomEvent.TrackSubscribed, (track) => {
         if (track.kind === Track.Kind.Audio) document.body.appendChild(track.attach());
       });

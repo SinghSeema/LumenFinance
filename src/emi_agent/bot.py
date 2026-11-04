@@ -33,8 +33,8 @@ from pipecat.utils.text.base_text_aggregator import AggregationType
 
 from emi_agent import config as config_mod
 from emi_agent.turn_gate import make_smart_turn
-from emi_agent import latency, providers, special
-from emi_agent.brain import _ASK_DOB, _ASK_LAST4, Brain, is_stop_request
+from emi_agent import call_report, latency, providers, special
+from emi_agent.brain import _ASK_DOB, _ASK_LAST4, Brain, Sentence, is_stop_request
 from emi_agent.data import load_borrowers
 from emi_agent.heard import has_number_or_month
 from emi_agent.llm import build_llm
@@ -43,7 +43,9 @@ from emi_agent.speech_format import clean_for_tts
 
 # Voice cannot wait out a 429: the SDK's retries honour Groq's retry-after (seconds of silence),
 # so the primary falls over to the next model at once; the last fallback keeps one retry.
-VOICE_OVERRIDES = ["llm.max_retries=0", "llm.timeout_secs=4"]
+# Timeout 4 -> 2.5 s (C47): Sarvam's slowest whole request on the live calls was 1975 ms (n=44, 2026-11-04);
+# both failures were 4 s timeouts, so the fallback now starts 1.5 s sooner.
+VOICE_OVERRIDES = ["llm.max_retries=0", "llm.timeout_secs=2.5"]
 
 
 def voice_config(cfg: dict) -> dict:
@@ -111,6 +113,7 @@ class BrainProcessor(FrameProcessor):
         self.slow_pace = providers.pace_delta(config, config["tts"]["hardship_pace"])
         self.slowed = False            # the slower pace was sent to TTS (kept for the rest of the call)
         self.min_words = config["turn"]["min_words_interrupt"]
+        self.filler_after = config["turn"].get("filler_after_secs") or 0  # 0: no slow-model filler (C47)
         self.latency_path = latency_path
         self.heard: list[str] = []      # final transcript pieces of the borrower's current turn
         self.pending = ""               # latest interim text Deepgram has not finalized yet
@@ -277,29 +280,55 @@ class BrainProcessor(FrameProcessor):
         """All sentences of one reply go to TTS as one LLM-style response, so Sarvam speaks them
         back to back. Separate TTSSpeakFrames made TTS wait for each sentence to finish playing
         before starting the next (0.2-0.9 s gaps, owner calls 2026-11-03)."""
-        started = False
+        reply = {"started": False, "first": False}  # TTS response opened; a first line went out
+        lock = asyncio.Lock()  # the filler and the reply's first sentence must not interleave
         self.last_agent_text = ""
-        async with aclosing(self.brain.respond(text, hint)) as sentences:
-            async for s in sentences:
-                spoken = clean_for_tts(s.text)
-                self.last_agent_text += spoken + " "
-                if turn and turn.first_sentence is None:
-                    turn.first_sentence = time.monotonic()
-                    turn.bridge = s.bridge
-                logger.info(f"agent> {spoken}" + (f"  [guard: {s.guard}]" if s.guard else "")
-                            + ("  [bridge while a tool runs]" if s.bridge else ""))
-                if s.guard:
-                    logger.info(f"  guard blocked: {self.brain.state.guard_hits[-1]['original']}")
-                if s.speech:
-                    logger.info(f"  pre-TTS {list(s.speech)}")
-                if spoken:
-                    if not started:
-                        await self._maybe_slow_down()
-                        await self.push_frame(LLMFullResponseStartFrame())
-                        started = True
-                    # Already a whole, guarded sentence: skip Pipecat's own sentence aggregator.
-                    await self.push_frame(AggregatedTextFrame(spoken + " ", AggregationType.SENTENCE))
-        if started:  # not reached on a barge-in: the interruption resets TTS instead
+
+        async def send(s: Sentence, filler: bool = False) -> None:
+            spoken = clean_for_tts(s.text)
+            self.last_agent_text += spoken + " "
+            if turn and turn.first_sentence is None:
+                turn.first_sentence = time.monotonic()
+                turn.bridge, turn.filler = s.bridge, filler
+            logger.info(f"agent> {spoken}" + (f"  [guard: {s.guard}]" if s.guard else "")
+                        + ("  [filler: the model is slow]" if filler
+                           else "  [bridge while a tool runs]" if s.bridge else ""))
+            if s.guard:
+                logger.info(f"  guard blocked: {self.brain.state.guard_hits[-1]['original']}")
+            if s.speech:
+                logger.info(f"  pre-TTS {list(s.speech)}")
+            if not spoken:
+                return
+            async with lock:
+                if not reply["started"]:
+                    await self._maybe_slow_down()
+                    await self.push_frame(LLMFullResponseStartFrame())
+                    reply["started"] = True
+                # Already a whole, guarded sentence: skip Pipecat's own sentence aggregator.
+                await self.push_frame(AggregatedTextFrame(spoken + " ", AggregationType.SENTENCE))
+                if s.bridge:  # short: TTS would hold it until the next sentence (C42)
+                    await self.push_frame(providers.FlushTTSFrame())
+
+        async def filler_after_silence() -> None:
+            # C47, live call B004 19:51: the LLM timed out after 4 s and nothing was said for 4.75 s.
+            await asyncio.sleep(self.filler_after)
+            if reply["first"]:
+                return
+            line = self.brain.slow_filler()
+            if line:
+                reply["first"] = True
+                await send(Sentence(line, bridge=True), filler=True)
+
+        watch = self.create_task(filler_after_silence()) if self.filler_after else None
+        try:
+            async with aclosing(self.brain.respond(text, hint)) as sentences:
+                async for s in sentences:
+                    reply["first"] = True  # set before any await: the filler must not follow it
+                    await send(s)
+        finally:
+            if watch and not watch.done():
+                await self.cancel_task(watch)
+        if reply["started"]:  # not reached on a barge-in: the interruption resets TTS instead
             await self.push_frame(LLMFullResponseEndFrame())
         if self.brain.should_hang_up:
             await self._wait_until_quiet()
@@ -442,7 +471,8 @@ async def main() -> None:
         f"{cfg['llm']['provider']}_llm"]))
     borrower = load_borrowers()[args.borrower]
     brain = Brain(cfg, borrower, args.today, build_llm(cfg), calls_path=Path(cfg["behavior"]["calls_log"]))
-    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    started = datetime.now()
+    stamp = started.strftime("%Y%m%d-%H%M%S")
     latency_path = Path("results/latency") / f"{stamp}-{args.borrower}.jsonl"
     logger.info(f"profile {args.profile} | llm {cfg['llm']['model']} | tts {cfg['tts']['model']} "
                 f"{cfg['tts'].get('voice')} | {borrower.borrower_id} | today {args.today} | "
@@ -478,9 +508,16 @@ async def main() -> None:
 
     await PipelineRunner(handle_sigint=True).run(task)
     proc.finish()  # Ctrl-C or a dropped connection still records an outcome
+    rows = []
     if latency_path.exists():
         rows = [json.loads(line) for line in latency_path.read_text().splitlines()]
         logger.info("latency this call:\n" + latency.report(rows))
+    secs = (datetime.now() - started).seconds
+    meta = {"started": started.strftime("%Y-%m-%d %H:%M:%S"), "length": f"{secs // 60}m {secs % 60}s",
+            "profile": args.profile, "llm": cfg["llm"]["model"],
+            "tts": f"{cfg['tts']['model']} {cfg['tts'].get('voice') or ''}".strip(), "today": args.today}
+    report = call_report.write(brain, rows, meta, Path("results/calls") / f"{stamp}-{args.borrower}.html")
+    logger.info(f"call report: {report.resolve().as_uri()}")
 
 
 if __name__ == "__main__":

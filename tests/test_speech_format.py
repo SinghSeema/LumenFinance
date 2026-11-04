@@ -153,3 +153,13 @@ def test_hindi_sentence_english_numbers_forms():
     assert date_to_words(date(2026, 11, 5), today, "hi-en", "roman") == "parson"
     assert date_to_words(date(2027, 1, 5), today, "hi-en", "roman") == "fifth January twenty twenty-seven"
     assert days_to_words(14, "hi-en", "devanagari") == "fourteen days"
+
+
+def test_hindi_date_forms_cover_ordinals_and_month_spellings():
+    from datetime import date
+    from emi_agent.speech_format import hindi_date_forms
+    forms = hindi_date_forms(date(2026, 11, 8))
+    assert {"आठवीं November", "आठ नवंबर", "आठ नवम्बर", "आठवीं नवंबर"} <= set(forms)
+    assert forms == sorted(forms, key=len, reverse=True)  # longest first: no partial replacement
+    assert "तीसरी November" in hindi_date_forms(date(2026, 11, 3))
+    assert "पच्चीसवीं अक्टूबर" in hindi_date_forms(date(2026, 10, 25))

@@ -7,6 +7,7 @@ from datetime import date, datetime
 
 from pydantic import ValidationError
 
+from emi_agent.language import _NEGATION
 from emi_agent import context, dates, policy, special
 from emi_agent.heard import digits_were_said, dob_was_said, find_dob, find_last4
 from emi_agent.outcome import Outcome, OutcomeRecord
@@ -129,8 +130,10 @@ _REQUEST = re.compile(r"\b(?:talk|speak|connect|transfer|want|need|give|get|put|
                       r"karaiye|karwaiye|karwa|chahiye|chahta|chahti|jodo|jodiye)\b|"
                       r"बात|चाहिए|चाहता|चाहती|जोड़|कराओ|कराइए|करवाइए", re.IGNORECASE)
 _OFFER = re.compile(r"colleague|human|person|team|sahkarmi|insaan|सहकर्मी|इंसान", re.IGNORECASE)
+# The end is a lookahead, not \b: after a Devanagari vowel sign \b never matches, so "जी, भेज दीजिए"
+# and "हाँ" were never a yes (found 2026-11-04, C48).
 _YES = re.compile(r"^\W*(?:yes|yeah|yep|sure|ok|okay|please|haan|han|ha|ji|jee|theek|thik|zaroor|"
-                  r"हाँ|हां|जी|ठीक|ज़रूर|जरूर)\b", re.IGNORECASE)
+                  r"हाँ|हां|जी|ठीक|ज़रूर|जरूर)(?![a-z\u0900-\u097F])", re.IGNORECASE)
 
 
 # What to tell the borrower after an escalation (owner, 2026-11-04, prompt v14): help first, then one
@@ -146,8 +149,11 @@ _ESCALATION_LINE = {
 _DATE_HELP = {
     "ambiguous_phrase": "They gave only a vague time. Ask one clear question: which date exactly "
                         "will they pay? Today is {today}; never suggest a date that has passed.",
-    "past_date": "That date has already passed (today is {today}). Say so gently and ask which "
-                 "coming date they mean.",
+    # Live call B004 20:13: "आठ November" was heard as "एक November", and the agent offered "आने वाली
+    # first November" (a year away). A past date is most often misheard: ask again, suggest nothing (C52).
+    "past_date": "That date has already passed (today is {today}), so it may have been misheard. Say "
+                 "briefly that you may not have heard the date right and ask them to say it once more. "
+                 "Do not suggest a date yourself.",
 }
 # Escalations whose call back our internal team arranges (D-35, v14): no schedule_callback, no time.
 # "other" too: a waiver demand escalated as "other" scheduled its own callback for "tomorrow" (v13 S11 run 2).
@@ -165,6 +171,12 @@ _BY_DUE = re.compile(r"due date (?:तक|se pehle|से पहले|tak|par|�
                      r"(?:by|before|on) (?:the )?(?:due|deadline)\b", re.IGNORECASE)
 _LEAVING = re.compile(r"\bbye\b|alvida|अलविदा|rakhti hoon|rakhta hoon|रखती हूँ|रखता हूँ|फ़ोन रख|फोन रख|"
                       r"\bgotta go\b|\bhave to go\b", re.IGNORECASE)
+# The whole reply is "(no,) thank you": the answer to "anything else?" (live call B004 19:31,
+# 2026-11-04: "No. Thank you." got the date question and cost a 1.25 s model round trip).
+# Anchored to the whole reply, so "no, I can't pay, thank you" is not a goodbye.
+_NO_THANKS = re.compile(r"^\W*(?:(?:no|nope|nahi|nahin|नहीं|ना|ji|जी|okay|ok)\W+)*"
+                        r"(?:thank you|thanks|thankyou|dhanyavaad|dhanyawad|धन्यवाद|shukriya|शुक्रिया)\W*$",
+                        re.IGNORECASE)
 
 # Calls that never reached the borrower: a dispute or hardship escalation makes no sense (D-30).
 _NOT_THE_BORROWER = {Outcome.wrong_number, Outcome.third_party}
@@ -276,7 +288,7 @@ class Tools:
                 "message": "Answer only what they asked, in one or two short sentences, from this text. "
                            "Never add an amount, date or rule that is not in it."}
 
-    def _send_payment_link(self, channel: str) -> dict:
+    def _send_payment_link(self, channel: str = "whatsapp") -> dict:  # WhatsApp by default (owner, D-46)
         mode = self.config["faults"]["payment_link_fail"]
         if mode == "always" or (mode == "once" and self._link_failures == 0):
             self._link_failures += 1
@@ -366,6 +378,18 @@ class Tools:
             return {"escalated": True, "message": special.instruction(situation, 0)}
         return {"escalated": True, "message": _ESCALATION_LINE.get(reason, _ESCALATION_LINE["other"])}
 
+    def _yes_to_due_date_question(self) -> bool:
+        """C49, live call B004 19:51: "eighth November से पहले payment हो जाएगी ना?" - "जी payment हो जाएगी"
+        was recorded as will_pay with no date, and the date was asked again. The agent's own question
+        named the due date (not a link offer) and the answer is a plain yes: a promise for the due date."""
+        s = self.state
+        question = s.last_agent.rsplit("?", 1)[0].rsplit("।", 1)[-1].rsplit(".", 1)[-1] if "?" in s.last_agent else ""
+        due = self.facts().due_date_spoken
+        names_due = due.lower() in question.lower() or "due date" in question.lower()
+        said = s.heard[-1] if s.heard else ""
+        return (names_due and "link" not in question.lower() and bool(_YES.search(said))
+                and not _NEGATION.search(said) and "?" not in said)
+
     def _record_outcome(self, outcome: str, promise_to_pay_date: str | None, notes: str) -> dict:
         s = self.state
         if s.outcome is not None and s.outcome.outcome is Outcome.verification_failed:
@@ -406,12 +430,12 @@ class Tools:
         # description says the due date counts); the model recorded will_pay and the call ended
         # unresolved (v17-dev3-fix S16 run 2). Code records it as what it is.
         if (Outcome(outcome) is Outcome.will_pay and not promise_to_pay_date and s.verified
-                and any(_BY_DUE.search(u) for u in s.heard[-2:])):
+                and (any(_BY_DUE.search(u) for u in s.heard[-2:]) or self._yes_to_due_date_question())):
             outcome, promise_to_pay_date = Outcome.promise_to_pay.value, self.borrower.due_date.isoformat()
         # Not when they are saying bye: "Ok. You. Bye." got one more question (owner call B004 17:59).
         if (Outcome(outcome) is Outcome.will_pay and not promise_to_pay_date and self.borrower.days_overdue == 0
                 and s.verified and "asked_exact_date" not in s.flags
-                and not (s.heard and _LEAVING.search(s.heard[-1]))):
+                and not (s.heard and (_LEAVING.search(s.heard[-1]) or _NO_THANKS.search(s.heard[-1])))):
             s.flags.add("asked_exact_date")
             return {"error": "no_date", "message": "Ask once, kindly, on which date they plan to pay (the due date is "
                     + self.facts().due_date_spoken + "; a later date is their choice, never push). Record "

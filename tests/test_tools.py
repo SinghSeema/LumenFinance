@@ -608,3 +608,53 @@ def test_will_pay_by_the_due_date_is_recorded_as_a_promise(borrower, today):
     r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
     assert r["recorded"] and state.outcome.outcome.value == "promise_to_pay"
     assert state.outcome.promise_to_pay_date == borrower.due_date
+
+
+@pytest.mark.parametrize("said,asks", [("No. Thank you.", False), ("No thanks", False), ("नहीं, धन्यवाद।", False),
+                                       ("जी, धन्यवाद", False), ("Thank you.", False), ("Ok bye", False),
+                                       ("No, I can't pay this month, thank you", True),
+                                       ("I need to pay", True), ("Thank you, I will pay", True)])
+def test_no_date_question_skipped_when_the_borrower_is_saying_goodbye(borrower, today, said, asks):
+    """C43, live call B004 19:31: "No. Thank you." to "anything else?" got the date question."""
+    tools, state = _verified(borrower, today, [said])
+    r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert (r.get("error") == "no_date") is asks
+
+
+@pytest.mark.parametrize("said,yes", [("जी भेज दीजिए.", True), ("हाँ", True), ("Haan ji", True), ("okay", True),
+                                      ("जीत गया", False), ("oklahoma", False), ("नहीं", False)])
+def test_yes_matches_devanagari(said, yes):
+    """C48: \\b after a Devanagari vowel sign never matched, so "जी"/"हाँ" were never a yes."""
+    from emi_agent.tools import _YES
+    assert bool(_YES.search(said)) is yes
+
+
+QUESTION = ("ठीक है, link WhatsApp पर भेज दिया है। payment हमारे records में दिखने में चौबीस से अड़तालीस घंटे लग सकते हैं। "
+            "{due} से पहले payment हो जाएगी ना?")
+
+
+def test_yes_to_the_agents_due_date_question_is_a_promise_for_the_due_date(borrower, today):
+    """C49, live call B004 19:51: "जी payment हो जाएगी" was will_pay and the date was asked again."""
+    tools, state = _verified(borrower, today, ["जी payment हो जाएगी."])
+    state.last_agent = QUESTION.format(due=tools.facts().due_date_spoken)
+    r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert r["recorded"] and state.outcome.outcome.value == "promise_to_pay"
+    assert state.outcome.promise_to_pay_date == borrower.due_date
+
+
+@pytest.mark.parametrize("said,last_agent", [
+    ("जी payment हो जाएगी.", "क्या मैं due date से पहले payment के लिए link भेज दूँ?"),  # a link offer, not a promise
+    ("नहीं, शायद नहीं हो पाएगी", QUESTION),                                              # not a yes
+    ("जी, पर कितने बजे तक?", QUESTION),                                                   # a question back
+    ("जी payment हो जाएगी.", "आपकी EMI eighteen thousand rupees है। और कुछ पूछना है?")])  # no due date asked
+def test_due_date_promise_needs_a_plain_yes_to_that_question(borrower, today, said, last_agent):
+    tools, state = _verified(borrower, today, [said])
+    state.last_agent = last_agent.format(due=tools.facts().due_date_spoken)
+    r = tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert r.get("error") == "no_date" or (r.get("recorded") and state.outcome.outcome.value == "will_pay")
+
+
+@pytest.mark.parametrize("line", ["आप जो comfortable हों, बस वही बताइए।", "बस वही बता दीजिए।", "Bas wahi bata dijiye."])
+def test_banned_just_tell_me_that_phrase_in_all_forms(line):
+    from emi_agent import guard
+    assert guard.unwanted(line)

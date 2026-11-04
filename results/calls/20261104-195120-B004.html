@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call B004</title><style>
+:root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --line:#dddcd6; --card:#fff;
+        --ok:#1f6f5c; --bad:#a23b2a; --agent:#eef4f1; --you:#f3f1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+        --bg:#171716; --fg:#ecece8; --muted:#9a9a94; --line:#33332f; --card:#20201e;
+        --ok:#4fb39a; --bad:#e07a68; --agent:#1d2a25; --you:#2a2822; } }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:1.4rem; margin:0 0 4px; } h2 { font-size:1.05rem; margin:28px 0 8px; }
+.meta { color:var(--muted); margin:0 0 16px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+.kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+.kpi b { display:block; font-size:1.3rem; } .kpi span { color:var(--muted); font-size:.85rem; }
+.ok { color:var(--ok); } .bad { color:var(--bad); }
+pre { margin:0; white-space:pre-wrap; word-break:break-word; font-size:.85rem; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:500; } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+.scroll { overflow-x:auto; }
+.turn { padding:8px 12px; border-radius:8px; margin:6px 0; }
+.turn.agent { background:var(--agent); } .turn.borrower { background:var(--you); }
+.who { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+</style></head>
+<body><main>
+<h1>Call report: B004</h1>
+<p class="meta">started 2026-11-04 19:51:20 · length 2m 34s · profile hindi_bulbul · llm sarvam-105b-conversations · tts bulbul:v4-flash simran_enhi_customer · today 2026-11-04</p>
+<div class="kpis"><div class="card kpi"><b class="">promise_to_pay</b><span>outcome</span></div><div class="card kpi"><b class="ok">yes</b><span>verified</span></div><div class="card kpi"><b class="">no</b><span>escalate to human</span></div><div class="card kpi"><b class="ok">none</b><span>loan detail before verification</span></div><div class="card kpi"><b class="ok">1186 ms</b><span>median gap (n=8); felt ≈ 1686 ms</span></div><div class="card kpi"><b class="bad">2848 ms</b><span>p90 gap; felt ≈ 3348 ms</span></div></div>
+<h2>Outcome record</h2>
+<div class="card"><pre>{
+  "borrower_id": "B004",
+  "verified": true,
+  "outcome": "promise_to_pay",
+  "promise_to_pay_date": "2026-11-08",
+  "payment_link_sent": true,
+  "escalate_to_human": false,
+  "notes": "Sunita promised to pay on 8th November",
+  "language_used": "hi+hinglish",
+  "callback_time": null
+}</pre></div>
+<h2>Transcript</h2>
+<div class="turn agent"><div class="who">Agent</div>नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?</div><div class="turn borrower"><div class="who">Borrower</div>जी, मैं Sunita बोल रहा हूं.</div><div class="turn agent"><div class="who">Agent</div>ठीक है Sunita जी, account verification के लिए क्या आप अपने registered mobile number के आखिरी चार अंक बता देंगी?</div><div class="turn borrower"><div class="who">Borrower</div>1, 2, 9 0.</div><div class="turn agent"><div class="who">Agent</div>धन्यवाद, verify हो गया है। Sunita जी, आपकी personal loan की EMI eighteen thousand rupees है, जिसकी due date eighth November है। अभी due है, और कोई charge नहीं लगा है। due date से पहले payment करने के लिए क्या मैं link भेज दूँ SMS या WhatsApp पर?</div><div class="turn borrower"><div class="who">Borrower</div>Can you please tell me the EMI amount in English?</div><div class="turn agent"><div class="who">Agent</div>EMI amount eighteen thousand rupees है, और due date eighth November है। due date से पहले payment करने के लिए क्या link भेज दूँ SMS या WhatsApp पर?</div><div class="turn borrower"><div class="who">Borrower</div>जी भेज दीजिए.</div><div class="turn agent"><div class="who">Agent</div>ठीक है, मैं link भेज देती हूँ। आप बताइए SMS पर भेजूँ या WhatsApp पर?</div><div class="turn borrower"><div class="who">Borrower</div>What&#x27;s it?</div><div class="turn agent"><div class="who">Agent</div>यह secure payment link है जिससे आप UPI, debit card या net banking से payment कर सकती हैं। मैं इसे SMS या WhatsApp पर भेज सकती हूँ, आपको क्या सही रहेगा?</div><div class="turn borrower"><div class="who">Borrower</div>WhatsApp.</div><div class="turn agent"><div class="who">Agent</div>ठीक है, मैं link भेज रही हूँ। ठीक है, link WhatsApp पर भेज दिया है। payment हमारे records में दिखने में चौबीस से अड़तालीस घंटे लग सकते हैं। eighth November से पहले payment हो जाएगी ना?</div><div class="turn borrower"><div class="who">Borrower</div>जी payment हो जाएगी.</div><div class="turn agent"><div class="who">Agent</div>जी। ठीक है। eighth November से पहले payment किस दिन तक कर देंगी? बस वही बता दीजिए।</div><div class="turn borrower"><div class="who">Borrower</div>I will do on 8th November.</div><div class="turn agent"><div class="who">Agent</div>जी। ठीक है, मैंने note कर लिया है। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।</div>
+<h2>Latency per turn (ms)</h2>
+<p class="meta">Gap = VAD stop to first agent audio. The borrower also waits the VAD stop time
+before that, shown as "felt". Interrupted turns are left out of the median and p90.</p>
+<div class="scroll"><table><tr><th>#</th><th>vad_stop → stt_final</th><th>stt_final → first_sentence</th><th>first_sentence → playback_start</th><th>gap</th><th>notes</th></tr><tr><td>1</td><td class="n">328</td><td class="n">710</td><td class="n">421</td><td class="n">1459</td><td></td></tr><tr><td>2</td><td class="n">374</td><td class="n">553</td><td class="n">222</td><td class="n">1149</td><td></td></tr><tr><td>3</td><td class="n">291</td><td class="n">308</td><td class="n">246</td><td class="n">845</td><td></td></tr><tr><td>4</td><td class="n">62</td><td class="n">315</td><td class="n">224</td><td class="n">601</td><td></td></tr><tr><td>5</td><td class="n">319</td><td class="n">366</td><td class="n">203</td><td class="n">888</td><td></td></tr><tr><td>6</td><td class="n">374</td><td class="n">646</td><td class="n">740</td><td class="n">1761</td><td>bridge line</td></tr><tr><td>7</td><td class="n">314</td><td class="n">4751</td><td class="n">318</td><td class="n">5383</td><td>bridge line</td></tr><tr><td>8</td><td class="n">15</td><td class="n">821</td><td class="n">388</td><td class="n">1224</td><td>bridge line</td></tr></table></div>
+<h2>Tool calls</h2>
+<div class="scroll"><table><tr><th>tool</th><th>stage</th><th>args</th><th>result</th></tr><tr><td>verify_identity</td><td>reminding</td><td>{&quot;factor&quot;: &quot;last4&quot;, &quot;value&quot;: &quot;1290&quot;}</td><td>{&quot;verified&quot;: true, &quot;loan_facts&quot;: {&quot;amount_spoken&quot;: &quot;eighteen thousand rupees&quot;, &quot;due_date_spoken&quot;: &quot;eighth November&quot;, &quot;loan_type&quot;: &quot;personal loan&quot;}, &quot;status&quot;: &quot;T…</td></tr><tr><td>send_payment_link</td><td>action</td><td>{&quot;channel&quot;: &quot;whatsapp&quot;}</td><td>{&quot;sent&quot;: true, &quot;channel&quot;: &quot;whatsapp&quot;, &quot;url&quot;: &quot;https://pay.lumenfinance.example/l/B004-****&quot;}</td></tr><tr><td>record_outcome</td><td>action</td><td>{&quot;notes&quot;: &quot;Sunita confirmed payment will be made before due date&quot;, &quot;outcome&quot;: &quot;will_pay&quot;, &quot;promise_to_pay_date&quot;: null}</td><td>{&quot;error&quot;: &quot;no_date&quot;, &quot;message&quot;: &quot;Ask once, kindly, on which date they plan to pay (the due date is eighth November; a later date is their choice, never push). R…</td></tr><tr><td>record_outcome</td><td>closing</td><td>{&quot;notes&quot;: &quot;Sunita promised to pay on 8th November&quot;, &quot;outcome&quot;: &quot;promise_to_pay&quot;, &quot;promise_to_pay_date&quot;: &quot;eighth November&quot;}</td><td>{&quot;recorded&quot;: true, &quot;promise_date_spoken&quot;: &quot;eighth November&quot;}</td></tr></table></div>
+<h2>Code guard events</h2>
+<div class="scroll"><table><tr><th>check</th><th>model wrote</th><th>spoken instead</th></tr><tr><td>number_style</td><td>Sunita जी, आपकी personal loan की EMI अठारह हज़ार रुपये है, जिसकी due date आठवीं November है।</td><td>Sunita जी, आपकी personal loan की EMI eighteen thousand rupees है, जिसकी due date eighth November है।</td></tr></table></div>
+<p class="meta">State flags: asked_exact_date, numbers_chosen · tokens {&#x27;input&#x27;: 42876, &#x27;output&#x27;: 393, &#x27;cache_read&#x27;: 0}</p>
+</main></body></html>

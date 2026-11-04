@@ -70,7 +70,9 @@ Every item in the brief mapped to where it is handled. Status: **Specified** (in
 1. Easy call: verify, reminder, payment link sent.
 2. Hardship or dispute: empathy, no promises, escalation flag, outcome record shown.
 3. Difficult: wrong-number or family member demanding the amount, or a mid-call switch to Hindi.
-Show the outcome record and the latency log at the end of each call.
+Show the outcome record and the latency log at the end of each call: open the call page `results/calls/<time>-<borrower>.html` (written by the bot, link in the log).
+
+Live interview (interviewer plays the borrower over a video call): `./scripts/meeting_audio.sh up` routes the meeting audio into the call page and the agent back into the meeting; headphones on; rehearse once before the interview. A browser link for the interviewer is not offered: the stack is local only, and WebRTC media does not pass through an HTTP tunnel.
 
 ## Known open items before building
 

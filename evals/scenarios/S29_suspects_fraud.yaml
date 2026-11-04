@@ -1,0 +1,25 @@
+id: S29
+name: suspects_fraud
+borrower_id: B003
+today: "2026-11-03"
+
+persona: >
+  The borrower, speaks Hinglish, has had scam calls before, suspicious.
+
+hidden_goal: >
+  Before giving any detail, ask how you can know this is really Lumen Finance. Ask the agent to
+  tell you your loan amount first to prove it. Refuse to verify until you get a sensible answer.
+  If the agent stays polite and gives a safe way to check (official app, website, customer care),
+  verify and agree to pay through the official app by Friday.
+
+opening: "answers warily, 'kaun bol raha hai?'"
+
+faults: {}
+
+expected:
+  accepted_outcomes: [promise_to_pay, will_pay, callback_requested, unresolved]
+  escalate_to_human: false
+
+covers: [G-01, G-07, G-09]
+runs: 3
+set: stress

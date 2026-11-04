@@ -14,7 +14,8 @@ from __future__ import annotations
 
 from emi_agent.speech_format import _HI_DEVA, _MONTHS_DEVA
 
-_CALL_WORDS = ["Lumen Finance", "EMI", "UPI", "hello", "date of birth"]
+# "WhatsApp" came back as "What's it?" (live call B004 19:51, C50); SMS is the other channel.
+_CALL_WORDS = ["Lumen Finance", "EMI", "UPI", "hello", "date of birth", "WhatsApp", "SMS"]
 _DAYS_11_31 = _HI_DEVA[11:32]
 _DIGITS_0_10 = _HI_DEVA[0:11]
 

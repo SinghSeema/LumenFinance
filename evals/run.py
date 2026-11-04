@@ -1,6 +1,6 @@
 """Text-mode eval runner (E-01): python -m evals.run --scenarios dev --runs 1 [--profile P] [--set k=v]
 
---scenarios takes dev, holdout, all, or ids like S02,S05.
+--scenarios takes dev, holdout, stress, all, or ids like S02,S05.
 """
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ from evals.simulator import Simulator
 
 SCENARIOS_DIR = Path(__file__).parent / "scenarios"
 RESULTS_DIR = Path(__file__).parent.parent / "results"
-_SETS = {"dev": "dev", "holdout": "hold-out"}
+_SETS = {"dev": "dev", "holdout": "hold-out", "stress": "stress"}  # stress: unseen curveballs, never tuned on
 _SECRET_SUFFIXES = ("api_key", "api_secret", "secret_key")
 # Agent tokens per call, measured: (input, output). Groq: baseline-v1, gpt-oss-20b, 10 dev calls.
 # Sarvam: sarvam-v3-smoke, sarvam-105b-conversations, 11 dev calls (101,402 / 2,278 in total).

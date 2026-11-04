@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call B004</title><style>
+:root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --line:#dddcd6; --card:#fff;
+        --ok:#1f6f5c; --bad:#a23b2a; --agent:#eef4f1; --you:#f3f1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+        --bg:#171716; --fg:#ecece8; --muted:#9a9a94; --line:#33332f; --card:#20201e;
+        --ok:#4fb39a; --bad:#e07a68; --agent:#1d2a25; --you:#2a2822; } }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:1.4rem; margin:0 0 4px; } h2 { font-size:1.05rem; margin:28px 0 8px; }
+.meta { color:var(--muted); margin:0 0 16px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+.kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+.kpi b { display:block; font-size:1.3rem; } .kpi span { color:var(--muted); font-size:.85rem; }
+.ok { color:var(--ok); } .bad { color:var(--bad); }
+pre { margin:0; white-space:pre-wrap; word-break:break-word; font-size:.85rem; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:500; } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+.scroll { overflow-x:auto; }
+.turn { padding:8px 12px; border-radius:8px; margin:6px 0; }
+.turn.agent { background:var(--agent); } .turn.borrower { background:var(--you); }
+.who { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+</style></head>
+<body><main>
+<h1>Call report: B004</h1>
+<p class="meta">started 2026-11-04 19:11:23 · length 1m 29s · profile hindi_bulbul · llm sarvam-105b-conversations · tts bulbul:v4-flash simran_enhi_customer · today 2026-11-04</p>
+<div class="kpis"><div class="card kpi"><b class="">unresolved</b><span>outcome</span></div><div class="card kpi"><b class="">no</b><span>verified</span></div><div class="card kpi"><b class="">no</b><span>escalate to human</span></div><div class="card kpi"><b class="ok">none</b><span>loan detail before verification</span></div><div class="card kpi"><b class="">n/a</b><span>no complete turns measured</span></div></div>
+<h2>Outcome record</h2>
+<div class="card"><pre>{
+  "borrower_id": "B004",
+  "verified": false,
+  "outcome": "unresolved",
+  "promise_to_pay_date": null,
+  "payment_link_sent": false,
+  "escalate_to_human": false,
+  "notes": "recorded by code: model did not record an outcome",
+  "language_used": "hi",
+  "callback_time": null
+}</pre></div>
+<h2>Transcript</h2>
+<div class="turn agent"><div class="who">Agent</div>नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?</div><div class="turn agent"><div class="who">Agent</div>Hello, क्या आप मुझे सुन पा रहे हैं?</div><div class="turn agent"><div class="who">Agent</div>मुझे आपकी आवाज़ नहीं आ रही, इसलिए मैं call बंद कर रही हूँ। हम आपको बाद में फिर call करेंगे। धन्यवाद।</div>
+<h2>Latency per turn (ms)</h2>
+<p class="meta">Gap = VAD stop to first agent audio. The borrower also waits the VAD stop time
+before that, shown as "felt". Interrupted turns are left out of the median and p90.</p>
+<p class="meta">No latency rows.</p>
+<h2>Tool calls</h2>
+<p class="meta">No tool calls.</p>
+<h2>Code guard events</h2>
+<p class="meta">No sentence was changed or dropped by the code guards.</p>
+<p class="meta">State flags: silent_close · tokens {&#x27;input&#x27;: 0, &#x27;output&#x27;: 0, &#x27;cache_read&#x27;: 0}</p>
+</main></body></html>

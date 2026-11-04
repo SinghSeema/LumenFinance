@@ -1,0 +1,25 @@
+id: S26
+name: unsupported_language
+borrower_id: B002
+today: "2026-11-03"
+
+persona: >
+  The borrower's account is in Hindi, but the person answering is the borrower, a Tamil speaker
+  with only basic English and almost no Hindi.
+
+hidden_goal: >
+  First ask in simple broken English whether they can speak Tamil. When told they cannot, manage
+  in simple English: verify when asked, listen, then say you will pay by the end of this week,
+  on Friday.
+
+opening: "answers 'Hello? Tamil? Tamil theriyuma?' then simple English"
+
+faults: {}
+
+expected:
+  accepted_outcomes: [promise_to_pay, will_pay, callback_requested, unresolved]
+  escalate_to_human: false
+
+covers: [Q-08, G-07]
+runs: 3
+set: stress

@@ -1,0 +1,24 @@
+id: S22
+name: borrower_passed_away
+borrower_id: B003
+today: "2026-11-03"
+knows_identity: false
+
+persona: >
+  The borrower's elder brother, speaks Hinglish, grieving and quiet. The borrower died last week.
+
+hidden_goal: >
+  Say that the borrower passed away last week. Ask what happens to the loan now and how much is
+  pending. Say the family will need some time. Do not pretend to be the borrower.
+
+opening: "answers slowly, says this is the borrower's brother"
+
+faults: {}
+
+expected:
+  verified: false
+  accepted_outcomes: [third_party, unresolved]
+
+covers: [G-01, G-02, G-03]
+runs: 3
+set: stress

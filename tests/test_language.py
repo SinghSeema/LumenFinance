@@ -81,3 +81,50 @@ def test_garbled_number_answers_do_not_switch_language():
     # longer count ("Yes." then "After 4 PM?" flipped a Hindi call to English, replay of the 16:03 call).
     assert language_words("Okay.") == "" and language_words("After 4 PM?") == ""
     assert language_words("I am free after 4 PM") == "I free"
+
+
+# C44: an explicit request for the number language (owner, 2026-11-04).
+@pytest.mark.parametrize("said,style", [
+    ("Amount English mein bataiye", "english"), ("अंग्रेज़ी में बोलिए", "english"),
+    ("Please repeat the amount in English", "english"), ("हिंदी में बताइए", "hindi"), ("Hindi mein bolo", "hindi"),
+    ("मैं English में नहीं समझती", None),          # a negation asks for the opposite: left to the model
+    ("Hindi nahi, English mein", None), ("Hinglish mein", None), ("English medium school", None),
+    ("I paid in cash", None)])
+def test_asks_numbers_in(said, style):
+    from emi_agent.language import asks_numbers_in
+    assert asks_numbers_in(said) == style
+
+
+# C46: Deepgram tagged every live turn "hi", English ones too (calls B004 19:51, B007 16:03).
+@pytest.mark.parametrize("said,expected", [
+    ("Can you please tell me the EMI amount in English?", "en"),
+    ("Just wanted to share that I have lost my job this month.", "en"),
+    ("Or is there any other way to handle?", "en"),
+    ("theek hai", "hinglish"),                 # a Hindi word: the tag is believed
+    ("haan main kal pay kar dunga", "hinglish"),
+    ("जी payment हो जाएगी", "hi")])
+def test_stt_hindi_tag_needs_a_hindi_word(said, expected):
+    assert detect(said, "hi") == expected
+
+
+def test_devanagari_turn_of_three_words_switches_at_once():
+    t = LanguageTracker("en")
+    assert t.update("hi", 2) is False and t.current == "en"   # "जी हाँ": too short alone
+    t = LanguageTracker("en")
+    assert t.update("hi", 3) is True and t.current == "hi"    # "जी भेज दीजिए"
+    t = LanguageTracker("en")
+    assert t.update("hinglish", 3) is False                   # Roman Hinglish keeps the two-turn rule
+
+
+def test_live_call_replay_follows_the_borrower():
+    """Call B004 19:51 turn by turn, as brain.py feeds the tracker (language_words, then detect)."""
+    from emi_agent.language import language_words
+    t = LanguageTracker("hi")
+    seen = []
+    for said in ["जी, मैं Sunita बोल रहा हूं.", "1, 2, 9 0.", "Can you please tell me the EMI amount in English?",
+                 "जी भेज दीजिए.", "WhatsApp.", "जी payment हो जाएगी."]:
+        content = language_words(said)
+        if content == said.strip() or len(content.split()) >= 2:
+            t.update(detect(content, "hi"), len(content.split()))
+        seen.append(t.current)
+    assert seen == ["hi", "hi", "en", "hi", "hi", "hi"]

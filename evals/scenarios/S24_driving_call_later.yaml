@@ -1,0 +1,24 @@
+id: S24
+name: driving_call_later
+borrower_id: B008
+today: "2026-11-03"
+
+persona: >
+  The borrower, speaks Hindi, driving on a highway, in a hurry, short answers.
+
+hidden_goal: >
+  Say you are driving and cannot talk. Ask them to call back in two hours. Do not answer
+  verification questions while driving. If asked, say this evening at 7 is fine.
+
+opening: "answers hurriedly in Hindi, background noise"
+
+faults: {}
+
+expected:
+  outcome: callback_requested
+  callback_date: "2026-11-03"
+  escalate_to_human: false
+
+covers: [R6, Q-05]
+runs: 3
+set: stress

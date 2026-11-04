@@ -26,6 +26,10 @@ class FakeBrain:
     def greeting_cut(self):
         self.cut += 1
 
+    def slow_filler(self):
+        self.fillers = getattr(self, "fillers", 0) + 1
+        return "जी, एक second।" if self.fillers == 1 else None
+
     def reply_unheard(self):
         self.unheard = getattr(self, "unheard", 0) + 1
 
@@ -44,8 +48,9 @@ class FakeBrain:
 def make(tmp_path, monkeypatch):
     monkeypatch.setattr(FrameProcessor, "process_frame", lambda self, f, d: _noop())
 
-    def _make(brain, stt_wait=0.2, unfinished_wait=0.05, silence=(0.2, 0.3, 0.3), hardship_wait=0.05):
-        cfg = load(overrides=[f"turn.stt_wait_secs={stt_wait}",
+    def _make(brain, stt_wait=0.2, unfinished_wait=0.05, silence=(0.2, 0.3, 0.3), hardship_wait=0.05,
+              filler_after=1.2):
+        cfg = load(overrides=[f"turn.stt_wait_secs={stt_wait}", f"turn.filler_after_secs={filler_after}",
                               f"turn.unfinished_wait_secs={unfinished_wait}",
                               f"turn.hardship_unfinished_wait_secs={hardship_wait}",
                               f"turn.silence_after_barge_in_secs={silence[0]}",
@@ -339,3 +344,62 @@ async def test_no_pace_change_without_hardship(make):
     await feed(p, VADUserStartedSpeakingFrame(), final("Haan, main pay kar dungi."), VADUserStoppedSpeakingFrame(),
                settle=0.2)
     assert not any(type(f).__name__ == "TTSUpdateSettingsFrame" for f in p.pushed)
+
+
+class BridgeBrain(FakeBrain):
+    async def respond(self, text, hint=None):
+        self.turns.append(text)
+        yield Sentence("जी।", bridge=True)
+        yield Sentence("समय देने के लिए धन्यवाद।")
+
+
+async def test_bridge_line_is_flushed_to_tts_at_once(make):
+    """C42: Sarvam held the one-word bridge "जी।" 1.8 s until the next sentence; a flush follows it."""
+    from emi_agent.providers import FlushTTSFrame
+    p = make(BridgeBrain())
+    await feed(p, VADUserStartedSpeakingFrame(), final("No. Thank you."), VADUserStoppedSpeakingFrame())
+    out = [f for f in p.pushed if isinstance(f, (AggregatedTextFrame, FlushTTSFrame))]
+    assert [type(f).__name__ for f in out] == ["AggregatedTextFrame", "FlushTTSFrame", "AggregatedTextFrame"]
+    assert out[0].text.startswith("जी।")  # the flush comes right after the bridge, not after the reply
+
+
+# C47: the model is slow (live call B004 19:51: 4.75 s of silence after an LLM timeout).
+def _texts(p):
+    from emi_agent.providers import FlushTTSFrame
+    return [f.text.strip() if isinstance(f, AggregatedTextFrame) else "FLUSH"
+            for f in p.pushed if isinstance(f, (AggregatedTextFrame, FlushTTSFrame))]
+
+
+async def test_slow_model_gets_a_filler_first_then_the_reply(make):
+    brain = FakeBrain(delay=0.3)
+    p = make(brain, filler_after=0.1)
+    await feed(p, VADUserStartedSpeakingFrame(), final("जी payment हो जाएगी."), VADUserStoppedSpeakingFrame(),
+               settle=0.5)
+    assert _texts(p) == ["जी, एक second।", "FLUSH", "Theek hai."]
+    assert brain.fillers == 1
+    assert sum(isinstance(f, LLMFullResponseStartFrame) for f in p.pushed) == 1  # one TTS response
+
+
+async def test_fast_model_gets_no_filler(make):
+    brain = FakeBrain(delay=0.0)
+    p = make(brain, filler_after=0.2)
+    await feed(p, VADUserStartedSpeakingFrame(), final("WhatsApp."), VADUserStoppedSpeakingFrame(), settle=0.4)
+    assert _texts(p) == ["Theek hai."] and not hasattr(brain, "fillers")
+
+
+async def test_filler_off_when_set_to_zero(make):
+    brain = FakeBrain(delay=0.3)
+    p = make(brain, filler_after=0)
+    await feed(p, VADUserStartedSpeakingFrame(), final("Yes."), VADUserStoppedSpeakingFrame(), settle=0.5)
+    assert _texts(p) == ["Theek hai."]
+
+
+async def test_barge_in_before_the_filler_cancels_it(make):
+    """The borrower speaks again while the model is still silent: the old reply and its filler timer
+    are cancelled, so the filler never plays over the borrower."""
+    brain = FakeBrain(delay=1.0)
+    p = make(brain, filler_after=0.2)
+    await feed(p, final("Haan ji, boliye."), VADUserStoppedSpeakingFrame(), settle=0.05)
+    await feed(p, VADUserStartedSpeakingFrame(), final("Ek minute, main apna number dekh rahi hoon"), settle=0.4)
+    assert any(isinstance(f, InterruptionFrame) for f in p.pushed)
+    assert not hasattr(brain, "fillers") and _texts(p) == []  # 0.45 s in: the old timer would have fired

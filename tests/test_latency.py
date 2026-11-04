@@ -32,3 +32,8 @@ def test_report_excludes_interrupted_and_incomplete(tmp_path):
     assert text.startswith("5 turns, 3 complete")
     assert "gap " in text and "median   1000 ms" in text
     assert "median   1500 ms" in text  # gap + 0.5 s VAD stop
+
+
+def test_report_says_how_many_gaps_end_at_the_filler():
+    row = {"stop_secs": 0.5, "interrupted": False, "ms": {"gap": 1300}, "filler": True}
+    assert "1 of them started with the slow-model filler" in report([row, {**row, "filler": False}])

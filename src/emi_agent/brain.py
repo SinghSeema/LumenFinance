@@ -13,12 +13,16 @@ from typing import AsyncIterator
 
 from emi_agent import context, guard, policy, speakable, special
 from emi_agent.heard import find_dob, find_last4, partial_digits
-from emi_agent.language import LanguageTracker, detect, language_words, says_hindi_numbers
+from emi_agent.language import _NEGATION, LanguageTracker, asks_numbers_in, detect, language_words, says_hindi_numbers
 from emi_agent.llm import LLMError
 from emi_agent.outcome import Outcome, OutcomeRecord, append_record
 from emi_agent.state import Borrower, CallState, Stage
-from emi_agent.speech_format import amount_to_words
-from emi_agent.tools import TOOL_SCHEMAS, Tools, loan_facts, protected_phrases
+from emi_agent.speech_format import amount_to_words, hindi_date_forms
+from emi_agent.tools import _YES, TOOL_SCHEMAS, Tools, loan_facts, protected_phrases
+
+# "भेज दीजिए" / "send it" without a "yes" first (C48).
+_SEND_IT = re.compile(r"^\W*(?:भेज (?:दीजिए|दीजिये|दो|दें|देना)|bhej (?:dijiye|do|dein|dena)|send (?:it|me|the link))",
+                      re.IGNORECASE)
 
 MAX_TOOL_ROUNDS = 4
 INCOMPLETE_DOB = ("Not checked: the date of birth the borrower gave is incomplete. Ask only for "
@@ -155,6 +159,8 @@ class Brain:
         self._attempts_at_turn_start = 0  # a verify result may be stated only if this went up
         self._muted = False  # rest of this reply dropped after an invented verify result
         self._bridges, self._bridge_noted = 0, False
+        self._filler: str | None = None
+        self._invited = False
         self._bridge_counts: dict[str, int] = {}  # per tool, to rotate bridge lines over the call
         self._said_once: set[str] = set()  # apology / hand-off / contact question / warm close said
         self._once_this_turn: set[str] = set()  # ...of which in the reply being spoken now
@@ -187,6 +193,8 @@ class Brain:
         self._asked_this_turn = False  # in a special-situation step, a question ends the reply
         self._muted = False  # set when an invented verification result was replaced
         self._bridges, self._bridge_noted = 0, False  # bridge lines said this turn (no dead air)
+        self._filler = None  # the slow-model filler bot.py had code say this turn (C47)
+        self._invited = False  # this reply invited more questions: stop there and wait (C51)
         spoken: list[str] = []
         finished = False
         held = 0  # 1 once the hold line was said
@@ -201,10 +209,11 @@ class Brain:
                                          "attempts": attempt, "ms": 0, "stage": s.stage.value})
                     if attempt == 2 or spoken:  # never repeat words already said
                         raise
-                    line = context.hold(s.reply_language, self.script)
-                    spoken.append(line)
-                    held = 1
-                    yield Sentence(line)
+                    if not self._filler:  # "जी, एक second।" already covers the wait
+                        line = context.hold(s.reply_language, self.script)
+                        spoken.append(line)
+                        held = 1
+                        yield Sentence(line)
                     await asyncio.sleep(HOLD_RETRY_SECS)
             # A bridge line ("I understand.") is not a reply: the closing is still owed.
             if len(spoken) == held + self._bridges and (s.stage is Stage.CLOSING or "stop_requested" in s.flags):
@@ -234,7 +243,7 @@ class Brain:
                     turn = value
                     continue
                 if kind == "tool_start":
-                    if not spoken and not buf.strip() and not self._muted and bridge is None:
+                    if not spoken and not buf.strip() and not self._muted and bridge is None and not self._filler:
                         n = self._bridge_counts.get(value, 0)
                         self._bridge_counts[value] = n + 1
                         bridge = context.bridge(value, self.state.reply_language, self.script,
@@ -283,9 +292,51 @@ class Brain:
                         "content": json.dumps(self._tool(c.name, c.input), ensure_ascii=False)}
                        for c in turn.tool_calls]
             self.history.append({"role": "user", "content": results})
+            if self._plain_close(turn.tool_calls, results, spoken):
+                return  # respond() says the code-owned closing line: no model round for fixed words
             if bridge and not self._bridge_noted:  # once per turn
                 self.history.append({"role": "system", "content": context.note_bridge(bridge)})
                 self._bridge_noted = True
+
+    def _send_link_on_yes(self, user_text: str) -> None:
+        """C48, live call B004 19:51: "जी भेज दीजिए" to "क्या link भेज दूँ SMS या WhatsApp पर?" got the
+        channel question again, four times in the call. A plain yes to the link offer, naming no channel,
+        sends it on WhatsApp now (owner's default); the model only says so."""
+        s = self.state
+        offered = "link" in s.last_agent.lower() and "?" in s.last_agent
+        plain_yes = (bool(_YES.search(user_text)) or bool(_SEND_IT.search(user_text))) and "?" not in user_text
+        if (not s.verified or s.payment_link_sent or not offered or not plain_yes
+                or guard.names_channel(user_text) or _NEGATION.search(user_text)):
+            return
+        result = self.tools.call("send_payment_link", {"channel": "whatsapp"})
+        if result.get("sent"):
+            self._pending_notes.append(context.NOTE_LINK_SENT)
+
+    def slow_filler(self) -> str | None:
+        """A short line for bot.py to say when the model has said nothing yet this turn (C47).
+        Once per turn; afterwards no tool bridge or hold line, which would say the same thing again."""
+        if self._filler is not None:
+            return None
+        n = self._bridge_counts.get("_slow", 0)
+        self._bridge_counts["_slow"] = n + 1
+        self._filler = context.bridge("_slow", self.state.reply_language, self.script, n=n)
+        return self._filler
+
+    def _plain_close(self, calls: list, results: list[dict], spoken: list[str]) -> bool:
+        """C45, live call B004 19:31: after record_outcome the model took one more request (0.4 s, more
+        with retries) only to say the fixed goodbye. Skip it when nothing else is owed: the only call
+        was record_outcome, its result carries no instruction (special flow, stop, payment check) and no
+        promise date to read back, nothing but bridge lines was said this turn, and the borrower's last
+        words were not a question (never close on one)."""
+        s = self.state
+        if len(calls) != 1 or calls[0].name != "record_outcome":
+            return False
+        if json.loads(results[0]["content"]) != {"recorded": True}:
+            return False
+        if len(spoken) != self._bridges or (s.heard and s.heard[-1].rstrip().endswith("?")):
+            return False
+        s.flags.add("code_closed")
+        return True
 
     def _closing_line(self) -> Sentence:
         line = context.closing(self.state.reply_language, self.script, self._first_name)
@@ -295,7 +346,7 @@ class Brain:
 
     def _end_turn(self, spoken: list[str], finished: bool) -> None:
         s = self.state
-        said = " ".join(spoken)
+        said = " ".join(([self._filler] if self._filler else []) + spoken)
         heard_it = bool(spoken) and (finished or not self._unheard)
         if s.special and heard_it:
             self._next_special_step()
@@ -318,7 +369,8 @@ class Brain:
         if s.stage is Stage.REMINDING and s.verified:
             s.stage = Stage.INTENT
         s.last_agent = said
-        if s.stage is Stage.CLOSING or "stop_requested" in s.flags:
+        # An invitation to ask more waits for the answer, even at the close (C51); a stop never waits.
+        if (s.stage is Stage.CLOSING and not self._invited) or "stop_requested" in s.flags:
             self.should_hang_up = True
         if self.should_hang_up and finished and spoken:
             self._said_closing = True
@@ -349,19 +401,27 @@ class Brain:
                 s.loan_facts = facts
                 s.disclose(facts)
             self._pending_notes.append(context.note_language(s.reply_language, facts))
-        if s.numbers != "hindi" and says_hindi_numbers(user_text):
-            # Mirror the borrower: they said numbers in Hindi words, so the agent does too.
-            s.numbers = "hindi"
-            if s.verified and s.reply_language != "en":
+        asked = asks_numbers_in(user_text)
+        if asked:
+            # C44: the borrower named the language for numbers ("amount English mein bataiye"). Their
+            # choice holds for the rest of the call: their own Hindi number words no longer flip it.
+            s.flags.add("numbers_chosen")
+        if asked or (s.numbers != "hindi" and "numbers_chosen" not in s.flags and says_hindi_numbers(user_text)):
+            # Otherwise mirror the borrower: they said numbers in Hindi words, so the agent does too.
+            changed = (asked or "hindi") != s.numbers
+            s.numbers = asked or "hindi"
+            if s.verified and s.reply_language != "en" and (changed or asked):
                 facts = self.tools.facts()
                 s.loan_facts = facts
                 s.disclose(facts)
-                self._pending_notes.append(context.note_numbers(facts))
+                self._pending_notes.append(context.note_numbers(facts, s.numbers, asked=bool(asked)))
         if not s.verified and _ASKS_PURPOSE.search(user_text):
             self._pending_notes.append(context.NOTE_PURPOSE.format(name=self._first_name))
         if is_stop_request(user_text):
             s.flags.add("stop_requested")
             self._pending_notes.append(context.note_stop(s.verified, s.loan_facts))
+        else:
+            self._send_link_on_yes(user_text)
         elapsed = self._clock() - self._started
         if elapsed > self.config["behavior"]["max_call_secs"] and "time_up" not in s.flags:
             s.flags.add("time_up")
@@ -445,11 +505,30 @@ class Brain:
             s.guard_hits.append({"category": "after_question", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})
             return None
+        if self._invited:
+            # C51, live call B004 20:13: "यदि कोई और सवाल हो तो बताइए।" then the goodbye at once and a
+            # hang-up. A person stops after asking and waits for the answer.
+            s.guard_hits.append({"category": "after_invite", "original": sentence, "spoken": "",
+                                 "stage": s.stage.value, "verified": s.verified})
+            return None
         upset = any(f in s.flags for f in ("escalate:hardship", "escalate:dispute"))  # v14 special situations
         once = guard.once_kind(sentence)  # apology, hand-off, contact question, warm close: once per call
         if ((upset and guard.anything_else(sentence)) or guard.unwanted(sentence)
                 or (once and once in self._said_once)):
             s.guard_hits.append({"category": "dropped_filler", "original": sentence, "spoken": "",
+                                 "stage": s.stage.value, "verified": s.verified})
+            return None
+        # After the drops above, so a dropped invitation never makes the call wait (C51).
+        if guard.invites_more(sentence) and not s.special and not {"stop_requested", "time_up"} & s.flags:
+            if "invited_more" in s.flags:  # once per call: a second invitation would loop
+                s.guard_hits.append({"category": "invite_again", "original": sentence, "spoken": "",
+                                     "stage": s.stage.value, "verified": s.verified})
+                return None
+            s.flags.add("invited_more")
+            self._invited = True
+        if guard.asks_channel(sentence) and (s.payment_link_sent or guard.asks_channel(s.last_agent)):
+            # C48: once is enough; after the link went, never.
+            s.guard_hits.append({"category": "channel_again", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})
             return None
         if once:
@@ -550,9 +629,17 @@ class Brain:
         s = self.state
         if not s.verified or s.numbers != "english" or s.reply_language == "en":
             return None
-        hindi = loan_facts(self.tools.borrower, self.tools.today, "hi", "devanagari").as_dict()
+        b, today = self.tools.borrower, self.tools.today
+        hindi = loan_facts(b, today, "hi", "devanagari").as_dict()
         spoken = self.tools.facts().as_dict()
-        return {hindi[k]: spoken[k] for k in hindi if hindi[k] and spoken.get(k) and hindi[k] != spoken[k]}
+        phrases = {}
+        # C44, live call B004 19:31: "EMI eighteen thousand rupees है, जो आठवीं November को due है":
+        # the amount was mapped, the model's ordinal date was not. Every Hindi form of the due date
+        # (longest first) maps to the tools' phrase. Not for kal/parson: those stay as they are.
+        if not 0 <= (b.due_date - today).days <= 2:  # date_to_words says aaj/kal/parson only for these
+            phrases = {form: spoken["due_date_spoken"] for form in hindi_date_forms(b.due_date)}
+        phrases.update({hindi[k]: spoken[k] for k in hindi if hindi[k] and spoken.get(k) and hindi[k] != spoken[k]})
+        return phrases or None
 
     def finish(self) -> OutcomeRecord:
         """Validate and write the outcome record (CLOSING -> ENDED). Code picks one if the model didn't."""

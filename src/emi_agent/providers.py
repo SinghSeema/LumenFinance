@@ -4,7 +4,16 @@ from __future__ import annotations
 import dataclasses
 from typing import Any
 
+from pipecat.frames.frames import DataFrame
+
 from emi_agent import keyterms
+
+
+@dataclasses.dataclass
+class FlushTTSFrame(DataFrame):
+    """Speak the text sent so far now. Sarvam holds text until about 50 characters arrive or the
+    reply ends, so a one-word bridge line ("जी।") waited 1.8 s for the next sentence (live call
+    B004 19:31, 2026-11-04). bot.py pushes this right after a bridge line."""
 
 
 def make_stt(config: dict, first_name: str | None = None) -> Any:
@@ -53,7 +62,13 @@ def make_tts(config: dict) -> Any:
 
         api_key = tts_cfg.get("sarvam_api_key") or _missing("SARVAM_API_KEY")
         _register_sarvam_model(tts_cfg["model"])
-        return SarvamTTSService(
+        class SarvamTTS(SarvamTTSService):
+            async def process_frame(self, frame, direction):
+                await super().process_frame(frame, direction)  # all frames still take the normal path
+                if isinstance(frame, FlushTTSFrame):  # the bridge text was already sent above
+                    await self.flush_audio()
+
+        return SarvamTTS(
             api_key=api_key,
             sample_rate=tts_cfg.get("sample_rate", 16000),
             settings=SarvamTTSService.Settings(

@@ -129,6 +129,10 @@ _BRIDGE = {
                     "devanagari": "एक second, मैं details check कर लेती हूँ।"},
                    {"en": "Sure, let me see.", "roman": "Ji, dekhti hoon.", "devanagari": "जी, देखती हूँ।"},
                    {"en": "Good question, one second.", "roman": "Ji, bas ek second.", "devanagari": "जी, बस एक second।"}],
+    # The model has said nothing for turn.filler_after_secs (bot.py). Live call B004 19:51: Sarvam timed
+    # out after 4 s and the borrower heard 4.75 s of silence (C47). Rotated so two slow turns differ.
+    "_slow": [{"en": "One moment.", "roman": "Ji, ek second.", "devanagari": "जी, एक second।"},
+              {"en": "Just a second.", "roman": "Haan ji, ek second.", "devanagari": "हाँ जी, एक second।"}],
     # Closing a hardship or dispute call: "Okay." before the close sounded curt (v16-special S03).
     "_special_close": {"en": "I understand.", "roman": "Ji.", "devanagari": "जी।"},
 }
@@ -187,9 +191,18 @@ def system_prompt(borrower: Borrower, config: dict, lang: str, opening: str) -> 
     )
 
 
-def note_numbers(facts: LoanFacts) -> str:
+# C48: code sent the link because the borrower said yes to it (WhatsApp, the owner's default).
+NOTE_LINK_SENT = ("The call system has just sent the payment link on WhatsApp, because they said yes. "
+                  "Say in a few words that it is sent on WhatsApp, and that SMS is also possible if they "
+                  "prefer. Do not call send_payment_link and do not ask SMS or WhatsApp again.")
+
+
+def note_numbers(facts: LoanFacts, style: str = "hindi", asked: bool = False) -> str:
     spoken = "; ".join(f"{k}: {v}" for k, v in facts.as_dict().items())
-    return ("The borrower says numbers in Hindi words. Say numbers in Hindi words from now on. "
+    words = "English" if style == "english" else "Hindi"
+    why = (f"The borrower asked for numbers in {words}. If they asked you to repeat one, repeat it now. "
+           if asked else f"The borrower says numbers in {words} words. ")
+    return (f"{why}Say numbers in {words} words from now on, in the same sentence language as before. "
             f"Loan facts as phrases: {spoken}.")
 
 

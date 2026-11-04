@@ -129,8 +129,23 @@ _WARM_CLOSE = re.compile(r"\bhave a (?:good|nice|great) day\b|दिन शु�
 # situation is" after the gentle question ("आप जो comfortable हों, बस वही बताइए।", "आप का ध्यान रखें।").
 _UNWANTED = re.compile(r"\btake care\b|(?:अपना|आप ?का) (?:ख्याल|ध्यान) (?:रखिए|रखें|रखियेगा|रखिएगा|रखना)|"
                        r"(?:apna|aap ?ka) (?:khayal|dhyan) (?:rakhiye|rakhein|rakhna)|"
-                       r"बस वही बताइए|bas wahi bataiye|whatever (?:is|you're|you are|feels) comfortable|"
+                       r"बस वही बता(?:इए|ईए| दीजिए| दीजिये| दें| दो)|bas wahi bata(?:iye| dijiye| do)|whatever (?:is|you're|you are|feels) comfortable|"
                        r"only (?:what|whatever) (?:is|you're|you are|feels) comfortable", re.IGNORECASE)
+
+
+# "SMS या WhatsApp?" Live call B004 19:51 asked it four times (C48).
+_SMS = re.compile(r"\bsms\b|एसएमएस", re.IGNORECASE)
+_WHATSAPP = re.compile(r"whats ?app|व्हाट्सऐप|व्हाट्सएप|व्हाट्सअप", re.IGNORECASE)
+
+
+def asks_channel(text: str) -> bool:
+    """A question that offers both channels."""
+    return "?" in text and bool(_SMS.search(text)) and bool(_WHATSAPP.search(text))
+
+
+def names_channel(text: str) -> bool:
+    return bool(_SMS.search(text) or _WHATSAPP.search(text)
+                or re.search(r"message|मैसेज|e-?mail|ईमेल|what'?s it", text, re.IGNORECASE))
 
 
 def unwanted(sentence: str) -> bool:
@@ -223,6 +238,18 @@ def contact_question(sentence: str) -> bool:
 
 def anything_else(sentence: str) -> bool:
     return _ANYTHING_ELSE.search(sentence) is not None
+
+
+# An invitation to ask more, in any wording (C51, live call B004 20:13: "यदि कोई और सवाल हो तो बताइए।"
+# then the goodbye in the same breath, and the call hung up).
+_INVITE = re.compile(r"anything else|any (?:other|more|further) questions?|(?:other|more) questions?\?|"
+                     r"(?:कोई|koi) (?:और|aur) (?:सवाल|प्रश्न|बात|sawal|sawaal|baat|question)|"
+                     r"(?:और|aur) (?:कुछ|kuch) (?:पूछना|जानना|मदद|चाहिए|बताइए|puchna|poochna|jaanna|madad|chahiye)",
+                     re.IGNORECASE)
+
+
+def invites_more(sentence: str) -> bool:
+    return _INVITE.search(sentence) is not None
 
 
 def warm_close(sentence: str) -> bool:

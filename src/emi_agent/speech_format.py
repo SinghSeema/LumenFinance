@@ -181,6 +181,22 @@ def date_to_words(d: date, today: date, lang: str = "en", script: str = "roman")
     return text
 
 
+_HI_ORDINAL_DEVA = {1: "पहली", 2: "दूसरी", 3: "तीसरी", 4: "चौथी", 6: "छठी"}
+_MONTH_DEVA_VARIANTS = {"नवंबर": ["नवम्बर"], "दिसंबर": ["दिसम्बर"], "सितंबर": ["सितम्बर"],
+                        "अक्टूबर": ["अक्तूबर"], "फ़रवरी": ["फरवरी"]}
+
+
+def hindi_date_forms(d: date) -> list[str]:
+    """Ways a model writes this date in Devanagari: "आठ नवंबर", "आठवीं November", "आठ नवम्बर"...
+    Longest first, so a caller replacing them never cuts a longer form. Day and month only."""
+    day = number_to_words(d.day, "hi", "devanagari")
+    days = [day, _HI_ORDINAL_DEVA.get(d.day, day + "वीं")]
+    deva = _MONTHS_DEVA[d.month - 1]
+    months = [deva, *_MONTH_DEVA_VARIANTS.get(deva, []), _MONTHS_EN[d.month - 1]]
+    forms = {f"{x} {m}" for x in days for m in months}
+    return sorted(forms, key=len, reverse=True)
+
+
 def days_to_words(days: int, lang: str = "en", script: str = "roman") -> str:
     n = number_to_words(days, lang, script)
     hs = _hindi_script(lang, script)

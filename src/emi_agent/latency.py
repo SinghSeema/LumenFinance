@@ -28,6 +28,7 @@ class Turn:
     interrupted: bool = False
     after_barge_in: bool = False  # reply right after a barge-in (Sarvam reconnects then)
     bridge: bool = False  # first audio was a code bridge line said while a tool ran
+    filler: bool = False  # first audio was the slow-model filler (C47): the reply itself came later
 
     def stages_ms(self) -> dict[str, float]:
         """Duration of each stage that has both ends, plus the total gap."""
@@ -55,6 +56,9 @@ def median_p90(values: list[float]) -> tuple[float, float]:
 def report(rows: list[dict]) -> str:
     complete = [r for r in rows if "gap" in r["ms"] and not r["interrupted"]]
     lines = [f"{len(rows)} turns, {len(complete)} complete (interrupted or missing marks excluded)"]
+    fillers = sum(1 for r in complete if r.get("filler"))
+    if fillers:  # honest reporting: there the gap ends at "जी, एक second", not at the answer (C47)
+        lines.append(f"  {fillers} of them started with the slow-model filler: the gap is to the filler, not the reply")
     if not complete:
         return lines[0]
     stop = complete[0]["stop_secs"]

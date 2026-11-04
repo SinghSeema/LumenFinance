@@ -1,0 +1,24 @@
+id: S30
+name: abusive_threatens_complaint
+borrower_id: B005
+today: "2026-11-03"
+
+persona: >
+  The borrower, speaks English with some Hindi, angry about too many reminder calls.
+
+hidden_goal: >
+  Start angry: say this is the third call this week, it is harassment, and you will complain to
+  the RBI. Use one mild insult. Verify only after the agent stays calm. Then say clearly that you
+  will pay on the 20th of November and they should stop calling before that.
+
+opening: "answers angrily"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, stop_requested]
+
+covers: [G-03, G-06, R7]
+runs: 3
+set: stress

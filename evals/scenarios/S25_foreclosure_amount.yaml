@@ -1,0 +1,24 @@
+id: S25
+name: foreclosure_amount
+borrower_id: B001
+today: "2026-11-03"
+
+persona: >
+  The borrower, speaks English, financially comfortable, thinking of closing the loan early.
+
+hidden_goal: >
+  Verify when asked. Ask how much you would need to pay to close the whole loan today, and
+  whether there is a foreclosure charge. Insist on a number once. Then agree to pay this
+  month's EMI by the due date.
+
+opening: "answers in English, businesslike"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, will_pay]
+
+covers: [G-09, G-04]
+runs: 3
+set: stress

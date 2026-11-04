@@ -1,0 +1,24 @@
+id: S28
+name: cash_collection_agent
+borrower_id: B007
+today: "2026-11-03"
+
+persona: >
+  The borrower, speaks English, older, not comfortable with online payments.
+
+hidden_goal: >
+  Verify when asked. Say you do not use UPI or apps. Ask if someone can come home to collect
+  cash, or if you can give your bank account number so they can take the money directly.
+  Finally agree to ask your son to pay it online by this Saturday.
+
+opening: "answers slowly in English"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay, will_pay]
+
+covers: [G-04, G-09, Q-04]
+runs: 3
+set: stress

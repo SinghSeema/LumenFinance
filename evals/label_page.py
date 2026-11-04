@@ -14,17 +14,21 @@ from evals.judge import FLAGS, RUBRIC
 from evals.report import _btype
 
 # (run directory, conversation, why it is in the set)
-SAMPLE = [  # 10, owner 2026-11-04: the calls where a judge is most likely to be wrong
-    ("20261104-133125-v10-all5", "S03_run1", "hardship: empathy matters"),
-    ("20261104-133125-v10-all5", "S04_run2", "dispute; angry; closing said twice"),
-    ("20261104-133125-v10-all5", "S04b_run4", "not my loan; promised a callback 'today'"),
-    ("20261104-133125-v10-all5", "S06_run3", "family member: correct refusal (old judge gave clarity 1)"),
-    ("20261104-133125-v10-all5", "S08_run3", "irritated (old judge gave firmness 1)"),
-    ("20261104-133125-v10-all5", "S11_run2", "demands a waiver (old judge flagged a false promise)"),
-    ("20261104-133125-v10-all5", "S12_run3", "stop calling: correct early end (old judge gave firmness 1)"),
-    ("20261104-133125-v10-all5", "S13_run3", "vague date accepted without a question"),
-    ("20261104-133125-v10-all5", "S14a_run1", "mumbled digits; 'pay today' refused"),
-    ("20261104-135904-v10-fixes", "S04_run5", "angry, demands a human; same line repeated"),
+# Rebuilt 2026-11-04 18:30 from the v17 dev run (prompt v17, judge rubric v3): the v10 sample showed
+# behaviour the agent no longer has ("colleague", "concerned team", "privacy"). No hold-out scenario
+# (S06, S11, S13, S14a, S14b), so labelling never exposes them. Mixed high and low judge scores, so
+# calibration tests the judge in both directions.
+SAMPLE = [  # 10: the calls where a judge is most likely to be wrong
+    ("20261104-181142-v17-dev3", "S03_run1", "hardship: does the code-owned flow sound caring? (judge empathy 5)"),
+    ("20261104-181142-v17-dev3", "S04_run1", "wrong amount, firm borrower (judge empathy 5)"),
+    ("20261104-181142-v17-dev3", "S04b_run2", "not my loan, fear of misuse (judge empathy 3)"),
+    ("20261104-181142-v17-dev3", "S05_run2", "wrong number: correct refusal, short call"),
+    ("20261104-181142-v17-dev3", "S08_run1", "irritated, off-topic, asks if it is a bot (judge naturalness 3)"),
+    ("20261104-181142-v17-dev3", "S10_run2", "verification keeps failing: repeated lines (judge naturalness 1)"),
+    ("20261104-181142-v17-dev3", "S12_run1", "stop calling: correct early end (judge empathy 2)"),
+    ("20261104-181142-v17-dev3", "S16_run2", "asks the late fee before the due date (judge empathy 2)"),
+    ("20261104-181142-v17-dev3", "S17_run1", "English, grace period / auto-debit / CIBIL questions (judge naturalness 3)"),
+    ("20261104-181142-v17-dev3", "S18_run1", "male Hinglish borrower, asks to pay cash"),
 ]
 OUT = Path("results/labelling.html")
 

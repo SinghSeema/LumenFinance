@@ -1,6 +1,6 @@
 """Judge calibration: python3 -m evals.calibrate [--judges groq:openai/gpt-oss-120b gemini:gemini-3.5-flash ...]
 
-Runs each candidate judge on the 20 conversations the owner labelled (evals/labels/owner_labels.json,
+Runs each candidate judge on the 10 conversations the owner labelled (evals/labels/owner_labels.json,
 from results/labelling.html) and reports how well each agrees with the owner, per rubric item:
 exact match, within one point, "n/a" agreement, mean absolute difference, and guardrail-flag
 precision and recall. The judge to trust is the one that agrees best; its agreement is the trust
@@ -78,7 +78,7 @@ async def main() -> None:
     p.add_argument("--labels", default=str(LABELS))
     args = p.parse_args()
     if not Path(args.labels).exists():
-        raise SystemExit(f"No labels yet: open results/labelling.html, score the 20 calls, Export, "
+        raise SystemExit(f"No labels yet: open results/labelling.html, score the 10 calls, Export, "
                          f"and save the file as {args.labels}")
     owner_all = {l["id"]: l for l in json.loads(Path(args.labels).read_text())["labels"]}
     sample = [s for s in load_sample() if s["id"] in owner_all]

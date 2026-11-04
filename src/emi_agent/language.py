@@ -22,7 +22,10 @@ def detect(text: str, stt_hint: str | None = None) -> str:
     Devanagari is judged by words, not letters: "हाँ मैं pay कर दूँगा twenty fifth को" is Hindi,
     though English loanwords hold most of its letters (was 'en' until 2026-11-04)."""
     words = text.split()
-    if words and len(_DEVANAGARI_WORD.findall(text)) / len(words) >= 1 / 3:
+    deva = len(_DEVANAGARI_WORD.findall(text))
+    # Hinglish carries its grammar in Devanagari and its nouns in English: "Actually, मेरा अभी job चला
+    # गया है and मैं अभी pay नहीं कर सकती हूं" is 11 of 35 words (live call 2026-11-04 16:03).
+    if words and (deva / len(words) >= 1 / 3 or (deva >= 3 and deva / len(words) >= 1 / 5)):
         return "hi"
     words = _WORD.findall(text.lower())
     markers = sum(w in _HINDI_MARKERS for w in words)
@@ -89,7 +92,11 @@ from emi_agent.speech_format import _EN_ONES, _EN_TENS, _MONTHS_DEVA, _MONTHS_EN
 
 _NUMBER_OR_MONTH = ({w.lower() for w in _MONTHS_EN} | {w[:3].lower() for w in _MONTHS_EN} | set(_MONTHS_DEVA)
                     | set(_EN_ONES) | {w for w in _EN_TENS if w != "_"} | set(_HI_DEVA) | set(_HI_ROMAN)
-                    | {"hundred", "thousand", "lakh", "sau", "सौ", "हज़ार", "हजार", "double", "triple"})
+                    | {"hundred", "thousand", "lakh", "sau", "सौ", "हज़ार", "हजार", "double", "triple"}
+                    # Said the same way in a Hindi or an English call: "Yes." then "After 4 PM?" flipped a
+                    # Hindi call to English (replay of the 16:03 call).
+                    | {"yes", "no", "ok", "okay", "thank", "thanks", "you", "hello", "hi", "sorry", "pm", "am",
+                       "after", "before", "bye"})
 
 
 from emi_agent.heard import _loose_deva  # noqa: E402

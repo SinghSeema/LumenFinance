@@ -63,7 +63,8 @@ _NEGATED_BEFORE_LONG = re.compile(
     r"(?:can't|cannot|can not|not able to|unable to|won't be able to|not allowed to|"
     r"don't have the authority to)\s+(?:(?:promise|offer|give|provide|suggest|approve|arrange|"
     r"grant|guarantee|discuss|or|and|any|a|an|the|you|your|kind|type|of|late|waivers?|"
-    r"discounts?|fees?|reversals?|restructuring|changes?),?\s+){0,8}$", re.IGNORECASE)
+    r"discounts?|fees?|reversals?|restructuring|changes?|hint|at|reductions?|delays?|myself|"
+    r"anything|such),?\s+){0,8}$", re.IGNORECASE)
 # Hindi puts the verb last: "छूट या बदलाव का वादा नहीं कर सकती". Up to 6 words, same clause only
 # (a word carrying , . ; । ends the search), and नहीं must be followed by a refusal verb, so
 # "छूट दे दूंगी, चिंता की कोई बात नहीं" stays a promise (eval S03, 2026-11-04).
@@ -74,6 +75,11 @@ _NEGATED_AFTER_HI = re.compile(
     re.IGNORECASE)
 
 _SAFE = {
+    "change_short": {
+        "en": "I'm not able to make changes to your account myself.",
+        "roman": "Main khud account mein koi badlav nahi kar sakti.",
+        "devanagari": "मैं खुद अकाउंट में कोई बदलाव नहीं कर सकती।",
+    },
     "unverified_disclosure": {
         "en": "Before I share any details, I just need to confirm who I'm speaking with.",
         "roman": "Koi bhi jaankari dene se pehle, mujhe bas aapki pehchaan confirm karni hogi.",
@@ -116,7 +122,7 @@ _NOTICE = re.compile(
 # Hardship (owner review, prompt v13): the model still asked "Is there anything else I can help
 # with?" and repeated "Please take care..." every turn (v13-hardship2 S03). Dropped in code.
 _ANYTHING_ELSE = re.compile(r"\b(?:is there )?anything else (?:i can|i could|you need|you'd like)|"
-                            r"और कुछ (?:मदद|जानना|चाहिए)|aur kuch (?:madad|chahiye)", re.IGNORECASE)
+                            r"और कुछ (?:मदद|जानना|चाहिए|बताइए)|aur kuch (?:madad|chahiye|bataiye)", re.IGNORECASE)
 _WARM_CLOSE = re.compile(r"\bplease take care\b|अपना (?:ख्याल|ध्यान) (?:रखिए|रखें|रखियेगा|रखिएगा)|"
                          r"apna (?:khayal|dhyan) (?:rakhiye|rakhein|rakhna)", re.IGNORECASE)
 
@@ -128,6 +134,38 @@ _HANDOFF_SAID = re.compile(r"internal team .{0,80}(?:call ?back|callback)|intern
 
 def handoff(sentence: str) -> bool:
     return _HANDOFF_SAID.search(sentence) is not None
+
+
+_CONTACT_Q = re.compile(r"best (?:number|one) to reach|reach you on|number .{0,40}(?:best|सही)|"
+                        r"(?:यह|ये|yeh?) number .{0,40}(?:best|सही|sahi|ठीक)", re.IGNORECASE)
+
+
+_APOLOGY = re.compile(r"\b(?:i'?m|i am) (?:really |so |very |truly )?sorry to hear|सच में (?:बहुत )?(?:अफ़सोस|अफसोस|दुख)|"
+                      r"सच में माफ़?ी चाहती|माफ़?ी चाहती हूँ.{0,40}(?:परेशानी|job|नौकरी)|"
+                      r"यह सुनकर (?:मुझे )?(?:सच में )?(?:बहुत )?(?:दुख|अफ़सोस)|sun ?kar (?:mujhe )?(?:bahut )?dukh",
+                      re.IGNORECASE)
+
+
+_SHORT_TERM_Q = re.compile(r"short[- ]term|कुछ समय की (?:परेशानी|बात|situation)|kuch samay ki", re.IGNORECASE)
+
+
+def once_kind(sentence: str) -> str | None:
+    """Phrases said at most once per call (live call 16:03 and v14 runs repeated each of them)."""
+    if _APOLOGY.search(sentence):
+        return "apology"
+    if _SHORT_TERM_Q.search(sentence):
+        return "short_term"
+    if handoff(sentence):
+        return "handoff"
+    if contact_question(sentence):
+        return "contact"
+    if warm_close(sentence):
+        return "warm_close"
+    return None
+
+
+def contact_question(sentence: str) -> bool:
+    return "?" in sentence and _CONTACT_Q.search(sentence) is not None
 
 
 def anything_else(sentence: str) -> bool:

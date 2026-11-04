@@ -25,6 +25,9 @@ class FakeBrain:
     def greeting_cut(self):
         self.cut += 1
 
+    def reply_unheard(self):
+        self.unheard = getattr(self, "unheard", 0) + 1
+
     def silence_line(self, close):
         if close:
             self.should_hang_up = True

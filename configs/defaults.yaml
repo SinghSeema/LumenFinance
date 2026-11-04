@@ -41,7 +41,7 @@ turn:
   vad_stop_secs: 0.5          # seconds of silence to end a turn (setup B uses 0.2: it only triggers the check)
   vad_start_secs: 0.1
   stt_wait_secs: 1.0          # at VAD stop, longest wait for words Deepgram still has in progress; none pending = reply at once
-  unfinished_wait_secs: 0.4   # extra wait at VAD stop when the words so far look unfinished (bot.looks_unfinished)
+  unfinished_wait_secs: 0.7   # 0.4 -> 0.7 (call 2026-11-04 16:03: borrower resumed 26 ms after a 0.4 s wait). Extra wait at VAD stop when the words so far look unfinished (bot.looks_unfinished)
   min_words_interrupt: 2      # words needed to count as a real barge-in (a stop request always counts)
   silence_after_barge_in_secs: 4  # a barge-in with no borrower turn after it: prompt this soon (live call 2026-11-04)
   silence_prompts_secs: 8     # agent finished and nobody spoke: "can you hear me?" (or the greeting again if it was cut)

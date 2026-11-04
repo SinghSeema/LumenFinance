@@ -77,4 +77,7 @@ def test_garbled_number_answers_do_not_switch_language():
     assert language_words("Buys, July 19 94.") == "Buys,"
     assert language_words("Buys July") == "Buys"
     assert language_words("मेरा जन्म तिथि बाइस July 19 94 है.").split() == ["मेरा", "जन्म", "तिथि", "है."]
-    assert language_words("Okay.") == "Okay."  # nothing stripped: counts as before
+    # "Okay", "Yes", "Thank you", "After 4 PM" are said the same in a Hindi or an English call; they no
+    # longer count ("Yes." then "After 4 PM?" flipped a Hindi call to English, replay of the 16:03 call).
+    assert language_words("Okay.") == "" and language_words("After 4 PM?") == ""
+    assert language_words("I am free after 4 PM") == "I free"

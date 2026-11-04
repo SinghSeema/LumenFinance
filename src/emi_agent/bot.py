@@ -60,6 +60,9 @@ _CONTINUES = {
 }
 
 
+UNHEARD_SECS = 1.0  # a reply cut within this much playing was not heard (live call 16:03: cut 250 ms in)
+
+
 def looks_unfinished(text: str) -> bool:
     """Deepgram punctuates a sentence it heard end ('Tuesday.'); fragments cut by a pause have no
     final mark ('जी मैं राहुल', 'right now', '7 4') or end on a joining word ('... Because')."""
@@ -124,6 +127,7 @@ class BrainProcessor(FrameProcessor):
                              t["silence_close_secs"])
         self.silence: asyncio.Task | None = None  # the silence prompt timer
         self.nudged = False            # "can you hear me?" already said since the borrower last spoke
+        self.bot_started_at = 0.0      # when the agent's current audio began
         self.heard_results: list = []  # Deepgram results behind self.heard, for confidence logging
 
     # ---- frames ----
@@ -158,6 +162,7 @@ class BrainProcessor(FrameProcessor):
             return
         elif isinstance(frame, BotStartedSpeakingFrame):
             self.bot_speaking = self.bot_spoke = True
+            self.bot_started_at = time.monotonic()
             if self.turn and self.turn.first_sentence and not self.turn.playback_start:
                 self.turn.playback_start = time.monotonic()
                 latency.append(self.turn, self.latency_path)
@@ -302,6 +307,9 @@ class BrainProcessor(FrameProcessor):
             self.turn.interrupted = True
             latency.append(self.turn, self.latency_path)
         if self.reply and not self.reply.done():
+            played = time.monotonic() - self.bot_started_at if self.bot_speaking else 0.0
+            if played < UNHEARD_SECS:
+                self.brain.reply_unheard()  # e.g. cut 250 ms in: the apology was never heard (call 16:03)
             await self.cancel_task(self.reply)  # Brain records the cut-off turn (brain._end_turn)
         self.reply = None
         self.bot_speaking = False

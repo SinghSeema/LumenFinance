@@ -216,6 +216,11 @@ NOTE_PURPOSE = ("They asked what this call is about. Answer that first, warmly, 
                 "and never ask them for any verification details.")
 
 
+NOTE_UNHEARD = ("Your last reply was cut off at once, so the borrower did not hear it. Answer what they "
+                "say now, and briefly include its key point again (for example your apology or your "
+                "question); do not repeat it word for word.")
+
+
 NOTE_VERIFY_FAILED = ("Identity could not be verified after three attempts. Apologise briefly, say our "
                       "internal team will arrange a call back, and close with thanks. Share no loan detail and call no tool.")
 

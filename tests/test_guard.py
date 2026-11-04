@@ -210,3 +210,17 @@ from emi_agent.guard import warm_close  # noqa: E402
 @pytest.mark.parametrize("s", ["Please take care, Deepa.", "कृपया अपना ध्यान रखें, Sunita जी।", "अपना ख्याल रखिए।"])
 def test_warm_close_variants(s):
     assert warm_close(s)
+
+
+from emi_agent.guard import once_kind  # noqa: E402
+
+
+@pytest.mark.parametrize("s,kind", [("I am really sorry to hear about your job, Deepa.", "apology"),
+                                    ("मैं सच में माफी चाहती हूँ Deepa जी, लेकिन...", "apology"),
+                                    ("क्या यह कुछ समय की परेशानी है, या अभी कहना मुश्किल है?", "short_term"),
+                                    ("Our internal team will check this and arrange a call back for you.", "handoff"),
+                                    ("Is this number the best one to reach you on?", "contact"),
+                                    ("Please take care, Deepa.", "warm_close"),
+                                    ("Your EMI is due on the fifth.", None)])
+def test_once_per_call_phrases(s, kind):
+    assert once_kind(s) == kind

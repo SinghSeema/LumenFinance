@@ -671,3 +671,70 @@ async def test_hand_off_is_said_once_per_call(today, tmp_path):
     first = [s.text for s in await run(brain, "I lost my job.")]
     second = [s.text for s in await run(brain, "When will they call?")]
     assert any("internal team" in x for x in first) and second == ["I understand."]
+
+
+# Live hardship call 2026-11-04 16:03.
+async def test_reply_cut_at_once_is_marked_unheard_and_note_added(today, tmp_path):
+    import asyncio
+    llm = ScriptedLLM([say("मुझे सच में बहुत अफ़सोस है Deepa जी। क्या यह short-term है?"), say("Okay.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    gen = brain.respond("मेरा job चला गया है")
+    await gen.__anext__()          # first sentence produced, then the borrower cuts in at once
+    brain.reply_unheard()
+    await gen.aclose()
+    assert "Not heard" in brain.history[-1]["content"]
+    await run(brain, "So is there any way")
+    assert any("did not hear it" in str(m["content"]) for m in llm.requests[1][1] if m["role"] == "system")
+
+
+async def test_contact_question_asked_once(today, tmp_path):
+    llm = ScriptedLLM([say("Noted. Is this number the best one to reach you on?"),
+                       say("Okay. और कुछ बताइए, क्या यह number ही best है?")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    await run(brain, "I lost my job.")
+    second = [s.text for s in await run(brain, "After 4 PM.")]
+    assert second == ["Okay."]
+
+
+async def test_guard_safe_line_counts_as_the_hand_off(today, tmp_path):
+    llm = ScriptedLLM([say("I can't promise or hint at any waiver or reduction myself, but I've noted it.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    out = await run(brain, "Can the fee be reduced?")
+    assert not any(s.guard == "promise" for s in out)  # a refusal is not a promise
+
+
+def test_sentence_keeps_bridge_and_speech_apart():
+    from emi_agent.brain import Sentence
+    s = Sentence("x", None, speech=("number_style",))
+    assert s.bridge is False and s.speech == ("number_style",)
+
+
+async def test_apology_once_but_again_if_the_first_was_not_heard(today, tmp_path):
+    sorry = "I'm really sorry to hear about your job, Deepa."
+    llm = ScriptedLLM([say(sorry), say(sorry + " Is it short-term?"), say(sorry + " Noted.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    gen = brain.respond("I lost my job")
+    await gen.__anext__()
+    brain.reply_unheard()            # cut 250 ms in: never heard
+    await gen.aclose()
+    second = [s.text for s in await run(brain, "So is there any way")]
+    third = [s.text for s in await run(brain, "the fee can be reduced?")]
+    assert sorry in second and sorry not in third
+
+
+async def test_language_of_a_sentence_split_by_barge_ins(today, tmp_path):
+    llm = ScriptedLLM([say("जी।"), say("जी।"), say("जी।")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.reply_language = brain.lang.current = "hi"
+    for text in ["Ok. I know it's overdue. Actually, मेरा अभी job चला गया है and मैं अभी pay नहीं कर सकती हूं.",
+                 "So is there any way"]:
+        gen = brain.respond(text)
+        await gen.__anext__()
+        await gen.aclose()
+    await run(brain, "the EMI or the late fee can be reduced?")
+    assert brain.state.reply_language == "hi"

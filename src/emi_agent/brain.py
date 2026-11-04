@@ -122,8 +122,11 @@ class Brain:
         self._attempts_at_turn_start = 0  # a verify result may be stated only if this went up
         self._muted = False  # rest of this reply dropped after an invented verify result
         self._bridges, self._bridge_noted = 0, False
-        self._warm_closed = False  # "Please take care..." already said this call
-        self._handoff_said = False  # "our internal team will ... call back" already said this call
+        self._said_once: set[str] = set()  # apology / hand-off / contact question / warm close said
+        self._once_this_turn: set[str] = set()  # ...of which in the reply being spoken now
+        self._cut_chain: list[str] = []  # borrower fragments since the last reply they heard in full
+        self._unheard = False  # the reply being cut now was cut within a second: not heard
+        self._last_reply_cut = False  # the previous reply was cut by a barge-in
         self._clock = clock
         self._started = clock()
 
@@ -236,8 +239,19 @@ class Brain:
         said = " ".join(spoken)
         if not finished:
             # Interrupted: the reply never reached history, so record what was said and that it was cut (LLD 9).
-            said = f"{said} [cut off by the borrower]".strip()
+            if self._unheard:
+                self._said_once -= self._once_this_turn  # never heard, so not said (apology must come again)
+                # Cut within a second of playing (live call 16:03: "मुझे सच में बहुत अफ़सोस है..." was cut
+                # 250 ms in; the next reply skipped the apology because history said it was given).
+                said = f"[Not heard: the borrower cut in at once, so they did not hear this reply: {said}]"
+                self._pending_notes.append(context.NOTE_UNHEARD)
+            else:
+                said = f"{said} [cut off by the borrower]".strip()
             self.history.append({"role": "assistant", "content": said})
+        self._last_reply_cut = not finished
+        self._cut_chain = (self._cut_chain + [s.heard[-1]]) if (not finished and s.heard) else []
+        self._unheard = False
+        self._once_this_turn = set()
         self.transcript.append(("agent", said))
         if s.stage is Stage.REMINDING and s.verified:
             s.stage = Stage.INTENT
@@ -249,9 +263,12 @@ class Brain:
 
     def _add_turn_notes(self, user_text: str, lang_hint: str | None) -> None:
         s = self.state
-        content = language_words(user_text)
+        # Live call 16:03: a Hindi sentence split by barge-ins ended in an English fragment ("the EMI or
+        # the late fee can be reduced?") and flipped the reply to English for one turn.
+        lang_text = " ".join(self._cut_chain + [user_text])  # the whole sentence the barge-ins split
+        content = language_words(lang_text)
         # A turn that was mostly numbers or months ("Buys, July 19 94.") says nothing about language.
-        counts = content == user_text.strip() or len(content.split()) >= 2
+        counts = content == lang_text.strip() or len(content.split()) >= 2
         if counts and self.lang.update(detect(content, lang_hint), len(content.split())):
             s.reply_language = self.lang.current
             s.languages_used = list(self.lang.used)
@@ -346,18 +363,14 @@ class Brain:
         if self._muted:
             return None
         upset = any(f in s.flags for f in ("escalate:hardship", "escalate:dispute"))  # v14 special situations
-        if (upset and guard.anything_else(sentence)) or (guard.warm_close(sentence) and self._warm_closed):
+        once = guard.once_kind(sentence)  # apology, hand-off, contact question, warm close: once per call
+        if (upset and guard.anything_else(sentence)) or (once and once in self._said_once):
             s.guard_hits.append({"category": "dropped_filler", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})
             return None
-        if guard.handoff(sentence):
-            if self._handoff_said:  # "our internal team will ... call back": once per call
-                s.guard_hits.append({"category": "dropped_filler", "original": sentence, "spoken": "",
-                                     "stage": s.stage.value, "verified": s.verified})
-                return None
-            self._handoff_said = True
-        if guard.warm_close(sentence):
-            self._warm_closed = True  # "Please take care..." once per call
+        if once:
+            self._said_once.add(once)
+            self._once_this_turn.add(once)
         if guard.invented_notice(sentence):
             s.guard_hits.append({"category": "invented_notice", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})
@@ -376,6 +389,11 @@ class Brain:
             return Sentence(line, "invented_verify")
         r = guard.check(sentence, verified=s.verified, protected=self._protected,
                         lang=s.reply_language, script=self.script, heard=s.heard)
+        if r.category and guard.handoff(r.text):  # the safe line carries the hand-off: once per call
+            if "handoff" in self._said_once:
+                r = guard.GuardResult(guard.safe_line("change_short", s.reply_language, self.script), r.category)
+            self._said_once.add("handoff")
+            self._once_this_turn.add("handoff")
         if r.category is not None:
             s.guard_hits.append({"category": r.category, "original": sentence, "spoken": r.text,
                                  "stage": s.stage.value, "verified": s.verified})
@@ -385,7 +403,11 @@ class Brain:
         if hits:
             s.speech_hits.append({"hits": hits, "original": r.text, "spoken": text,
                                   "lang": s.reply_language})
-        return Sentence(text, r.category, tuple(hits))
+        return Sentence(text, r.category, speech=tuple(hits))  # keyword: a positional third arg was "bridge"
+
+    def reply_unheard(self) -> None:
+        """The bot cut the agent within a second of playing: the borrower did not hear the reply."""
+        self._unheard = True
 
     def greeting_cut(self) -> None:
         """The borrower barged in on the greeting: they never heard who we want (bot, 2026-11-04)."""

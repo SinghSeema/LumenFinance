@@ -62,7 +62,8 @@ behavior:
   calls_log: results/calls.jsonl
 
 evals:
-  judge_model: openai/gpt-oss-120b  # NOT USED YET: no judge is wired (2026-11-04); Groq; must differ from the agent (E-08)
+  judge_provider: sarvam      # groq | sarvam. evals/judge.py (2026-11-04); a different family from the agent (E-08)
+  judge_model: glm5.3-flash   # tone (M7) and guardrail wording (M5); uncalibrated until hand labels
   simulator_provider: sarvam  # groq | sarvam. Sarvam since 2026-11-04: Groq's free daily cap cut the v5 dev run short
   simulator_model: glm5.3-flash  # different model family from the agent (was qwen/qwen3.8-27b on Groq)
   simulator_temperature: 0.8

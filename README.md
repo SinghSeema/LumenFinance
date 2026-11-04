@@ -74,17 +74,18 @@ Requirements: Linux or macOS, Python 3.10+, the [`livekit-server`](https://docs.
 
 ```bash
 git clone https://github.com/SinghSeema/LumenFinance.git && cd LumenFinance
-python3 -m pip install -r requirements.txt
-python3 -m pip install -e .
-cp .env.example .env        # fill in your keys; .env is gitignored
+./run.sh setup          # installs, creates .env (add DEEPGRAM_API_KEY and SARVAM_API_KEY), checks keys and livekit-server, runs the tests
+./run.sh call B002      # starts LiveKit, the browser client and the agent; open http://localhost:8080 and press call
 ```
 
-Then, in three terminals:
+Ctrl-C ends the call and stops all three processes. Logs go to `logs/` (LiveKit, client, and `bot-<borrower>.log`). `./run.sh` with no argument lists the other commands (`test`, `evals`, `judge`, `report`).
+
+The same steps by hand, in three terminals:
 
 ```bash
-livekit-server --dev                                        # 1: local LiveKit (keys devkey / secret)
-python3 -m emi_agent.bot --profile hindi_bulbul --borrower B002   # 2: the agent joins the room
-python3 scripts/serve_client.py                             # 3: open http://localhost:8080 and press call
+livekit-server --dev                                              # 1: local LiveKit (keys devkey / secret)
+PYTHONPATH=src python3 -m emi_agent.bot --profile hindi_bulbul --borrower B002   # 2: the agent joins the room
+python3 scripts/serve_client.py                                   # 3: open http://localhost:8080
 ```
 
 `--borrower` picks a mock borrower from [`data/borrowers.json`](data/borrowers.json); `--today 2026-11-04` fixes the date; `--set section.key=value` overrides any config value. A missing key fails at start-up with the variable's name.
@@ -94,10 +95,12 @@ After each call the agent prints the outcome record, token usage and a latency t
 ## Tests and evals
 
 ```bash
-python3 -m pytest -q                                   # 668 unit and replay tests, no network
-python3 -m evals.run --scenarios dev --runs 5          # text evals: real Brain vs an LLM-played borrower
-python3 -m evals.run --scenarios holdout --runs 5      # hold-out scenarios, run once fixes are frozen
-python3 -m evals.run --scenarios S02,S15 --runs 3      # chosen scenarios
+./run.sh test                                   # 671 unit and replay tests, no network
+./run.sh evals --scenarios dev --runs 5         # text evals: real Brain vs an LLM-played borrower (paid; asks first)
+./run.sh evals --scenarios holdout --runs 5     # hold-out scenarios
+./run.sh evals --scenarios S02,S15 --runs 3     # chosen scenarios
+./run.sh judge results/<run>                    # LLM tone judge on a finished run (paid; asks first)
+./run.sh report results/<run>                   # results tables for the report
 ```
 
 The eval runner prints a cost estimate before it starts. Each run saves every transcript, tool call, guard hit and score under `results/<timestamp>-<label>/`. Scenarios (17, dev and hold-out) are in [`evals/scenarios/`](evals/scenarios/); metrics M1 to M11 and how each is scored are in [`docs/evals.md`](docs/evals.md). Scoring is rule-based today; the LLM judge for tone is designed but not wired in yet.

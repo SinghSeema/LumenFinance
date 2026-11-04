@@ -18,3 +18,4 @@ JustNewThought
 VoiceCLoneArchitecture
 # Assignment brief from the hiring company: not published
 *.pdf
+logs/

@@ -84,7 +84,10 @@ def confidence_note(results: list) -> str:
     conf = min(a.confidence for a in alts if a.confidence is not None)
     low = [f"{w.punctuated_word or w.word}({w.confidence:.2f})" for a in alts for w in (a.words or [])
            if w.confidence is not None and w.confidence < LOW_WORD_CONFIDENCE]
-    return f"confidence {conf:.2f}" + (f" | low words: {' '.join(low)}" if low else "")
+    # Deepgram returns detected languages only with language=multi: proof the mode is on.
+    langs = sorted({lang for a in alts for lang in (getattr(a, "languages", None) or [])})
+    return (f"confidence {conf:.2f}" + (f" | langs {','.join(langs)}" if langs else "")
+            + (f" | low words: {' '.join(low)}" if low else ""))
 
 
 class BrainProcessor(FrameProcessor):

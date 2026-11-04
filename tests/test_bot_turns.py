@@ -294,3 +294,11 @@ def test_confidence_note_empty_without_results():
     from emi_agent.bot import confidence_note
     assert confidence_note([]) == ""
     assert confidence_note([_dg_result(0.95, [("Okay.", 0.95)])]) == "confidence 0.95"
+
+
+def test_confidence_note_shows_languages_deepgram_detected():
+    from types import SimpleNamespace as NS
+    from emi_agent.bot import confidence_note
+    r = NS(channel=NS(alternatives=[NS(confidence=0.9, languages=["hi", "en"],
+                                       words=[NS(word="bies", punctuated_word="Bies.", confidence=0.59)])]))
+    assert confidence_note([r]) == "confidence 0.90 | langs en,hi | low words: Bies.(0.59)"

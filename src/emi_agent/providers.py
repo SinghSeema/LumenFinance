@@ -30,7 +30,16 @@ def make_stt(config: dict, first_name: str | None = None) -> Any:
         if terms:
             settings.keyterm = terms
         host = stt_cfg.get("host") or ""  # empty = Deepgram's default (US) host
-        return DeepgramSTTService(api_key=api_key, settings=settings, base_url=host)
+        service = DeepgramSTTService(api_key=api_key, settings=settings, base_url=host)
+        # Pipecat logs "Language string 'multi' is not a recognized Language code ... passed to the
+        # service as-is": its own enum lacks "multi", the string is still sent. This line shows the
+        # query Deepgram actually gets (owner asked, 2026-11-04).
+        q = service._build_connect_kwargs()
+        from loguru import logger
+        logger.info(f"deepgram query: model={q.get('model')} language={q.get('language')} "
+                    f"keyterms={len(q.get('keyterm') or [])} numerals={q.get('numerals')} "
+                    f"endpointing={q.get('endpointing')} host={host or 'default'}")
+        return service
 
     raise ValueError(f"Unknown STT provider: {provider!r}")
 

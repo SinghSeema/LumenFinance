@@ -160,8 +160,8 @@ def test_danda_does_not_hide_a_number_word():
 
 
 def test_misheard_day_is_missing_not_guessed():
-    # Live call 2026-11-04: "बाईस July" came back as "buys, July". 19 is the year's first half.
-    assert find_dob(["Date of birth, buys, July 19 94."], _T) == (None, {"day"})
+    # Live call 2026-11-04: "बाईस July" came back as "Twice July". 19 is the year's first half.
+    assert find_dob(["Date of birth, twice, July 19 94."], _T) == (None, {"day"})
 
 
 @pytest.mark.parametrize("said,day", [("1st March 1988", 1), ("3rd March 1988", 3), ("4th March 1988", 4)])
@@ -187,3 +187,16 @@ def test_amount_in_thousands_is_one_number():
 def test_hundreds_with_an_unknown_word_is_not_the_year_1900():
     # STT bake-off 2026-11-04: "सतासी" (an unknown spelling of 87) left "उन्नीस सौ" = 1900.
     assert find_dob(["तेईस सितंबर उन्नीस सौ सतासी"], _T) == (None, {"year"})
+
+
+# Live calls 2026-11-04: Deepgram multi wrote "बाईस" (22) as "Buys", "Bies", "Twice".
+@pytest.mark.parametrize("said", ["Buys, July 19 94.", "Date of birth, buys, July 19 94.", "Bies July 1994",
+                                  "bies, july nineteen ninety four"])
+def test_misheard_22_before_a_month_is_22(said):
+    assert find_dob([said], _T)[0] == _PRIYA
+    assert dob_was_said(_PRIYA, [said])  # the tool's "was it said" check agrees
+
+
+@pytest.mark.parametrize("said", ["Twice July 19 94.", "he buys things", "Bies.", "July buys 1994"])
+def test_misheard_22_is_not_guessed_elsewhere(said):
+    assert find_dob([said], _T)[0] is None

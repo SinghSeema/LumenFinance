@@ -469,8 +469,9 @@ async def test_replay_live_call_garbled_dob_keeps_hindi(today, tmp_path):
     brain = make(ScriptedLLM([say(ASK), say("जुलाई की कौन सी तारीख?"), say("कौन सी तारीख?")]),
                  today, tmp_path, borrower_id="B002")
     await run(brain, "हां जी, मैं प्रिया शर्मा बोल रही हूं.")
-    await run(brain, "Buys, July 19 94.")
-    await run(brain, "Buys July")
+    # "Buys" is now read as 22 (heard._MISHEARD_22); "Twice" is the garbled form still left unread.
+    await run(brain, "Twice July 19 94.")
+    await run(brain, "Twice July")
     assert brain.state.reply_language == "hi" and not brain.state.verified
     assert brain.state.verify_attempts == 0
 
@@ -503,13 +504,13 @@ async def test_ordinal_dob_is_verified_by_code(today, tmp_path):
 
 
 async def test_model_dob_guess_on_partial_answer_is_not_checked(today, tmp_path):
-    # "buys July 19 94": code finds no day; the model guessing 19 July must not use an attempt.
+    # "Twice July 19 94" (live, बाईस misheard): code finds no day; the model guessing 19 July must not use an attempt.
     llm = ScriptedLLM([say(ASK_DOB),
                        say("", ("verify_identity", {"factor": "dob", "value": "1994-07-19"})),
                        say("Which day in July?")])
     brain = make(llm, today, tmp_path, "B002")
     await run(brain, "Yes, speaking.")
-    await run(brain, "Date of birth, buys, July 19 94.")
+    await run(brain, "Date of birth, twice, July 19 94.")
     assert brain.state.verify_attempts == 0
     assert brain.state.tool_calls[-1]["by"] == "blocked"
 

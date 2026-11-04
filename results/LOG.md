@@ -299,3 +299,9 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 - Main failure mode is not Hindi numbers as such: multi wrote 27/75 transcripts (none) in Telugu, Kannada, Bengali or Arabic script ("six zero five four" -> "సిక్స్ జీరో ఫైవ్ ఫోర్"); 14/75 with dates, 12/75 with full. No documented way found to limit multi to hi+en.
 - Caveats: synthetic TTS voices, not a phone mic; n = 1 run; latency differences are within noise. The owner's recordings (`python3 -m bakeoff.stt_keyterms record`) decide the default; stt.keyterms stays none until then.
 - Owner decision: disputes and "already paid" on an overdue EMI now hear "the concerned team will look into it and arrange a callback" (D-35, prompt v10, code-owned escalation lines); no callback time or ticket number. 668 tests pass. v10 not yet run in evals or live.
+
+## 2026-11-04 13:47 live call B002 (after v10) and the v10 full eval
+
+- Live: "बाईस" heard as "Twice", "Bies.", "Bies." (confidence 0.67, 0.59); verified on "22nd July". Last four came back "Double 3, 5 7" (3357, not 3367): one real attempt used. Keyterms were still none.
+- Changes: stt.keyterms none -> full (D-33 evidence + this call); "buys/bies/byes" before a month = 22 (V13); startup line `deepgram query: model=nova-3 language=multi keyterms=51 ...`; per-turn `langs` from Deepgram (multi only). 680 tests pass.
+- v10 eval (results/20261104-133125-v10-all5, all 17 scenarios x5, resumed after the session ended at 42/85): 75/85 pass, 0 leaks, escalation precision 0.93 recall 1.0 (fp 2). S13 0/5 (vague date), S14a 2/5, S04 4/5, S04b 4/5. Agent tokens 667,151 in / 9,647 out (this half only). Failures not yet reviewed.

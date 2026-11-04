@@ -219,6 +219,7 @@ def digits_were_said(value: str, utterances: list[str]) -> bool:
 
 def dob_was_said(d: date, utterances: list[str]) -> bool:
     """Day, month and year each said by the borrower (in any of their turns), or a compact form."""
+    utterances = [_MISHEARD_22.sub("22 ", u) for u in utterances]  # same reading as find_dob
     said = said_numbers(utterances)
     if {d.strftime("%d%m%Y"), d.strftime("%Y%m%d"), d.strftime("%d%m%y")} & said:
         return True
@@ -271,6 +272,15 @@ _CORRECTION = re.compile(r"\b(?:i mean|sorry|actually|no wait|matlab|yaani|yani)
                          re.IGNORECASE)
 
 
+# Deepgram multi writes the Hindi "बाईस" (22) as English-looking words: "Buys, July 19 94",
+# "Bies." (live calls 2026-11-04). Read as 22 only right before a month name, where no English
+# sense fits. "Twice" also came back, but it is a real word in an answer, so it is not mapped.
+_MISHEARD_22 = re.compile(
+    r"\b(?:buys|bies|byes|baes|bayes)\b[\s,.]*(?=(?:" + "|".join(sorted(
+        (m for m in _MONTH_WORDS if m.isascii() and len(m) > 2), key=len, reverse=True)) + r")\b)",
+    re.IGNORECASE)
+
+
 def find_dob(utterances: list[str], today: date) -> tuple[date | None, set[str]]:
     """A full date of birth from these utterances, in order, plus the parts still missing.
 
@@ -281,6 +291,7 @@ def find_dob(utterances: list[str], today: date) -> tuple[date | None, set[str]]
     Returns (None, set()) when every part is there but they do not form one real date.
     """
     text = _FOUR_PHRASE.sub(" ", " ".join(utterances))
+    text = _MISHEARD_22.sub("22 ", text)
     parts = _CORRECTION.split(text)
     tail = parts[-1]
     if len(parts) > 1 and (_tokens(tail) or any(w in _MONTH_WORDS for w in _words(tail))):

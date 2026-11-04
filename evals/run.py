@@ -149,11 +149,16 @@ async def main() -> None:
     p.add_argument("--set", action="append", default=[], dest="overrides")
     p.add_argument("--label", default="")
     p.add_argument("--yes", action="store_true", help="skip the confirmation prompt")
+    p.add_argument("--resume", help="an earlier run directory: run only the conversations it lacks")
     args = p.parse_args()
 
     config_mod.load_dotenv()
     scenarios = load_scenarios(args.scenarios)
     plan = [(s, r) for s in scenarios for r in range(1, (args.runs or s["runs"]) + 1)]
+    if args.resume:  # a run cut short (session ended): keep what is saved, run the rest
+        done = {p.name for p in Path(args.resume).glob("S*_run*.json")}
+        plan = [(s, r) for s, r in plan if f"{s['id']}_run{r}.json" not in done]
+        print(f"Resuming {args.resume}: {len(done)} saved, {len(plan)} to run")
     base = EVAL_OVERRIDES + args.overrides
     probe = config_mod.load(args.profile, base)
     sim_key = _SIM_KEYS[probe["evals"]["simulator_provider"]]
@@ -166,9 +171,12 @@ async def main() -> None:
     if not args.yes and input("Proceed? [y/N] ").strip().lower() != "y":
         return
 
-    run_id = datetime.now().strftime("%Y%m%d-%H%M%S") + (f"-{args.label}" if args.label else "")
-    out = RESULTS_DIR / run_id
-    out.mkdir(parents=True)
+    if args.resume:
+        out = Path(args.resume)
+    else:
+        run_id = datetime.now().strftime("%Y%m%d-%H%M%S") + (f"-{args.label}" if args.label else "")
+        out = RESULTS_DIR / run_id
+        out.mkdir(parents=True)
     borrowers = load_borrowers()
     totals = {"agent_input": 0, "agent_output": 0, "sim_input": 0, "sim_output": 0}
     for scenario, run in plan:

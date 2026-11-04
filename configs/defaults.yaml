@@ -9,7 +9,7 @@ stt:
   language: multi             # Deepgram code-switching model (language_hints below are not sent)
   language_hints: [hi, en]
   endpointing: 100            # ms of silence before Deepgram finalizes; 100 beat 300 by ~200 ms (results/t_stt_latency_20261103.txt)
-  keyterms: none              # none | dates | full (emi_agent/keyterms.py). Off until bakeoff/stt_keyterms.py shows a gain
+  keyterms: full              # none | dates | full (emi_agent/keyterms.py). full since 2026-11-04: bake-off DOB 15->26/36, last4 9->15/18, no false numbers; live "बाईस" misheard 3x without
   host: api.eu.deepgram.com   # Frankfurt: ~170 ms RTT from here vs ~320 ms to the US default (results/t_stt_region_20261103.txt)
 
 tts:

@@ -155,6 +155,14 @@ _DATE_HELP = {
                  "briefly that you may not have heard the date right and ask them to say it once more. "
                  "Do not suggest a date yourself.",
 }
+def _opener(reply: str | None) -> str:
+    """The intent check's suggested warm line (intent.py), given to the agent to open with."""
+    if not reply:
+        return "Acknowledge what they said in a few words first. "
+    return (f'Open with a short, warm acknowledgement in the call\'s language, close to: "{reply}" '
+            "(your own words are fine; no amounts, promises or waivers). ")
+
+
 # Escalations whose call back our internal team arranges (D-35, v14): no schedule_callback, no time.
 # "other" too: a waiver demand escalated as "other" scheduled its own callback for "tomorrow" (v13 S11 run 2).
 _TEAM_CALLS_BACK = {"escalate:dispute", "escalate:hardship", "escalate:payment_check", "escalate:other"}
@@ -191,6 +199,9 @@ def asked_for_human(utterance: str, last_agent: str) -> bool:
 
 
 class Tools:
+    intent_check: dict | None = None  # the Brain's LLM intent check for the escalation being called (intent.py)
+    check_note: str = ""  # its one-line reason, added to the outcome notes
+
     def __init__(self, state: CallState, borrower: Borrower, today: date, config: dict):
         self.state = state
         self.borrower = borrower
@@ -351,6 +362,20 @@ class Tools:
         # v17-dev2 S08: "salary abhi aayi nahi, kal call kar lena" was escalated as hardship. With no sign
         # of a real setback in what they said, the first call is sent back; a second call goes through,
         # so a hardship told in words code does not know is delayed by one check, never refused.
+        check = self.intent_check  # set by the Brain for this call only (intent.py), else None
+        opener = None
+        if check and reason in ("hardship", "dispute") and f"{reason}_checked" not in s.flags:
+            if check["intent"] in (reason, None):  # confirmed, or the check failed: let it through
+                s.flags.add(f"{reason}_checked")
+                if check["intent"] == reason and check["why"]:  # for the person who calls back
+                    self.check_note = check["why"]
+                opener = check.get("reply")
+            else:
+                s.flags.add(f"{reason}_checked")
+                return {"escalated": False, "error": f"not_{reason}",
+                        "message": f"Not {reason}: {check['why']} " + _opener(check.get("reply")) +
+                                   "Then answer what they asked and help them pick a payment date or a call back "
+                                   f"time. Only if they really describe {reason}, call this again."}
         if (reason == "hardship" and "hardship_checked" not in s.flags
                 and not any(special.hardship_cue(u) for u in s.heard[-3:])):
             s.flags.add("hardship_checked")
@@ -373,10 +398,11 @@ class Tools:
         self.state.flags.add(f"escalate:{reason}")
         self._enter_action()
         # Hardship and disputes: code-owned steps, one per turn (special.py, prompt v16).
+        lead = _opener(opener) if opener else ""
         if situation := special.situation_for(reason, s.heard):
             s.special, s.special_step = situation, 0
-            return {"escalated": True, "message": special.instruction(situation, 0)}
-        return {"escalated": True, "message": _ESCALATION_LINE.get(reason, _ESCALATION_LINE["other"])}
+            return {"escalated": True, "message": lead + special.instruction(situation, 0)}
+        return {"escalated": True, "message": lead + _ESCALATION_LINE.get(reason, _ESCALATION_LINE["other"])}
 
     def _yes_to_due_date_question(self) -> bool:
         """C49, live call B004 19:51: "eighth November से पहले payment हो जाएगी ना?" - "जी payment हो जाएगी"
@@ -438,7 +464,8 @@ class Tools:
                 and not (s.heard and (_LEAVING.search(s.heard[-1]) or _NO_THANKS.search(s.heard[-1])))):
             s.flags.add("asked_exact_date")
             return {"error": "no_date", "message": "Ask once, kindly, on which date they plan to pay (the due date is "
-                    + self.facts().due_date_spoken + "; a later date is their choice, never push). Record "
+                    + self.facts().due_date_spoken + "; say 'by' the due date, never 'before' it, which means a day "
+                    "earlier; a later date is their choice, never push). Record "
                     "promise_to_pay with their words for the date; if they can't say, record will_pay."}
         # An escalated dispute or hardship is the outcome, not a callback: the team arranges the
         # callback (v10 eval S04b run 4 recorded callback_requested and promised "today").
@@ -491,7 +518,7 @@ class Tools:
             "promise_to_pay_date": promise,
             "payment_link_sent": s.payment_link_sent,
             "escalate_to_human": s.escalate_to_human,
-            "notes": notes,
+            "notes": f"{notes} [Check: {self.check_note}]" if self.check_note else notes,
             "language_used": "+".join(s.languages_used) or s.reply_language,
             "callback_time": s.callback_time,
         }, context={"today": self.today})

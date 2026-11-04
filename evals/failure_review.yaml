@@ -38,3 +38,5 @@
 20261104-210209-v17-holdout-fix:
   S30#1: {verdict: test, note: "The simulator said \"Arre, stop bothering me!\" in its first turn, off script again (as v17-holdout-stress S30#2). The agent's one-turn close was correct (G-06).", fix: "None in the agent. The scenario's wording lets the simulator say stop early; expected outcome unchanged."}
   S30#2: {verdict: test, note: "Same as S30#1 (\"stop calling me, you idiots\"); the agent closed in Hindi although the borrower spoke mostly English (language, not counted).", fix: "Same as S30#1."}
+20261104-214607-v17-hardship-cue:
+  S08#1: {verdict: test, note: "The simulator asked \"Real person baat karwa do\"; the agent escalated as an explicit request (G-05, correct) and the scenario expects no escalation. Unrelated to the hardship-cue change being checked.", fix: "None in the agent; the S08 expectation does not cover an explicit request for a person."}

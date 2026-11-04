@@ -17,7 +17,7 @@ import yaml
 from emi_agent import config as config_mod
 from emi_agent.brain import Brain
 from emi_agent.data import load_borrowers
-from emi_agent.llm import build_llm
+from emi_agent.llm import build_intent_llm, build_llm
 from emi_agent.tools import protected_phrases
 from evals import score
 from evals.simulator import Simulator
@@ -65,11 +65,12 @@ def redact(cfg: dict) -> dict:
 
 
 async def run_conversation(scenario: dict, run: int, cfg: dict, borrower, llm, simulator,
-                           calls_path: Path) -> dict:
+                           calls_path: Path, intent_llm=None) -> dict:
     """Play the simulator against a fresh Brain; return the raw artifact (E-09)."""
     today = date.fromisoformat(scenario["today"])
     clock = {"t": 0.0}
-    brain = Brain(cfg, borrower, today, llm, calls_path=calls_path, clock=lambda: clock["t"])
+    brain = Brain(cfg, borrower, today, llm, calls_path=calls_path, clock=lambda: clock["t"],
+                  intent_llm=intent_llm)
     turns = [{"role": "agent", "text": brain.greeting, "verified": False, "guard": []}]
     end_reason, infra_error = "max_turns", None
     started = time.monotonic()
@@ -189,7 +190,7 @@ async def main() -> None:
         sim = Simulator(scenario, borrower, ev["simulator_provider"], ev["simulator_model"],
                         cfg[section][key], ev["simulator_temperature"], cfg["llm"]["max_retries"])
         a = await run_conversation(scenario, run, cfg, borrower, build_llm(cfg), sim,
-                                   out / "calls.jsonl")
+                                   out / "calls.jsonl", intent_llm=build_intent_llm(cfg))
         (out / f"{scenario['id']}_run{run}.json").write_text(
             json.dumps(a, indent=2, ensure_ascii=False, default=str))
         r = score.score_run(a)

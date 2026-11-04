@@ -384,3 +384,33 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 
 - 20261104-210209-v17-holdout-fix: 10/12; S24 3/3, S27 3/3, S14b 3/3, S30 1/3 (2 test-side: simulator said stop in turn 1). 0 leaks. About Rs 6 (agent 181,840 / 1,951; simulator 13,275 / 1,200).
 - New open: C58 (callback offered after failed link without asking when). 1034 tests.
+
+## 2026-11-04 21:50 hardship cue widened (C62, C63), owner demo call B007 21:42
+
+- 20261104-214607-v17-hardship-cue S03,S08 x2: S03 2/2 hardship; S08 1/2 (run 1 escalated on "Real person baat karwa do", correct per G-05, scenario expects none). ~Rs 3.2 (agent 92,787 / 1,182; sim 10,866 / 1,116). 1044 tests.
+
+## 2026-11-04 22:00 escalation intent check (D-47, C64)
+
+- Probe, real Sarvam glm5.3-flash, 6 sentences (financial issues, haath tang, salary late, angry at fee + app, wrong amount, father in hospital): 6/6 labels right. First prompt 1.1-2.2 s (80-177 output tokens; replies had "take care", masculine Hindi, action promises). Tightened prompt: 1.0-1.5 s, 64-116 output tokens, feminine, no "take care".
+- 20261104-215508-v17-intent-check S03 S04 S08 x2: 6/6, escalation precision 1.0 recall 1.0. The check did not fire (word lists matched every time), so this shows no regression, not the check itself. ~Rs 6 (agent 170,388 / 2,151; sim 20,545 / 1,935). 1058 tests.
+
+## 2026-11-04 22:15 practical hardship (D-48), C65, C66
+
+- v17-hardship-practical S03 x2: 2/2 hardship, practical lines as designed; run 1 sent the link on "Please ask the team to call me" (C65) and replaced a read-back as a promise (C66).
+- v17-hardship-practical2 S03 x2 after fixes: 2/2, no link sent, no false replacements. ~Rs 2 each run. 1061 tests.
+- Left as is: the step-2 hand-off line is dropped as already said, because step 1 now names the team call back.
+
+## 2026-11-04 22:25 owner demo call B007 22:02 + C67-C69
+
+- Call: hardship by the word list (no intent check), Hindi flow as designed, outcome hardship/escalated/verified. Practical reply cut 1.9 s in by the borrower (C67); "can I pay later?" not answered (C68); Sarvam timeout after DOB, Groq fallback, real wait 5.3 s vs 1988 ms in the table (to the filler) (C69, open).
+- v17-hardship-c67 S03 x1: pass. ~Rs 1. 1063 tests.
+
+## 2026-11-04 22:20 S31 hardship in own words (D-47 check exercised), C70
+
+- New dev scenario S31 (B003, Hinglish, no listed words). v17-s31-intent x2: intent check fired 2/2 (hardship, 1094-1120 ms), 2/2 pass, but the link was sent on "shayad ... pakka nahi" (C70). v17-s31-intent2 x2 after the fix: check 2/2 (1125-1332 ms), 2/2 pass, no link. ~Rs 2 per run pair. 1065 tests.
+
+## 2026-11-04 22:30 owner call B003 22:25 (no rule matched), C71, C72
+
+- Live: intent check fired but timed out at 1.5 s (glm5.3-flash), escalation through by fail-open; the borrower talked into the 2.3 s silence and cut the practical reply; the flow skipped ahead because the reply was already written (C72).
+- Probe, 9 sentences (complaint x3, dispute x3, hardship x2, late salary): sarvam-105b-conversations 9/9 median 393 ms max 979 (after sharper dispute/complaint labels; before, it called anger at a fee a dispute 2/2); glm5.3-flash 9/9 median 1072 max 1631.
+- v17-intent-105b S31,S08 x2: 4/4, check 476-870 ms (S31), escalation precision 1.0. ~Rs 4.5. 1068 tests.

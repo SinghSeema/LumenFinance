@@ -37,7 +37,7 @@ from emi_agent import call_report, latency, providers, special
 from emi_agent.brain import _ASK_DOB, _ASK_LAST4, Brain, Sentence, is_stop_request
 from emi_agent.data import load_borrowers
 from emi_agent.heard import has_number_or_month
-from emi_agent.llm import build_llm
+from emi_agent.llm import build_intent_llm, build_llm
 from emi_agent.speech_format import clean_for_tts
 
 
@@ -358,6 +358,8 @@ class BrainProcessor(FrameProcessor):
             if played < UNHEARD_SECS:
                 self.brain.reply_unheard()  # e.g. cut 250 ms in: the apology was never heard (call 16:03)
             await self.cancel_task(self.reply)  # Brain records the cut-off turn (brain._end_turn)
+        elif self.bot_speaking:
+            self.brain.playback_cut()  # reply fully written, audio still playing (C67, live call B003 22:25)
         self.reply = None
         self.bot_speaking = False
         self.barged_in = True
@@ -470,7 +472,8 @@ async def main() -> None:
         "livekit", f"{cfg['stt']['provider']}_stt", f"{cfg['tts']['provider']}_tts",
         f"{cfg['llm']['provider']}_llm"]))
     borrower = load_borrowers()[args.borrower]
-    brain = Brain(cfg, borrower, args.today, build_llm(cfg), calls_path=Path(cfg["behavior"]["calls_log"]))
+    brain = Brain(cfg, borrower, args.today, build_llm(cfg), calls_path=Path(cfg["behavior"]["calls_log"]),
+                  intent_llm=build_intent_llm(cfg))
     started = datetime.now()
     stamp = started.strftime("%Y%m%d-%H%M%S")
     latency_path = Path("results/latency") / f"{stamp}-{args.borrower}.jsonl"

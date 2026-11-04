@@ -58,6 +58,9 @@ behavior:
   hindi_numbers: english      # english | hindi: number words in Hindi/Hinglish calls; switches to hindi if the borrower says Hindi numbers (owner 2026-11-04)
   max_call_secs: 300
   filler_delay_ms: 300        # start filler if tool takes longer than this
+  intent_check_timeout_secs: 1.5  # LLM second opinion on a hardship/dispute escalation no word list confirmed (intent.py); a failed or slower check lets it through; 0 = off
+  intent_check_provider: sarvam    # a small model, no fallback (owner: no paid Groq)
+  intent_check_model: sarvam-105b-conversations  # probe 2026-11-04, 9 sentences: 9/9, median 393 ms, max 979 (glm5.3-flash 9/9, median 1072, max 1631; timed out live in call B003 22:25)
   tool_timeout_s: 8
   verify_max_attempts: 3
   lender_name: "Lumen Finance"

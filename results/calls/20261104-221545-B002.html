@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call B002</title><style>
+:root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --line:#dddcd6; --card:#fff;
+        --ok:#1f6f5c; --bad:#a23b2a; --agent:#eef4f1; --you:#f3f1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+        --bg:#171716; --fg:#ecece8; --muted:#9a9a94; --line:#33332f; --card:#20201e;
+        --ok:#4fb39a; --bad:#e07a68; --agent:#1d2a25; --you:#2a2822; } }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:1.4rem; margin:0 0 4px; } h2 { font-size:1.05rem; margin:28px 0 8px; }
+.meta { color:var(--muted); margin:0 0 16px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+.kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+.kpi b { display:block; font-size:1.3rem; } .kpi span { color:var(--muted); font-size:.85rem; }
+.ok { color:var(--ok); } .bad { color:var(--bad); }
+pre { margin:0; white-space:pre-wrap; word-break:break-word; font-size:.85rem; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:500; } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+.scroll { overflow-x:auto; }
+.turn { padding:8px 12px; border-radius:8px; margin:6px 0; }
+.turn.agent { background:var(--agent); } .turn.borrower { background:var(--you); }
+.who { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+</style></head>
+<body><main>
+<h1>Call report: B002</h1>
+<p class="meta">started 2026-11-04 22:15:45 · length 1m 18s · profile hindi_bulbul · llm sarvam-105b-conversations · tts bulbul:v4-flash simran_enhi_customer · today 2026-11-04</p>
+<div class="kpis"><div class="card kpi"><b class="">third_party</b><span>outcome</span></div><div class="card kpi"><b class="">no</b><span>verified</span></div><div class="card kpi"><b class="">no</b><span>escalate to human</span></div><div class="card kpi"><b class="ok">none</b><span>loan detail before verification</span></div><div class="card kpi"><b class="ok">856 ms</b><span>median gap (n=4); felt ≈ 1356 ms</span></div><div class="card kpi"><b class="ok">1245 ms</b><span>p90 gap; felt ≈ 1745 ms</span></div></div>
+<h2>Outcome record</h2>
+<div class="card"><pre>{
+  "borrower_id": "B002",
+  "verified": false,
+  "outcome": "third_party",
+  "promise_to_pay_date": null,
+  "payment_link_sent": false,
+  "escalate_to_human": false,
+  "notes": "Borrower's brother answered. Requested callback after 5 PM in the evening.",
+  "language_used": "hi",
+  "callback_time": null
+}</pre></div>
+<h2>Transcript</h2>
+<div class="turn agent"><div class="who">Agent</div>नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Priya जी से हो रही है?</div><div class="turn borrower"><div class="who">Borrower</div>जी प्रिया जी बोल रहे हैं.</div><div class="turn agent"><div class="who">Agent</div>ठीक है, account verification के लिए क्या आप अपने registered mobile number के आखिरी चार digits बता सकते हैं?</div><div class="turn borrower"><div class="who">Borrower</div>I&#x27;m sorry.</div><div class="turn agent"><div class="who">Agent</div>कोई बात नहीं। account verification के लिए बस अपने mobile number के आखिरी चार digits बता दीजिए।</div><div class="turn borrower"><div class="who">Borrower</div>उनका भाई बोल रहा हूं sorry sorry.</div><div class="turn agent"><div class="who">Agent</div>कोई बात नहीं। प्रिया जी से कब बात हो पाएगी? किस समय call करना सही रहेगा?</div><div class="turn borrower"><div class="who">Borrower</div>आप उनको evening भी कर लीजिएगा after 5 o&#x27;clock</div><div class="turn agent"><div class="who">Agent</div>जी। आपके समय के लिए धन्यवाद। आपका दिन शुभ हो।</div>
+<h2>Latency per turn (ms)</h2>
+<p class="meta">Gap = VAD stop to first agent audio. The borrower also waits the VAD stop time
+before that, shown as "felt". Interrupted turns are left out of the median and p90. On a turn marked
+"filler", the first audio was "one second" while the model was slow, not the answer.</p>
+<div class="scroll"><table><tr><th>#</th><th>vad_stop → stt_final</th><th>stt_final → first_sentence</th><th>first_sentence → playback_start</th><th>gap</th><th>notes</th></tr><tr><td>1</td><td class="n">0</td><td class="n">526</td><td class="n">210</td><td class="n">736</td><td></td></tr><tr><td>2</td><td class="n">80</td><td class="n">336</td><td class="n">274</td><td class="n">690</td><td></td></tr><tr><td>3</td><td class="n">298</td><td class="n">390</td><td class="n">287</td><td class="n">976</td><td>after barge-in</td></tr><tr><td>4</td><td class="n">701</td><td class="n">323</td><td class="n">336</td><td class="n">1360</td><td>bridge line</td></tr></table></div>
+<h2>Tool calls</h2>
+<div class="scroll"><table><tr><th>tool</th><th>stage</th><th>args</th><th>result</th></tr><tr><td>record_outcome</td><td>closing</td><td>{&quot;outcome&quot;: &quot;third_party&quot;, &quot;promise_to_pay_date&quot;: null, &quot;notes&quot;: &quot;Borrower&#x27;s brother answered. Requested callback after 5 PM in the evening.&quot;}</td><td>{&quot;recorded&quot;: true}</td></tr></table></div>
+<h2>Code guard events</h2>
+<p class="meta">No sentence was changed or dropped by the code guards.</p>
+<p class="meta">State flags: code_closed · tokens {&#x27;input&#x27;: 13190, &#x27;output&#x27;: 118, &#x27;cache_read&#x27;: 0}</p>
+</main></body></html>

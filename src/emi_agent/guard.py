@@ -256,6 +256,13 @@ def warm_close(sentence: str) -> bool:
     return _WARM_CLOSE.search(sentence) is not None
 
 
+def warm_close_lead(sentence: str) -> str:
+    """The words before the goodbye, without punctuation ("Time given for your time")."""
+    m = _WARM_CLOSE.search(sentence)
+    lead = re.sub(r"[^\w\sऀ-ॿ]", " ", sentence[:m.start()] if m else sentence)
+    return re.sub(r"\s*(?:आपका|aapka)\s*$", "", lead, flags=re.IGNORECASE).strip()  # "आपका दिन शुभ हो"
+
+
 def invented_notice(sentence: str) -> bool:
     return _NOTICE.search(sentence.replace("’", "'")) is not None
 
@@ -288,7 +295,8 @@ def safe_line(kind: str, lang: str, script: str = "roman") -> str:
 _REPORTED_BEFORE = re.compile(
     r"\byou(?:'re|'d|'ve| are| would| have| had)?\s+(?:\S+\s+){0,2}?(?:want\w*|like|asking|asked|ask|"
     r"expect\w*|request\w*|need|hoping|hope|wish\w*)\b(?:\s+\S+){0,12}\s*$|"
-    r"\byour (?:question|request|concern|query) (?:about|for|regarding|on)\b(?:\s+\S+){0,6}\s*$", re.IGNORECASE)
+    # "...along with your request to delay the EMI or waive the late fee" (v17-hardship-practical S03 run 1)
+    r"\byour (?:question|request|concern|query) (?:about|for|regarding|on|to)\b(?:\s+\S+){0,6}\s*$", re.IGNORECASE)
 _REPORTED_AFTER_HI = re.compile(r"^\s*(?:\S+\s+){0,4}?(?:चाहती|चाहते|चाहता|chahti|chahte|chahta|माँग|मांग|"
                                 r"request)", re.IGNORECASE)
 _COMMITMENT = re.compile(

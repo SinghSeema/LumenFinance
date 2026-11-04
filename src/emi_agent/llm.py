@@ -113,7 +113,7 @@ class GroqLLM:
     async def stream(self, system: str, messages: list, tools: list) -> AsyncIterator:
         try:
             resp = await self.client.chat.completions.create(
-                model=self.model, messages=to_openai(system, messages), tools=openai_tools(tools),
+                model=self.model, messages=to_openai(system, messages), **_tools_arg(tools),
                 max_tokens=self.max_tokens, temperature=self.temperature, stream=True, **self.extra)
             async for item in accumulate(resp, f"groq:{self.model}", _groq_usage):
                 yield item
@@ -131,6 +131,11 @@ def _groq_usage(chunk) -> dict | None:
 def _openai_usage(chunk) -> dict | None:
     u = getattr(chunk, "usage", None)
     return {"input": u.prompt_tokens, "output": u.completion_tokens, "cache_read": 0} if u else None
+
+
+def _tools_arg(tools: list) -> dict:
+    """No tools key at all for a plain request (the intent check): an empty list is rejected."""
+    return {"tools": openai_tools(tools)} if tools else {}
 
 
 def openai_tools(tools: list) -> list[dict]:
@@ -205,7 +210,7 @@ class OpenAICompatLLM:
     async def stream(self, system: str, messages: list, tools: list) -> AsyncIterator:
         try:
             resp = await self.client.chat.completions.create(
-                model=self.model, messages=to_openai(system, messages), tools=openai_tools(tools),
+                model=self.model, messages=to_openai(system, messages), **_tools_arg(tools),
                 max_tokens=self.max_tokens, temperature=self.temperature, stream=True,
                 stream_options={"include_usage": True}, **self.extra)
             async for item in accumulate(resp, f"{self.provider}:{self.model}", _openai_usage):
@@ -280,6 +285,15 @@ def build_llm(config: dict) -> FallbackLLM:
         except EnvironmentError as e:
             print(f"WARNING: LLM fallback {spec['provider']} disabled: {e}")
     return FallbackLLM(providers)
+
+
+def build_intent_llm(config: dict):
+    """The small Sarvam model for the escalation intent check (intent.py); None when the check is off."""
+    b = config["behavior"]
+    if not b["intent_check_timeout_secs"]:
+        return None
+    return _make_one({"provider": b["intent_check_provider"], "model": b["intent_check_model"],
+                      "temperature": 0}, config)
 
 
 def _missing(env_name: str):

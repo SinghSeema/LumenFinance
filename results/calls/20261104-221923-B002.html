@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call B002</title><style>
+:root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --line:#dddcd6; --card:#fff;
+        --ok:#1f6f5c; --bad:#a23b2a; --agent:#eef4f1; --you:#f3f1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+        --bg:#171716; --fg:#ecece8; --muted:#9a9a94; --line:#33332f; --card:#20201e;
+        --ok:#4fb39a; --bad:#e07a68; --agent:#1d2a25; --you:#2a2822; } }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:1.4rem; margin:0 0 4px; } h2 { font-size:1.05rem; margin:28px 0 8px; }
+.meta { color:var(--muted); margin:0 0 16px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+.kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+.kpi b { display:block; font-size:1.3rem; } .kpi span { color:var(--muted); font-size:.85rem; }
+.ok { color:var(--ok); } .bad { color:var(--bad); }
+pre { margin:0; white-space:pre-wrap; word-break:break-word; font-size:.85rem; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:500; } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+.scroll { overflow-x:auto; }
+.turn { padding:8px 12px; border-radius:8px; margin:6px 0; }
+.turn.agent { background:var(--agent); } .turn.borrower { background:var(--you); }
+.who { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+</style></head>
+<body><main>
+<h1>Call report: B002</h1>
+<p class="meta">started 2026-11-04 22:19:23 · length 1m 39s · profile hindi_bulbul · llm sarvam-105b-conversations · tts bulbul:v4-flash simran_enhi_customer · today 2026-11-04</p>
+<div class="kpis"><div class="card kpi"><b class="">already_paid</b><span>outcome</span></div><div class="card kpi"><b class="ok">yes</b><span>verified</span></div><div class="card kpi"><b class="bad">yes</b><span>escalate to human</span></div><div class="card kpi"><b class="ok">none</b><span>loan detail before verification</span></div><div class="card kpi"><b class="bad">1463 ms</b><span>median gap (n=6); felt ≈ 1963 ms</span></div><div class="card kpi"><b class="bad">2253 ms</b><span>p90 gap; felt ≈ 2753 ms</span></div></div>
+<h2>Outcome record</h2>
+<div class="card"><pre>{
+  "borrower_id": "B002",
+  "verified": true,
+  "outcome": "already_paid",
+  "promise_to_pay_date": null,
+  "payment_link_sent": false,
+  "escalate_to_human": true,
+  "notes": "Borrower claims full payment already made via UPI. EMI is six days overdue according to system. Asked when and how paid; borrower said UPI.",
+  "language_used": "hi+en",
+  "callback_time": null
+}</pre></div>
+<h2>Transcript</h2>
+<div class="turn agent"><div class="who">Agent</div>नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Priya जी से हो रही है?</div><div class="turn borrower"><div class="who">Borrower</div>जी प्रिया जी बोल रहे हैं?</div><div class="turn agent"><div class="who">Agent</div>जी, एक second। जी, मेरी बात Priya जी से ही हो रही है ना? Account verification के लिए बस अपने registered mobile number के आखिरी चार digits बता दीजिए।</div><div class="turn borrower"><div class="who">Borrower</div>Ok. Give give me a moment.</div><div class="turn agent"><div class="who">Agent</div>Sure, take your time. I am waiting.</div><div class="turn borrower"><div class="who">Borrower</div>Double 3 6 7.</div><div class="turn agent"><div class="who">Agent</div>One moment, let me check that. Sorry, I didn&#x27;t catch that clearly. Could you share the last four digits of your registered mobile number once more?</div><div class="turn borrower"><div class="who">Borrower</div>Double 3 6 7</div><div class="turn agent"><div class="who">Agent</div>Thank you, Priya. Your two-wheeler loan EMI of four thousand two hundred rupees is due on the twenty-eighth of October, and it is now six days overdue. A charge of five hundred rupees has been added as per your loan terms. Can you clear this today? I can send you a secure payment link on SMS or WhatsApp.</div><div class="turn borrower"><div class="who">Borrower</div>Sorry but मैंने तो पूरा payment कर दिया था so कुछ भी due नहीं होना चाहिए.</div><div class="turn agent"><div class="who">Agent</div>कोई बात नहीं, Priya जी। हमारे records में अभी भी यह pending दिख रहा है, पर कोई problem नहीं है। हमारी internal team इसे check करके call back arrange करेगी। आपने payment कब और कैसे किया था, जैसे UPI या bank transfer, बस इतना बता दीजिए?</div><div class="turn borrower"><div class="who">Borrower</div>UPIC.</div><div class="turn agent"><div class="who">Agent</div>जी। समय देने के लिए धन्यवाद, आपका दिन शुभ हो.</div>
+<h2>Latency per turn (ms)</h2>
+<p class="meta">Gap = VAD stop to first agent audio. The borrower also waits the VAD stop time
+before that, shown as "felt". Interrupted turns are left out of the median and p90. On a turn marked
+"filler", the first audio was "one second" while the model was slow, not the answer.</p>
+<div class="scroll"><table><tr><th>#</th><th>vad_stop → stt_final</th><th>stt_final → first_sentence</th><th>first_sentence → playback_start</th><th>gap</th><th>notes</th></tr><tr><td>1</td><td class="n">0</td><td class="n">1214</td><td class="n">970</td><td class="n">2184</td><td>filler (model slow)</td></tr><tr><td>2</td><td class="n">367</td><td class="n">842</td><td class="n">472</td><td class="n">1681</td><td></td></tr><tr><td>3</td><td class="n">453</td><td class="n">541</td><td class="n">251</td><td class="n">1245</td><td>after barge-in, bridge line</td></tr><tr><td>4</td><td class="n">1186</td><td class="n">886</td><td class="n">250</td><td class="n">2322</td><td></td></tr><tr><td>5</td><td class="n">0</td><td class="n">327</td><td class="n">224</td><td class="n">550</td><td></td></tr><tr><td>6</td><td class="n">257</td><td class="n">360</td><td class="n">524</td><td class="n">1141</td><td>bridge line</td></tr></table></div>
+<h2>Tool calls</h2>
+<div class="scroll"><table><tr><th>tool</th><th>stage</th><th>args</th><th>result</th></tr><tr><td>verify_identity</td><td>verifying</td><td>{&quot;factor&quot;: &quot;last4&quot;, &quot;value&quot;: &quot;3676&quot;}</td><td>{&quot;verified&quot;: false, &quot;attempts_left&quot;: 3, &quot;error&quot;: &quot;not_heard&quot;, &quot;message&quot;: &quot;Not checked: pass only a value the borrower has said in this call. Ask them for it fir…</td></tr><tr><td>verify_identity</td><td>reminding</td><td>{&quot;factor&quot;: &quot;last4&quot;, &quot;value&quot;: &quot;3367&quot;}</td><td>{&quot;verified&quot;: true, &quot;loan_facts&quot;: {&quot;amount_spoken&quot;: &quot;four thousand two hundred rupees&quot;, &quot;due_date_spoken&quot;: &quot;the twenty-eighth of October&quot;, &quot;loan_type&quot;: &quot;two-whee…</td></tr><tr><td>record_outcome</td><td>closing</td><td>{&quot;outcome&quot;: &quot;already_paid&quot;, &quot;promise_to_pay_date&quot;: null, &quot;notes&quot;: &quot;Borrower claims full payment already made via UPI. EMI is six days overdue according to syste…</td><td>{&quot;recorded&quot;: true, &quot;team_will_check&quot;: true, &quot;message&quot;: &quot;Thank them; say our internal team will check the payment and arrange a call back. Never promise when.&quot;}</td></tr></table></div>
+<h2>Code guard events</h2>
+<p class="meta">No sentence was changed or dropped by the code guards.</p>
+<p class="meta">State flags: escalate:payment_check · tokens {&#x27;input&#x27;: 28487, &#x27;output&#x27;: 302, &#x27;cache_read&#x27;: 0}</p>
+</main></body></html>

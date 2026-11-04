@@ -28,13 +28,24 @@ _ANSWER = ("First answer what they just said, in one or two short sentences: if 
            "won't pay until it is sorted, say you understand. ")
 
 STEPS: dict[str, list[str]] = {
+    # Owner, 2026-11-04 (demo call B007): sympathy in a practical, banking way, not a counsellor's. One plain
+    # line, then the true facts that help (data/policy.yaml: the charge is flat and once), then one choice.
     "hardship": [
-        "In one sentence, say warmly, in their own terms, that you are really sorry to hear it and thank them "
-        "for telling you. Then, only if they have not already said how long it may last or when they might "
-        "manage, gently ask whether it is something short-term or hard to say right now. Say nothing after the "
-        "question. Do not mention the amount, the late fee or paying.",
-        "Do not apologise again. In one sentence, read back what you noted, in their words (their situation, "
-        "and anything they said about timing or worries). Then " + _HANDOFF + ". Then " + _CONTACT + ".",
+        "First, one short, plain sentence that you understand and that this makes the EMI hard right now, in "
+        "their own terms (\"I understand, <name>. That makes the EMI difficult right now.\"; in Hindi \"समझ "
+        "सकती हूँ, ऐसे समय में EMI manage करना मुश्किल होता है।\"); no \"don't worry\", no \"we understand "
+        "you\", no long sympathy. Then the practical facts, once: if your loan facts include a late payment "
+        "charge, say it is a one-time charge of that amount and will not keep increasing; if the EMI is not "
+        "yet due, say no charge has been added. Say that any amount paid through the payment link goes towards "
+        "this EMI, and that our internal team can check options with them on a call back. Then ask one "
+        "question: whether a part payment is possible for now, or whether you should just ask the team to "
+        "call them. Say nothing after the question. Never say charges keep adding, never mention interest or "
+        "the credit score, never push for the full amount.",
+        "Do not apologise again. Only if they clearly said they will pay a part now, call send_payment_link "
+        "(WhatsApp unless they named SMS) and say it is sent; never name an amount for them. If they are unsure "
+        "(\"maybe\", \"shayad\", \"can't commit\"), do not send it: say the link can be sent whenever they want. In one sentence, read back what you "
+        "noted, in their words (their situation, and what they said about a part payment or timing). Then "
+        + _HANDOFF + ". Then " + _CONTACT + ".",
         _ANSWER + "Then " + _CLOSE.format(outcome="hardship") + ".",
     ],
     "dispute_amount": [
@@ -69,7 +80,11 @@ STEPS: dict[str, list[str]] = {
 }
 
 # v16-special S04b: "how did this loan come in my name?" asked three times, never answered.
-_RULES = ("Say only this step, in at most four short sentences, in the borrower's language. If they asked for "
+# Owner demo call B007 22:03 (C68): "can I pay later?" in the hardship flow got only a read-back.
+_PAY_LATER = ("If they ask whether they can pay later, say yes, through the same payment link whenever they are able; "
+              "if a late charge was added, it is one-time and will not increase. Never promise a new due date or "
+              "that no other charge will ever apply. ")
+_RULES = (_PAY_LATER + "Say only this step, in at most four short sentences, in the borrower's language. If they asked for "
           "a waiver, a lower amount, more time or a fee removal, say kindly that you can't change that yourself "
           "and that you have noted it for the team. If they asked something the repayment policy in your "
           "instructions answers (the late fee, part payment, how to pay), answer it first from the policy in one "
@@ -150,7 +165,12 @@ _HARDSHIP_CUE = re.compile(
     r"business (?:band|closed|shut|loss|doob)|lost (?:my|our) (?:business|shop)|no income|"
     r"bimar|beemar|bimaari|beemari|guzar gay|tabiyat|"
     r"(?:job|नौकरी) (?:चली गई|चला गया|छूट)|नौकरी नहीं|अस्पताल|hospital में|बीमार|बीमारी|"
-    r"ऑपरेशन|एक्सीडेंट|गुज़र गए|गुजर गए|देहांत|तबीयत|इमरजेंसी|emergency",
+    r"ऑपरेशन|एक्सीडेंट|गुज़र गए|गुजर गए|देहांत|तबीयत|इमरजेंसी|emergency|"
+    # Owner demo call B007 21:42: "I'm going through some financial issues ... maybe in a month or two" was
+    # refused as hardship and recorded will_pay. Plainly named money trouble is hardship; a late salary is not (D-43).
+    r"financial(?:ly)? (?:issue|problem|crisis|difficult|trouble|hardship|constraint|struggl|tight)\w*|"
+    r"going through (?:a |some )?(?:tough|difficult|hard|bad|rough) (?:time|phase|patch)|can'?t afford|cannot afford|"
+    r"pais(?:e|o|on) ki (?:\w+ )?(?:dikkat|tangi|problem|kami)|aarthik|आर्थिक|पैस(?:ों|े) की (?:तंगी|दिक्कत|कमी)",
     re.IGNORECASE)
 
 

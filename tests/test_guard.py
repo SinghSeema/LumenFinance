@@ -318,3 +318,11 @@ def test_unknown_amount(s, bad):
     ("अभी कोई late charge नहीं लगा है।", False)])
 def test_fee_added_claim(s, claim):
     assert fee_added_claim(s) is claim
+
+
+def test_read_back_of_your_request_to_waive_is_not_a_promise():
+    from emi_agent.guard import _is_promise
+    s = ("I have noted that you lost your job recently and that a part payment is hard right now, "
+         "along with your request to delay the EMI or waive the late fee.")
+    assert not _is_promise(s)
+    assert _is_promise("I will waive the late fee for you.")

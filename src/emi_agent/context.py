@@ -175,6 +175,14 @@ def hold(lang: str, script: str) -> str:
     return _HOLD[_key(lang, script)]
 
 
+_GOOD_DAY = {"en": "Have a good day.", "roman": "Aapka din shubh ho.", "devanagari": "आपका दिन शुभ हो।"}
+
+
+def good_day(lang: str, script: str) -> str:
+    """The goodbye alone, when the reply has already thanked them."""
+    return _GOOD_DAY[_key(lang, script)]
+
+
 def closing(lang: str, script: str, name: str | None) -> str:
     """No name when the listener may not be the borrower: a child was thanked as "Sunita जी" (S27, C55)."""
     line = _CLOSING[_key(lang, script)]
@@ -304,6 +312,11 @@ NOTE_PURPOSE = ("They asked what this call is about. Answer that first, warmly, 
                 "available): say it is a personal matter for {name}, ask when is a good time to reach {name}, "
                 "and never ask them for any verification details.")
 
+
+NOTE_CUT_STEP = ("The borrower cut in partway through your last reply, so they may not have heard all of it. "
+                 "First answer what they just said (a question the repayment policy answers: one short sentence "
+                 "from it). Then give that reply's key point again in one or two short sentences and ask its "
+                 "question again, unless what they said already answers it. Do not repeat it word for word.")
 
 NOTE_UNHEARD = ("Your last reply was cut off at once, so the borrower did not hear it. Answer what they "
                 "say now, and briefly include its key point again (for example your apology or your "

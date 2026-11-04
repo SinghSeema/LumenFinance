@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call B003</title><style>
+:root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --line:#dddcd6; --card:#fff;
+        --ok:#1f6f5c; --bad:#a23b2a; --agent:#eef4f1; --you:#f3f1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+        --bg:#171716; --fg:#ecece8; --muted:#9a9a94; --line:#33332f; --card:#20201e;
+        --ok:#4fb39a; --bad:#e07a68; --agent:#1d2a25; --you:#2a2822; } }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:1.4rem; margin:0 0 4px; } h2 { font-size:1.05rem; margin:28px 0 8px; }
+.meta { color:var(--muted); margin:0 0 16px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+.kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+.kpi b { display:block; font-size:1.3rem; } .kpi span { color:var(--muted); font-size:.85rem; }
+.ok { color:var(--ok); } .bad { color:var(--bad); }
+pre { margin:0; white-space:pre-wrap; word-break:break-word; font-size:.85rem; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:500; } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+.scroll { overflow-x:auto; }
+.turn { padding:8px 12px; border-radius:8px; margin:6px 0; }
+.turn.agent { background:var(--agent); } .turn.borrower { background:var(--you); }
+.who { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+</style></head>
+<body><main>
+<h1>Call report: B003</h1>
+<p class="meta">started 2026-11-04 22:24:49 · length 1m 13s · profile hindi_bulbul · llm sarvam-105b-conversations · tts bulbul:v4-flash simran_enhi_customer · today 2026-11-04</p>
+<div class="kpis"><div class="card kpi"><b class="">hardship</b><span>outcome</span></div><div class="card kpi"><b class="ok">yes</b><span>verified</span></div><div class="card kpi"><b class="bad">yes</b><span>escalate to human</span></div><div class="card kpi"><b class="ok">none</b><span>loan detail before verification</span></div><div class="card kpi"><b class="ok">736 ms</b><span>median gap (n=4); felt ≈ 1236 ms</span></div><div class="card kpi"><b class="ok">1138 ms</b><span>p90 gap; felt ≈ 1638 ms</span></div></div>
+<h2>Outcome record</h2>
+<div class="card"><pre>{
+  "borrower_id": "B003",
+  "verified": true,
+  "outcome": "hardship",
+  "promise_to_pay_date": null,
+  "payment_link_sent": false,
+  "escalate_to_human": true,
+  "notes": "Borrower said her situation is not good right now and she cannot make any payment at all. Confirmed this is the best number to reach her.",
+  "language_used": "hinglish+hi",
+  "callback_time": null
+}</pre></div>
+<h2>Transcript</h2>
+<div class="turn agent"><div class="who">Agent</div>नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Rahul जी से हो रही है?</div><div class="turn borrower"><div class="who">Borrower</div>जी मैं राहुल बोल रहा हूं.</div><div class="turn agent"><div class="who">Agent</div>ठीक है राहुल जी, account verification के लिए बस अपने registered mobile number के आखिरी चार digits बता दीजिए।</div><div class="turn borrower"><div class="who">Borrower</div>Double 7 4 3.</div><div class="turn agent"><div class="who">Agent</div>धन्यवाद राहुल जी। आपके consumer durable loan की three thousand eight hundred rupees की EMI first November को due थी, और अभी two days overdue दिख रही है। loan terms के हिसाब से five hundred rupees का late charge भी add हो गया है। क्या आप आज इसे online payment link से clear कर सकते हैं? SMS या WhatsApp, किस पर भेज दूँ?</div><div class="turn borrower"><div class="who">Borrower</div>नहीं मैं नहीं कर सकता.</div><div class="turn agent"><div class="who">Agent</div>कोई बात नहीं राहुल जी, मैं समझ सकती हूँ। तो फिर कब तक payment कर पाएंगे आप? आप अपनी सुविधा के हिसाब से कोई date बता दीजिए।</div><div class="turn borrower"><div class="who">Borrower</div>अभी मेरी हालत सही नहीं है.</div><div class="turn agent"><div class="who">Agent</div>जी। समझ सकती हूँ राहुल जी, ऐसे समय में EMI manage करना मुश्किल होता है। जो five hundred rupees का charge लगा है वो one-time है और आगे नहीं बढ़ेगा। जो भी payment link से आएगा वो इसी EMI में जाएगा, और हमारी internal team call back पर बाकी options देख लेगी। अभी क्या part payment possible है, या मैं team से कह दूँ कि वो आपको call कर लें?</div><div class="turn borrower"><div class="who">Borrower</div>बिल्कुल payment नहीं कर सकती हूं.</div><div class="turn agent"><div class="who">Agent</div>मैंने note कर लिया है कि अभी आपकी हालत ठीक नहीं है और आप payment अभी बिल्कुल नहीं कर सकतीं। क्या यह number आपसे बात करने के लिए ठीक रहेगा?</div><div class="turn borrower"><div class="who">Borrower</div>जी.</div><div class="turn agent"><div class="who">Agent</div>जी। ठीक है, मैंने सब note कर लिया है। बात करने के लिए धन्यवाद राहुल जी, आपका दिन शुभ हो।</div>
+<h2>Latency per turn (ms)</h2>
+<p class="meta">Gap = VAD stop to first agent audio. The borrower also waits the VAD stop time
+before that, shown as "felt". Interrupted turns are left out of the median and p90. On a turn marked
+"filler", the first audio was "one second" while the model was slow, not the answer.</p>
+<div class="scroll"><table><tr><th>#</th><th>vad_stop → stt_final</th><th>stt_final → first_sentence</th><th>first_sentence → playback_start</th><th>gap</th><th>notes</th></tr><tr><td>1</td><td class="n">0</td><td class="n">388</td><td class="n">247</td><td class="n">635</td><td></td></tr><tr><td>2</td><td class="n">394</td><td class="n">655</td><td class="n">258</td><td class="n">1307</td><td></td></tr><tr><td>3</td><td class="n">16</td><td class="n">360</td><td class="n">351</td><td class="n">727</td><td>after barge-in</td></tr><tr><td>4</td><td class="n">107</td><td class="n">349</td><td class="n">288</td><td class="n">744</td><td>bridge line</td></tr></table></div>
+<h2>Tool calls</h2>
+<div class="scroll"><table><tr><th>tool</th><th>stage</th><th>args</th><th>result</th></tr><tr><td>verify_identity</td><td>reminding</td><td>{&quot;factor&quot;: &quot;last4&quot;, &quot;value&quot;: &quot;7743&quot;}</td><td>{&quot;verified&quot;: true, &quot;loan_facts&quot;: {&quot;amount_spoken&quot;: &quot;three thousand eight hundred rupees&quot;, &quot;due_date_spoken&quot;: &quot;first November&quot;, &quot;loan_type&quot;: &quot;consumer durable lo…</td></tr><tr><td>_intent_check</td><td>intent</td><td>{&quot;reason&quot;: &quot;hardship&quot;}</td><td>{&quot;intent&quot;: null, &quot;why&quot;: &quot;check failed: TimeoutError&quot;, &quot;reply&quot;: &quot;&quot;}</td></tr><tr><td>escalate_to_human</td><td>action</td><td>{&quot;reason&quot;: &quot;hardship&quot;}</td><td>{&quot;escalated&quot;: true, &quot;message&quot;: &quot;Special situation (hardship), step 1 of 3, from the call system. First, one short, plain sentence that you understand and that t…</td></tr><tr><td>record_outcome</td><td>closing</td><td>{&quot;outcome&quot;: &quot;hardship&quot;, &quot;promise_to_pay_date&quot;: null, &quot;notes&quot;: &quot;Borrower said her situation is not good right now and she cannot make any payment at all. Confirm…</td><td>{&quot;recorded&quot;: true, &quot;message&quot;: &quot;Recorded. Now speak, in the borrower&#x27;s language, unless you already said it this turn: First answer what they just said, in one o…</td></tr></table></div>
+<h2>Code guard events</h2>
+<div class="scroll"><table><tr><th>check</th><th>model wrote</th><th>spoken instead</th></tr><tr><td>dropped_filler</td><td>हमारी internal team आपकी बात check करके आपको call back arrange करेगी।</td><td></td></tr><tr><td>number_style</td><td>आपके consumer durable loan की three thousand eight hundred rupees की EMI first November को due थी, और अभी दो दिन overdue दिख रही है।</td><td>आपके consumer durable loan की three thousand eight hundred rupees की EMI first November को due थी, और अभी two days overdue दिख रही है।</td></tr></table></div>
+<p class="meta">State flags: escalate:hardship, hardship_checked · tokens {&#x27;input&#x27;: 33124, &#x27;output&#x27;: 366, &#x27;cache_read&#x27;: 0}</p>
+</main></body></html>

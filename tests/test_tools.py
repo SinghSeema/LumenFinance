@@ -412,12 +412,15 @@ def test_dispute_escalation_starts_the_amount_flow(borrower, today):
     assert "ask what amount they expected" in r["message"] and "internal team" not in r["message"]
 
 
-def test_hardship_first_step_is_sorry_and_one_question_only(borrower, today):
+# Owner, 2026-11-04 (demo call B007): practical sympathy for an EMI call, not a counsellor's.
+def test_hardship_first_step_is_plain_then_practical_then_one_choice(borrower, today):
     tools, state = make_tools(borrower, today, heard=["I lost my job last month"])
     state.verified = True
     msg = tools.call("escalate_to_human", {"reason": "hardship"})["message"]
-    assert state.special == "hardship" and "sorry" in msg and "short-term" in msg
-    assert "internal team" not in msg and "Say nothing after the question" in msg
+    assert state.special == "hardship" and "one short, plain sentence" in msg and "don't worry" in msg
+    assert "will not keep increasing" in msg and "goes towards" in msg and "part payment" in msg
+    assert "Never say charges keep adding" in msg and "credit score" in msg
+    assert "Say nothing after the question" in msg
 
 
 def test_requested_escalation_uses_the_internal_team_hand_off(borrower, today):
@@ -658,3 +661,21 @@ def test_due_date_promise_needs_a_plain_yes_to_that_question(borrower, today, sa
 def test_banned_just_tell_me_that_phrase_in_all_forms(line):
     from emi_agent import guard
     assert guard.unwanted(line)
+
+
+# Owner demo call B007 21:42 (exact words): plainly named money trouble is hardship at once.
+@pytest.mark.parametrize("said", [
+    "No. Sorry, I cannot wait right away because I'm going through some going through some financial issues.",
+    "maybe in a month or 2 month. Once I once I have the, you know, the financial problem and sort it out.",
+    "I'm going through a tough time, I can't afford it this month", "abhi paise ki bahut tangi hai",
+    "आजकल पैसों की तंगी चल रही है"])
+def test_named_money_trouble_is_hardship_at_once(borrower, today, said):
+    tools, state = _verified(borrower, today, [said])
+    assert tools.call("escalate_to_human", {"reason": "hardship"})["escalated"]
+
+
+# S31 v17-s31-intent runs 1-2: "shayad thoda thoda... abhi pakka nahi" got the link sent.
+def test_hardship_step_two_sends_the_link_only_on_a_clear_yes():
+    from emi_agent import special
+    text = special.instruction("hardship", 1)
+    assert "Only if they clearly said they will pay a part now" in text and "shayad" in text

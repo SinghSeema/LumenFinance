@@ -33,6 +33,9 @@ class FakeBrain:
     def reply_unheard(self):
         self.unheard = getattr(self, "unheard", 0) + 1
 
+    def playback_cut(self):
+        self.playback_cuts = getattr(self, "playback_cuts", 0) + 1
+
     def silence_line(self, close):
         if close:
             self.should_hang_up = True
@@ -403,3 +406,12 @@ async def test_barge_in_before_the_filler_cancels_it(make):
     await feed(p, VADUserStartedSpeakingFrame(), final("Ek minute, main apna number dekh rahi hoon"), settle=0.4)
     assert any(isinstance(f, InterruptionFrame) for f in p.pushed)
     assert not hasattr(brain, "fillers") and _texts(p) == []  # 0.45 s in: the old timer would have fired
+
+
+# Live call B003 22:25 (C67): the reply was fully written, its audio still playing, when the borrower cut in.
+async def test_barge_in_on_audio_of_a_written_reply_tells_the_brain(make):
+    brain = FakeBrain()
+    p = make(brain)
+    p.reply, p.bot_speaking = None, True
+    await p._barge_in("बिल्कुल payment नहीं", "interim")
+    assert getattr(brain, "playback_cuts", 0) == 1

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call B007</title><style>
+:root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --line:#dddcd6; --card:#fff;
+        --ok:#1f6f5c; --bad:#a23b2a; --agent:#eef4f1; --you:#f3f1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+        --bg:#171716; --fg:#ecece8; --muted:#9a9a94; --line:#33332f; --card:#20201e;
+        --ok:#4fb39a; --bad:#e07a68; --agent:#1d2a25; --you:#2a2822; } }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:1.4rem; margin:0 0 4px; } h2 { font-size:1.05rem; margin:28px 0 8px; }
+.meta { color:var(--muted); margin:0 0 16px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+.kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+.kpi b { display:block; font-size:1.3rem; } .kpi span { color:var(--muted); font-size:.85rem; }
+.ok { color:var(--ok); } .bad { color:var(--bad); }
+pre { margin:0; white-space:pre-wrap; word-break:break-word; font-size:.85rem; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:500; } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+.scroll { overflow-x:auto; }
+.turn { padding:8px 12px; border-radius:8px; margin:6px 0; }
+.turn.agent { background:var(--agent); } .turn.borrower { background:var(--you); }
+.who { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+</style></head>
+<body><main>
+<h1>Call report: B007</h1>
+<p class="meta">started 2026-11-04 22:08:16 · length 2m 3s · profile hindi_bulbul · llm sarvam-105b-conversations · tts bulbul:v4-flash simran_enhi_customer · today 2026-11-04</p>
+<div class="kpis"><div class="card kpi"><b class="">hardship</b><span>outcome</span></div><div class="card kpi"><b class="ok">yes</b><span>verified</span></div><div class="card kpi"><b class="bad">yes</b><span>escalate to human</span></div><div class="card kpi"><b class="ok">none</b><span>loan detail before verification</span></div><div class="card kpi"><b class="ok">900 ms</b><span>median gap (n=5); felt ≈ 1400 ms</span></div><div class="card kpi"><b class="bad">2095 ms</b><span>p90 gap; felt ≈ 2595 ms</span></div></div>
+<h2>Outcome record</h2>
+<div class="card"><pre>{
+  "borrower_id": "B007",
+  "verified": true,
+  "outcome": "hardship",
+  "promise_to_pay_date": null,
+  "payment_link_sent": false,
+  "escalate_to_human": true,
+  "notes": "Borrower lost job recently, cannot pay full EMI this month, agreed to part payment after speaking with internal team, available after 4 PM on this number.",
+  "language_used": "en",
+  "callback_time": null
+}</pre></div>
+<h2>Transcript</h2>
+<div class="turn agent"><div class="who">Agent</div>Hello, I&#x27;m an AI assistant calling from Lumen Finance. Am I speaking with Deepa?</div><div class="turn borrower"><div class="who">Borrower</div>Yeah. Deepa speaking.</div><div class="turn agent"><div class="who">Agent</div>Great, Deepa. Before we go ahead, I need to verify your account. Could you share the last four digits of your registered mobile number? It&#x27;s just for account verification.</div><div class="turn borrower"><div class="who">Borrower</div>Double 2 double 3</div><div class="turn agent"><div class="who">Agent</div>That did not match our records, Deepa. For account verification, could you please share your date of birth instead?</div><div class="turn borrower"><div class="who">Borrower</div>18th December 19 83.</div><div class="turn agent"><div class="who">Agent</div>Thank you, Deepa. Your personal loan EMI of nine thousand five hundred rupees was due on the twentieth of October, and it is now fourteen days overdue. A charge of five hundred rupees has been added as per your loan terms. Can you clear this today through the secure payment link? I can send it to you by SMS or WhatsApp.</div><div class="turn borrower"><div class="who">Borrower</div>Sorry to tell you that I have, you know, I lost my job recently, and I&#x27;m not be able to clear amount, you know, this EMI for this month.</div><div class="turn agent"><div class="who">Agent</div>I hear you. I understand, Deepa. That makes the EMI difficult right now. The five hundred rupees is a one-time charge and will not keep increasing. Any amount paid through the link goes towards this EMI, and our internal team can check options with you on a call back. Is a part payment possible right now, or should I just have the team call you?</div><div class="turn borrower"><div class="who">Borrower</div>No. Just let me speak with your team, and then I&#x27;ll the part payment.</div><div class="turn agent"><div class="who">Agent</div>One moment. Noted, Deepa. You mentioned you lost your job recently and will do a part payment after speaking with our team. Is this number the best one to reach you on?</div><div class="turn borrower"><div class="who">Borrower</div>Yeah. Yeah. You can reach me on this number after 4 PM.</div><div class="turn agent"><div class="who">Agent</div>I understand. I have noted that you are available after four PM. Thank you for talking with me, Deepa. Have a good day.</div>
+<h2>Latency per turn (ms)</h2>
+<p class="meta">Gap = VAD stop to first agent audio. The borrower also waits the VAD stop time
+before that, shown as "felt". Interrupted turns are left out of the median and p90. On a turn marked
+"filler", the first audio was "one second" while the model was slow, not the answer.</p>
+<div class="scroll"><table><tr><th>#</th><th>vad_stop → stt_final</th><th>stt_final → first_sentence</th><th>first_sentence → playback_start</th><th>gap</th><th>notes</th></tr><tr><td>1</td><td class="n">0</td><td class="n">372</td><td class="n">255</td><td class="n">628</td><td></td></tr><tr><td>2</td><td class="n">1061</td><td class="n">603</td><td class="n">305</td><td class="n">1968</td><td></td></tr><tr><td>3</td><td class="n">251</td><td class="n">333</td><td class="n">316</td><td class="n">900</td><td></td></tr><tr><td>4</td><td class="n">526</td><td class="n">1215</td><td class="n">439</td><td class="n">2179</td><td>filler (model slow)</td></tr><tr><td>5</td><td class="n">29</td><td class="n">338</td><td class="n">373</td><td class="n">740</td><td>bridge line</td></tr></table></div>
+<h2>Tool calls</h2>
+<div class="scroll"><table><tr><th>tool</th><th>stage</th><th>args</th><th>result</th></tr><tr><td>verify_identity</td><td>verifying</td><td>{&quot;factor&quot;: &quot;last4&quot;, &quot;value&quot;: &quot;2233&quot;}</td><td>{&quot;verified&quot;: false, &quot;attempts_left&quot;: 2, &quot;ask_next&quot;: &quot;their date of birth instead (do not ask for the digits again)&quot;}</td></tr><tr><td>verify_identity</td><td>reminding</td><td>{&quot;factor&quot;: &quot;dob&quot;, &quot;value&quot;: &quot;1983-12-18&quot;}</td><td>{&quot;verified&quot;: true, &quot;loan_facts&quot;: {&quot;amount_spoken&quot;: &quot;nine thousand five hundred rupees&quot;, &quot;due_date_spoken&quot;: &quot;the twentieth of October&quot;, &quot;loan_type&quot;: &quot;personal lo…</td></tr><tr><td>escalate_to_human</td><td>action</td><td>{&quot;reason&quot;: &quot;hardship&quot;}</td><td>{&quot;escalated&quot;: true, &quot;message&quot;: &quot;Special situation (hardship), step 1 of 3, from the call system. First, one short, plain sentence that you understand and that t…</td></tr><tr><td>schedule_callback</td><td>action</td><td>{&quot;when_text&quot;: &quot;as soon as possible&quot;}</td><td>{&quot;status&quot;: &quot;not_needed&quot;, &quot;message&quot;: &quot;Our internal team arranges this call back themselves. Do not schedule one and do not promise a time; record the outcome as …</td></tr><tr><td>record_outcome</td><td>closing</td><td>{&quot;outcome&quot;: &quot;hardship&quot;, &quot;promise_to_pay_date&quot;: null, &quot;notes&quot;: &quot;Borrower lost job recently, cannot pay full EMI this month, agreed to part payment after speaking…</td><td>{&quot;recorded&quot;: true, &quot;message&quot;: &quot;Recorded. Now speak, in the borrower&#x27;s language, unless you already said it this turn: First answer what they just said, in one o…</td></tr></table></div>
+<h2>Code guard events</h2>
+<div class="scroll"><table><tr><th>check</th><th>model wrote</th><th>spoken instead</th></tr><tr><td>dropped_filler</td><td>Our internal team will check this and arrange a call back for you.</td><td></td></tr></table></div>
+<p class="meta">State flags: escalate:hardship · tokens {&#x27;input&#x27;: 38029, &#x27;output&#x27;: 410, &#x27;cache_read&#x27;: 0}</p>
+</main></body></html>

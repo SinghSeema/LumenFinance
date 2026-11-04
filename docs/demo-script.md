@@ -58,6 +58,24 @@ Show: outcome `hardship`, `escalate_to_human: true`, notes, and the guard events
 
 Show: outcome `third_party`, `verified: false`. Point out that no loan fact entered the model's context before verification: the disclosure log, also checked by the evals.
 
+## Optional call: no rule matches, the LLM check decides (B003, about 70 s)
+
+`./run.sh call B003` (Rahul Verma, Hinglish, ₹3,800 overdue, ₹500 late charge; last four 7743, date of birth 9 Nov 1985)
+
+Every borrower line below was checked against the code's word lists (hardship, dispute, stop, call later, waiver): none match. So when the agent escalates, code cannot confirm it, and the small Sarvam model reads your last lines (digits hidden) and decides. Avoid the words job, salary, illness, hospital, emergency, financial, problem and paisa, or a word list will match first.
+
+| You (borrower) | What it shows |
+| --- | --- |
+| "Haan, Rahul bol raha hoon." | Greeting, AI disclosure |
+| "Seven seven four three." | Verification by code |
+| (it states ₹3,800 overdue and the ₹500 charge) "Dekhiye, abhi ghar ki situation thodi theek nahi hai. Pichle mahine se haath bilkul tang hai, samajh nahi aa raha kya karun." | No rule matches; the LLM check labels it hardship; the practical reply follows (one plain line, one-time charge, part payment, team call back, one question) |
+| "Shayad thoda thoda kar sakta hoon, par abhi pakka kuch nahi bol sakta. Aap team se baat karwa dijiye." | A "maybe" is not a yes: no link sent; read-back and hand-off |
+| "Haan, yahi number theek hai." | Warm close |
+
+Show on the call page: the **`_intent_check`** row in Tool calls (intent `hardship`, the one-line reason, the suggested opening line), then the outcome `hardship`, `escalate_to_human: true`, and the notes ending in "[Check: ...]". Expect that turn to feel about half a second slower than the others: that is the check.
+
+Text runs of this scenario (S31, real models): with sarvam-105b-conversations as the check model the check fired 2 of 2 times as hardship in 476 to 870 ms (glm5.3-flash, used before: 4 of 4 in 1.09 to 1.33 s, but it timed out in the first live call).
+
 ## Closing (about 15 s)
 
 "Each call writes an outcome record and this page with latency per turn. The same Brain runs in the text evals against a simulated borrower: 30 scenarios, rules first, an LLM judge only for tone, calibrated against my own labels. The README links the eval report."

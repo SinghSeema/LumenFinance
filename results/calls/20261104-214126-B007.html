@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Call B007</title><style>
+:root { --bg:#f7f7f5; --fg:#1d1d1b; --muted:#6b6b66; --line:#dddcd6; --card:#fff;
+        --ok:#1f6f5c; --bad:#a23b2a; --agent:#eef4f1; --you:#f3f1ea; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+        --bg:#171716; --fg:#ecece8; --muted:#9a9a94; --line:#33332f; --card:#20201e;
+        --ok:#4fb39a; --bad:#e07a68; --agent:#1d2a25; --you:#2a2822; } }
+body { margin:0; background:var(--bg); color:var(--fg); font:15px/1.5 system-ui, sans-serif; }
+main { max-width:860px; margin:0 auto; padding:24px 16px 48px; }
+h1 { font-size:1.4rem; margin:0 0 4px; } h2 { font-size:1.05rem; margin:28px 0 8px; }
+.meta { color:var(--muted); margin:0 0 16px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:12px 16px; }
+.kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; }
+.kpi b { display:block; font-size:1.3rem; } .kpi span { color:var(--muted); font-size:.85rem; }
+.ok { color:var(--ok); } .bad { color:var(--bad); }
+pre { margin:0; white-space:pre-wrap; word-break:break-word; font-size:.85rem; }
+table { width:100%; border-collapse:collapse; font-size:.85rem; }
+th, td { text-align:left; padding:5px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+th { color:var(--muted); font-weight:500; } td.n { text-align:right; font-variant-numeric:tabular-nums; }
+.scroll { overflow-x:auto; }
+.turn { padding:8px 12px; border-radius:8px; margin:6px 0; }
+.turn.agent { background:var(--agent); } .turn.borrower { background:var(--you); }
+.who { font-size:.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+</style></head>
+<body><main>
+<h1>Call report: B007</h1>
+<p class="meta">started 2026-11-04 21:41:26 · length 1m 52s · profile hindi_bulbul · llm sarvam-105b-conversations · tts bulbul:v4-flash simran_enhi_customer · today 2026-11-04</p>
+<div class="kpis"><div class="card kpi"><b class="">will_pay</b><span>outcome</span></div><div class="card kpi"><b class="ok">yes</b><span>verified</span></div><div class="card kpi"><b class="">no</b><span>escalate to human</span></div><div class="card kpi"><b class="ok">none</b><span>loan detail before verification</span></div><div class="card kpi"><b class="ok">897 ms</b><span>median gap (n=5); felt ≈ 1397 ms</span></div><div class="card kpi"><b class="ok">1124 ms</b><span>p90 gap; felt ≈ 1624 ms</span></div></div>
+<h2>Outcome record</h2>
+<div class="card"><pre>{
+  "borrower_id": "B007",
+  "verified": true,
+  "outcome": "will_pay",
+  "promise_to_pay_date": null,
+  "payment_link_sent": false,
+  "escalate_to_human": false,
+  "notes": "Borrower said they may pay in one or two months once financial issues are sorted.",
+  "language_used": "en",
+  "callback_time": null
+}</pre></div>
+<h2>Transcript</h2>
+<div class="turn agent"><div class="who">Agent</div>Hello, I&#x27;m an AI assistant calling from Lumen Finance. Am I speaking with Deepa?</div><div class="turn borrower"><div class="who">Borrower</div>Yeah. Speaking.</div><div class="turn agent"><div class="who">Agent</div>Thanks for confirming. Before we go ahead, I need to verify your account. Could you share the last four digits of your registered mobile number? It is just for account verification.</div><div class="turn borrower"><div class="who">Borrower</div>I think it&#x27;s 3 4 9.</div><div class="turn agent"><div class="who">Agent</div>One moment, let me check that. I couldn&#x27;t catch that clearly. Could you tell me the last four digits of your registered mobile number again?</div><div class="turn borrower"><div class="who">Borrower</div>3 4 7 9.</div><div class="turn agent"><div class="who">Agent</div>That did not match our records. For account verification, could you please share your date of birth?</div><div class="turn borrower"><div class="who">Borrower</div>80 18th December</div><div class="turn agent"><div class="who">Agent</div>One moment. Could you also tell me the year you were born in?</div><div class="turn borrower"><div class="who">Borrower</div>19 83.</div><div class="turn agent"><div class="who">Agent</div>Thank you, Deepa. Your personal loan EMI of nine thousand five hundred rupees was due on the twentieth of October, and it is now fourteen days overdue. A late payment charge of five hundred rupees has been added as per your loan terms. Can you clear this today? I can send you a secure payment link by SMS or WhatsApp.</div><div class="turn borrower"><div class="who">Borrower</div>No. Sorry, I cannot wait right away because I&#x27;m going through some going through some financial issues.</div><div class="turn agent"><div class="who">Agent</div>I hear you. Let us find a date that works for you. When do you think you will be able to make the payment? You can just tell me in your own words.</div><div class="turn borrower"><div class="who">Borrower</div>May... And and maybe I&#x27;ll be able to pay, you know, in like, in a month or 2 month. Once I once I have the, you know, the financial problem and sort it out.</div><div class="turn agent"><div class="who">Agent</div>Okay. Thank you for your time, Deepa ji. Have a good day.</div>
+<h2>Latency per turn (ms)</h2>
+<p class="meta">Gap = VAD stop to first agent audio. The borrower also waits the VAD stop time
+before that, shown as "felt". Interrupted turns are left out of the median and p90. On a turn marked
+"filler", the first audio was "one second" while the model was slow, not the answer.</p>
+<div class="scroll"><table><tr><th>#</th><th>vad_stop → stt_final</th><th>stt_final → first_sentence</th><th>first_sentence → playback_start</th><th>gap</th><th>notes</th></tr><tr><td>1</td><td class="n">0</td><td class="n">341</td><td class="n">209</td><td class="n">551</td><td></td></tr><tr><td>2</td><td class="n">230</td><td class="n">302</td><td class="n">222</td><td class="n">753</td><td>bridge line</td></tr><tr><td>3</td><td class="n">303</td><td class="n">730</td><td class="n">213</td><td class="n">1246</td><td></td></tr><tr><td>4</td><td class="n">247</td><td class="n">386</td><td class="n">264</td><td class="n">897</td><td></td></tr><tr><td>5</td><td class="n">243</td><td class="n">385</td><td class="n">314</td><td class="n">942</td><td>after barge-in, bridge line</td></tr></table></div>
+<h2>Tool calls</h2>
+<div class="scroll"><table><tr><th>tool</th><th>stage</th><th>args</th><th>result</th></tr><tr><td>verify_identity</td><td>verifying</td><td>{&quot;factor&quot;: &quot;last4&quot;, &quot;value&quot;: &quot;349&quot;}</td><td>{&quot;verified&quot;: false, &quot;attempts_left&quot;: 3, &quot;error&quot;: &quot;unreadable_value&quot;, &quot;message&quot;: &quot;Not checked: pass only a value the borrower has said in this call. Ask them for…</td></tr><tr><td>verify_identity</td><td>verifying</td><td>{&quot;factor&quot;: &quot;last4&quot;, &quot;value&quot;: &quot;3479&quot;}</td><td>{&quot;verified&quot;: false, &quot;attempts_left&quot;: 2, &quot;ask_next&quot;: &quot;their date of birth instead (do not ask for the digits again)&quot;}</td></tr><tr><td>verify_identity</td><td>reminding</td><td>{&quot;factor&quot;: &quot;dob&quot;, &quot;value&quot;: &quot;1983-12-18&quot;}</td><td>{&quot;verified&quot;: true, &quot;loan_facts&quot;: {&quot;amount_spoken&quot;: &quot;nine thousand five hundred rupees&quot;, &quot;due_date_spoken&quot;: &quot;the twentieth of October&quot;, &quot;loan_type&quot;: &quot;personal lo…</td></tr><tr><td>escalate_to_human</td><td>intent</td><td>{&quot;reason&quot;: &quot;hardship&quot;}</td><td>{&quot;escalated&quot;: false, &quot;error&quot;: &quot;not_hardship&quot;, &quot;message&quot;: &quot;They have not described a real setback (job loss, illness, an emergency, no income). Salary arriving l…</td></tr><tr><td>record_outcome</td><td>closing</td><td>{&quot;outcome&quot;: &quot;will_pay&quot;, &quot;promise_to_pay_date&quot;: null, &quot;notes&quot;: &quot;Borrower said they may pay in one or two months once financial issues are sorted.&quot;}</td><td>{&quot;recorded&quot;: true}</td></tr></table></div>
+<h2>Code guard events</h2>
+<p class="meta">No sentence was changed or dropped by the code guards.</p>
+<p class="meta">State flags: code_closed, hardship_checked · tokens {&#x27;input&#x27;: 33217, &#x27;output&#x27;: 302, &#x27;cache_read&#x27;: 0}</p>
+</main></body></html>

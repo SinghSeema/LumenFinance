@@ -11,7 +11,7 @@ from datetime import date
 from pathlib import Path
 from typing import AsyncIterator
 
-from emi_agent import context, dates, guard, policy, speakable, special
+from emi_agent import context, dates, guard, intent, policy, speakable, special
 from emi_agent.heard import find_dob, find_last4, partial_digits
 from emi_agent.language import _NEGATION, LanguageTracker, asks_numbers_in, detect, language_words, says_hindi_numbers
 from emi_agent.llm import LLMError
@@ -112,6 +112,18 @@ def is_stop_request(text: str) -> bool:
     return False
 
 
+# A goodbye the model wrote: the words before it are only thanks or "for your time", not a read-back.
+_THANKS = re.compile(r"thank|धन्यवाद|dhanyavaa?d|shukriya|शुक्रिया", re.IGNORECASE)
+# Thanks that are already right, kept as the model wrote them (the borrower's name and ji removed first).
+_GOOD_LEAD = re.compile(
+    r"(?:(?:okay|ok|ji|जी|theek hai|ठीक है)\s*)?(?:"
+    r"(?:thank you|thanks)(?: (?:so|very) much| a lot)?(?: for your time)?|"
+    r"(?:आपके |आपका )?(?:बहुत )?(?:समय (?:देने )?के लिए )?(?:बहुत )?धन्यवाद|शुक्रिया|"
+    r"(?:aapke |aapka )?(?:bahut )?(?:samay (?:dene )?ke liye )?(?:bahut )?dhanyavaa?d|shukriya)?", re.IGNORECASE)
+_CLOSE_LEAD = re.compile(r"thank|time|समय|samay|धन्यवाद|dhanyavaa?d|shukriya|शुक्रिया|okay|ok|ji|जी|theek|ठीक",
+                         re.IGNORECASE)
+
+
 # The borrower asks to be called later ("call me back", "do ghante baad call kar lijiye").
 _CALL_LATER = re.compile(
     r"call (?:me )?(?:back|later)|call back|(?:call|phone|fon|कॉल|फ़ोन|फोन) (?:kar|कर) (?:lijiye|lijie|lena|dena|"
@@ -142,7 +154,7 @@ class Sentence:
 
 class Brain:
     def __init__(self, config: dict, borrower: Borrower, today: date, llm,
-                 calls_path: Path | None = None, clock=time.monotonic):
+                 calls_path: Path | None = None, clock=time.monotonic, intent_llm=None):
         lang = borrower.preferred_language
         self.config = config
         self.llm = llm
@@ -175,6 +187,9 @@ class Brain:
         self._filler: str | None = None
         self._invited = False
         self._tool_failed = False
+        self._turn_spoken: list[str] = []
+        self._step_advanced = False  # the last reply moved a special flow on (playback_cut can undo it)
+        self._last_once: set[str] = set()  # once-per-call phrases in the last reply
         self._bridge_counts: dict[str, int] = {}  # per tool, to rotate bridge lines over the call
         self._said_once: set[str] = set()  # apology / hand-off / contact question / warm close said
         self._once_this_turn: set[str] = set()  # ...of which in the reply being spoken now
@@ -185,6 +200,10 @@ class Brain:
         self.hardship_voice = False  # hardship heard: the bot slows the voice and waits longer (special.py)
         self._clock = clock
         self._started = clock()
+        # Second opinion on a hardship or dispute escalation the word lists did not confirm (intent.py).
+        # None in unit tests (scripted model turns); bot.py and the eval runner pass the call's LLM.
+        self.intent_llm = intent_llm
+        self.intent_timeout = config["behavior"]["intent_check_timeout_secs"]
 
     async def respond(self, user_text: str, lang_hint: str | None = None) -> AsyncIterator[Sentence]:
         s = self.state
@@ -211,6 +230,7 @@ class Brain:
         self._invited = False  # this reply invited more questions: stop there and wait (C51)
         self._tool_failed = False  # a tool failed this turn: the model must say so, no code close (C57)
         spoken: list[str] = []
+        self._turn_spoken = spoken  # what this reply has said so far (a fixed goodbye checks for thanks)
         finished = False
         held = 0  # 1 once the hold line was said
         try:
@@ -303,9 +323,12 @@ class Brain:
             self.history.append({"role": "assistant", "content": turn.content})
             if not turn.tool_calls:
                 return
-            results = [{"type": "tool_result", "tool_use_id": c.id,
-                        "content": json.dumps(self._tool(c.name, c.input), ensure_ascii=False)}
-                       for c in turn.tool_calls]
+            results = []
+            for c in turn.tool_calls:
+                self.tools.intent_check = await self._intent_check(c.name, c.input)
+                results.append({"type": "tool_result", "tool_use_id": c.id,
+                                "content": json.dumps(self._tool(c.name, c.input), ensure_ascii=False)})
+                self.tools.intent_check = None
             self.history.append({"role": "user", "content": results})
             if self._plain_close(turn.tool_calls, results, spoken):
                 return  # respond() says the code-owned closing line: no model round for fixed words
@@ -313,12 +336,38 @@ class Brain:
                 self.history.append({"role": "system", "content": context.note_bridge(bridge)})
                 self._bridge_noted = True
 
+    async def _intent_check(self, name: str, args) -> dict | None:
+        """Owner demo call B007 21:42: "going through some financial issues" matched no hardship words, so
+        the escalation was refused. When the word lists do not confirm a first hardship or dispute
+        escalation, an LLM reads the borrower's last lines (digits hidden) and names the intent."""
+        s = self.state
+        reason = args.get("reason") if isinstance(args, dict) else None
+        if (name != "escalate_to_human" or reason not in ("hardship", "dispute") or not self.intent_llm
+                or not self.intent_timeout or f"{reason}_checked" in s.flags or s.special):
+            return None
+        recent = s.heard[-3:]
+        listed = (any(special.hardship_cue(u) for u in recent) if reason == "hardship"
+                  else special.dispute_cue(recent))
+        if listed:
+            return None
+        result = await intent.check(self.intent_llm, recent, self.intent_timeout)
+        for k in self.usage:
+            self.usage[k] += result["usage"].get(k, 0)
+        s.tool_calls.append({"name": "_intent_check", "args": {"reason": reason},
+                             "result": {"intent": result["intent"], "why": result["why"], "reply": result["reply"]},
+                             "attempts": 1, "ms": result["ms"], "stage": s.stage.value, "by": "code"})
+        return result
+
     def _send_link_on_yes(self, user_text: str) -> None:
         """C48, live call B004 19:51: "जी भेज दीजिए" to "क्या link भेज दूँ SMS या WhatsApp पर?" got the
         channel question again, four times in the call. A plain yes to the link offer, naming no channel,
         sends it on WhatsApp now (owner's default); the model only says so."""
         s = self.state
-        offered = "link" in s.last_agent.lower() and "?" in s.last_agent
+        # v17-hardship-practical S03 run 1 (C65): "link" was in a facts sentence, the question was "a part
+        # payment, or should I ask the team to call you?", and "Please ask the team to call me" sent the link.
+        # The question itself must offer the link, and never inside a special flow (its steps decide).
+        question = s.last_agent.rsplit("?", 1)[0].rsplit("।", 1)[-1].rsplit(".", 1)[-1] if "?" in s.last_agent else ""
+        offered = "link" in question.lower() and not s.special
         plain_yes = (bool(_YES.search(user_text)) or bool(_SEND_IT.search(user_text))) and "?" not in user_text
         if (not s.verified or s.payment_link_sent or not offered or not plain_yes
                 or guard.names_channel(user_text) or _NEGATION.search(user_text)):
@@ -350,12 +399,34 @@ class Brain:
         # now"), failed again, and the code close followed, so the borrower never heard it failed.
         if self._tool_failed:
             return False
+        # Owner demo call B007 21:43: the fixed goodbye straight after "once I sort out the financial problem"
+        # sounded cold. Once hardship or a dispute came up, the model words the close.
+        if {"hardship_checked", "dispute_checked"} & s.flags or any(special.hardship_cue(u) for u in s.heard[-3:]):
+            return False
         if json.loads(results[0]["content"]) != {"recorded": True}:
             return False
         if len(spoken) != self._bridges or (s.heard and s.heard[-1].rstrip().endswith("?")):
             return False
         s.flags.add("code_closed")
         return True
+
+    def _fixed_close(self, sentence: str) -> str | None:
+        """Live call B001 21:27: the model's goodbye was "Time given for your time, have a good day." (a
+        word-for-word "समय देने के लिए धन्यवाद"). The goodbye is a fixed line, so code says it. Only when
+        the words before "have a good day" are a short thanks; a read-back before it is left alone."""
+        lead = guard.warm_close_lead(sentence)
+        bare = " ".join(w for w in lead.split()
+                        if w.lower() not in {self._first_name.lower(), "ji", "जी"})
+        if _GOOD_LEAD.fullmatch(bare):
+            return None
+        words = lead.split()
+        if len(words) > 6 or (words and not _CLOSE_LEAD.search(lead)):
+            return None
+        lang = self.state.reply_language
+        thanked = any(_THANKS.search(x) for x in self._turn_spoken)
+        fixed = (context.good_day(lang, self.script) if thanked
+                 else context.closing(lang, self.script, self._close_name()))
+        return None if fixed == sentence.strip() else fixed
 
     def _close_name(self) -> str | None:
         """The borrower's name only once verified: before that the listener may be someone else (C55)."""
@@ -369,8 +440,13 @@ class Brain:
 
     def _end_turn(self, spoken: list[str], finished: bool) -> None:
         s = self.state
+        self._step_advanced = False
         said = " ".join(([self._filler] if self._filler else []) + spoken)
-        heard_it = bool(spoken) and (finished or not self._unheard)
+        # Owner demo call B007 22:03 (C67): the practical hardship reply was cut 1.9 s in, after "जी। समझ सकती
+        # हूँ...", so the one-time charge, part payment and the question were never heard, yet the flow moved on.
+        # In a special flow a reply cut partway does not count as heard: the step comes again, briefly.
+        cut_in_flow = not finished and bool(s.special)
+        heard_it = bool(spoken) and (finished or not self._unheard) and not cut_in_flow
         if s.special and heard_it:
             self._next_special_step()
         if not finished:
@@ -381,12 +457,17 @@ class Brain:
                 # 250 ms in; the next reply skipped the apology because history said it was given).
                 said = f"[Not heard: the borrower cut in at once, so they did not hear this reply: {said}]"
                 self._pending_notes.append(context.NOTE_UNHEARD)
+            elif cut_in_flow:
+                self._said_once -= self._once_this_turn  # maybe not heard: may be said again, briefly
+                said = f"{said} [cut off partway by the borrower]".strip()
+                self._pending_notes.append(context.NOTE_CUT_STEP)
             else:
                 said = f"{said} [cut off by the borrower]".strip()
             self.history.append({"role": "assistant", "content": said})
         self._last_reply_cut = not finished
         self._cut_chain = (self._cut_chain + [s.heard[-1]]) if (not finished and s.heard) else []
         self._unheard = False
+        self._last_once = set(self._once_this_turn)
         self._once_this_turn = set()
         self.transcript.append(("agent", said))
         if s.stage is Stage.REMINDING and s.verified:
@@ -404,6 +485,7 @@ class Brain:
         s = self.state
         if not special.is_last(s.special, s.special_step):
             s.special_step += 1
+            self._step_advanced = True  # undone by playback_cut if its audio is then cut
         elif "warm_close" in self._said_once or s.outcome is not None:
             self.should_hang_up = True
 
@@ -557,6 +639,10 @@ class Brain:
             s.guard_hits.append({"category": "channel_again", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})
             return None
+        if once == "warm_close" and (fixed := self._fixed_close(sentence)):
+            s.guard_hits.append({"category": "fixed_close", "original": sentence, "spoken": fixed,
+                                 "stage": s.stage.value, "verified": s.verified})
+            sentence = fixed
         if once:
             self._said_once.add(once)
             self._once_this_turn.add(once)
@@ -615,6 +701,20 @@ class Brain:
                              "stage": s.stage.value, "verified": s.verified})
         self._pending_notes.append(context.note_guard(line))
         return Sentence(line, category)
+
+    def playback_cut(self) -> None:
+        """Live call B003 22:25 (C67): the model had finished writing the practical hardship reply, so the
+        turn ended normally and the flow moved on, but its audio was cut by the borrower before the facts and
+        the question played. The bot calls this when a barge-in stops audio of a reply already written."""
+        s = self.state
+        if not s.special or not self._step_advanced:
+            return
+        s.special_step -= 1
+        self._step_advanced = False
+        self._said_once -= self._last_once
+        self.history.append({"role": "system", "content": "[The borrower cut in while your last reply was still "
+                             "playing, so they may not have heard all of it.]"})
+        self._pending_notes.append(context.NOTE_CUT_STEP)
 
     def reply_unheard(self) -> None:
         """The bot cut the agent within a second of playing: the borrower did not hear the reply."""

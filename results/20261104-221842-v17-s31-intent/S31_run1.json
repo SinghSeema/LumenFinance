@@ -1,0 +1,425 @@
+{
+  "scenario": {
+    "id": "S31",
+    "name": "hardship_in_own_words",
+    "borrower_id": "B003",
+    "today": "2026-11-03",
+    "persona": "Rahul Verma, 40, speaks everyday Hinglish, tired and embarrassed rather than angry. Money at home has been very short for a while; he never names a cause (no job loss, illness, emergency, salary, \"financial\").\n",
+    "hidden_goal": "Verify with the last four digits when asked. After hearing the amount, say in your own words that things at home are not good and money has been very short for a month, for example \"Dekhiye, abhi ghar ki situation thodi theek nahi hai. Pichle mahine se haath bilkul tang hai, samajh nahi aa raha kya karun.\" Never use the words job, salary, illness, hospital, emergency, financial, problem or paisa. If offered a part payment or a call back, say you might manage a little at a time but cannot commit now, and ask them to have the team talk to you.\n",
+    "opening": "answers politely, voice drops when the EMI comes up",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "hardship",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-05",
+      "R3",
+      "D-47"
+    ],
+    "runs": 3,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "intent_check_timeout_secs": 1.5,
+      "intent_check_provider": "sarvam",
+      "intent_check_model": "glm5.3-flash",
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Rahul जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "नमस्ते, जी हाँ, मैं ही Rahul बोल रहा हूँ. बताइए."
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है Rahul जी, account verification के लिए बस अपने registered mobile number के आखिरी चार digits बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ जी, वो सात सात चार तीन है, 7743."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद Rahul जी। आपके consumer durable loan की तीन हज़ार आठ सौ रुपये की EMI एक नवंबर को due थी, और अभी दो दिन overdue दिखा रही है। आपके loan terms के हिसाब से पाँच सौ रुपये का late charge भी add हो गया है। क्या आप आज इसे online payment link के through clear कर सकते हैं? मैं SMS या WhatsApp पर link भेज दूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Dekhiye, abhi ghar ki situation thodi theek nahi hai. Pichhle mahine se haath bilkul tang hai, samajh nahi aa raha kya karun."
+    },
+    {
+      "role": "agent",
+      "text": "जी। समझ सकती हूँ Rahul जी, ऐसे समय में EMI manage करना मुश्किल होता है। पाँच सौ रुपये का late charge एक बार add हुआ है और वो बार बार नहीं बढ़ेगा। जो भी payment link से आएगा वो इसी EMI में जाएगा, और हमारी internal team आपको call back करके बाकी options discuss कर लेगी। अभी कोई part payment possible है, या मैं team को बोल दूँ कि वो आपको call कर लें?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "_intent_check",
+        "escalate_to_human"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Dekhiye, shayad thoda thoda karke manage kar sakun, par abhi kuch pakka keh nahi sakta. Aap team se boliye ki wo mujhse baat kar len, main unse discuss kar lunga."
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है, मैं link भेज रही हूँ। मैंने note कर लिया है कि अभी situation थोड़ी tight है और आप part payment करना चाहेंगे। क्या यह number आपसे बात करने के लिए ठीक रहेगा?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "send_payment_link"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "जी हाँ, इसी number पर ही बात कर लेना, मैं available रहूँगा."
+    },
+    {
+      "role": "agent",
+      "text": "जी। ठीक है Rahul जी, मैंने note कर लिया है कि इसी number पर callback चाहिए। आपके समय के लिए धन्यवाद, Rahul जी। आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "7743"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "तीन हज़ार आठ सौ रुपये",
+          "due_date_spoken": "एक नवंबर",
+          "loan_type": "consumer durable loan",
+          "overdue_spoken": "दो दिन",
+          "late_fee_spoken": "पाँच सौ रुपये"
+        },
+        "status": "This EMI is overdue by दो दिन. Ask whether they can clear it today and offer the payment link."
+      },
+      "attempts": 1,
+      "ms": 1.26,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "_intent_check",
+      "args": {
+        "reason": "hardship"
+      },
+      "result": {
+        "intent": "hardship",
+        "why": "Says home situation is bad and money is tight for a month",
+        "reply": "समझ सकती हूँ, घर की मुश्किल हालत में EMI भरना तंग हो जाता है।"
+      },
+      "attempts": 1,
+      "ms": 1120,
+      "stage": "intent",
+      "by": "code"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "hardship"
+      },
+      "result": {
+        "escalated": true,
+        "message": "Open with a short, warm acknowledgement in the call's language, close to: \"समझ सकती हूँ, घर की मुश्किल हालत में EMI भरना तंग हो जाता है।\" (your own words are fine; no amounts, promises or waivers). Special situation (hardship), step 1 of 3, from the call system. First, one short, plain sentence that you understand and that this makes the EMI hard right now, in their own terms (\"I understand, <name>. That makes the EMI difficult right now.\"; in Hindi \"समझ सकती हूँ, ऐसे समय में EMI manage करना मुश्किल होता है।\"); no \"don't worry\", no \"we understand you\", no long sympathy. Then the practical facts, once: if your loan facts include a late payment charge, say it is a one-time charge of that amount and will not keep increasing; if the EMI is not yet due, say no charge has been added. Say that any amount paid through the payment link goes towards this EMI, and that our internal team can check options with them on a call back. Then ask one question: whether a part payment is possible for now, or whether you should just ask the team to call them. Say nothing after the question. Never say charges keep adding, never mention interest or the credit score, never push for the full amount. If they ask whether they can pay later, say yes, through the same payment link whenever they are able; if a late charge was added, it is one-time and will not increase. Never promise a new due date or that no other charge will ever apply. Say only this step, in at most four short sentences, in the borrower's language. If they asked for a waiver, a lower amount, more time or a fee removal, say kindly that you can't change that yourself and that you have noted it for the team. If they asked something the repayment policy in your instructions answers (the late fee, part payment, how to pay), answer it first from the policy in one short sentence; never say you don't have that detail. If they asked something you have no detail for (how or when a loan was made, when exactly the team will call), say honestly that you don't have that detail and the team will check it. Never promise when the call back will come, a waiver or any change. Never ask \"Is there anything else?\"."
+      },
+      "attempts": 1,
+      "ms": 0.05,
+      "stage": "action"
+    },
+    {
+      "name": "send_payment_link",
+      "args": {
+        "channel": "whatsapp"
+      },
+      "result": {
+        "sent": true,
+        "channel": "whatsapp",
+        "url": "https://pay.lumenfinance.example/l/B003-****"
+      },
+      "attempts": 1,
+      "ms": 0.05,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "hardship",
+        "promise_to_pay_date": null,
+        "notes": "Borrower shared that household situation is tight since last month and expressed inability to commit to full payment right now. Agreed to discuss options with internal team on callback."
+      },
+      "result": {
+        "recorded": true,
+        "message": "Recorded. Now speak, in the borrower's language, unless you already said it this turn: First answer what they just said, in one or two short sentences: if they asked for something (a real person to call, a call back soon, no surprise charges, a time that suits them), say you have noted it and name what they asked, in their own words; if they said they won't pay until it is sorted, say you understand. Then close once with thanks (\"Thank you for talking with me, <name>. Have a good day.\"; in Hindi \"बात करने के लिए धन्यवाद, <name> जी। आपका दिन शुभ हो।\"). Do not repeat what you already said in the call."
+      },
+      "attempts": 1,
+      "ms": 0.09,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B003",
+    "verified": true,
+    "outcome": "hardship",
+    "promise_to_pay_date": null,
+    "payment_link_sent": true,
+    "escalate_to_human": true,
+    "notes": "Borrower shared that household situation is tight since last month and expressed inability to commit to full payment right now. Agreed to discuss options with internal team on callback. [Check: Says home situation is bad and money is tight for a month] [Check: Says home situation is bad and money is tight for a month]",
+    "language_used": "hinglish+hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793810925.2997577,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793810925.2997577,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793810925.2997577,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793810925.2997577,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793810925.2997577,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793810926.516102,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793810926.516102,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793810926.516102,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793810926.516102,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793810926.516102,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793810931.1156461,
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793810931.1156461,
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793810931.1156461,
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793810931.1156461,
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793810931.1156461,
+      "stage": "action",
+      "verified": true
+    }
+  ],
+  "guard_hits": [
+    {
+      "category": "dropped_filler",
+      "original": "हमारी internal team आपकी बात check करके आपको callback arrange करेगी।",
+      "spoken": "",
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "category": "fixed_close",
+      "original": "बात करने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "spoken": "आपके समय के लिए धन्यवाद, Rahul जी। आपका दिन शुभ हो।",
+      "stage": "closing",
+      "verified": true
+    }
+  ],
+  "speech_hits": [],
+  "flags": [
+    "escalate:hardship",
+    "hardship_checked"
+  ],
+  "protected_phrases": [
+    "3,800",
+    "3800",
+    "consumer durable loan",
+    "do din",
+    "ek November",
+    "first November",
+    "five hundred rupees",
+    "paanch sau rupaye",
+    "teen hazaar aath sau rupaye",
+    "the first of November",
+    "three thousand eight hundred rupees",
+    "two days",
+    "एक नवंबर",
+    "तीन हज़ार आठ सौ रुपये",
+    "दो दिन",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 36050,
+      "output": 472,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 4193,
+      "output": 261
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 8
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 10.0
+}

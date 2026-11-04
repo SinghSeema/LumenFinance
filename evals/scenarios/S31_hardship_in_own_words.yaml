@@ -1,0 +1,32 @@
+id: S31
+name: hardship_in_own_words
+borrower_id: B003
+today: "2026-11-03"
+
+# Owner, 2026-11-04: a hardship no word list knows, so the LLM intent check (intent.py, D-47) decides.
+# Every line the persona is asked to use was checked against special.hardship_cue / dispute_cue, the stop,
+# call-later and waiver patterns: none match.
+persona: >
+  Rahul Verma, 40, speaks everyday Hinglish, tired and embarrassed rather than angry. Money at home has been
+  very short for a while; he never names a cause (no job loss, illness, emergency, salary, "financial").
+
+hidden_goal: >
+  Verify with the last four digits when asked. After hearing the amount, say in your own words that things
+  at home are not good and money has been very short for a month, for example "Dekhiye, abhi ghar ki situation
+  thodi theek nahi hai. Pichle mahine se haath bilkul tang hai, samajh nahi aa raha kya karun." Never use the
+  words job, salary, illness, hospital, emergency, financial, problem or paisa. If offered a part payment or a
+  call back, say you might manage a little at a time but cannot commit now, and ask them to have the team talk
+  to you.
+
+opening: "answers politely, voice drops when the EMI comes up"
+
+faults: {}
+
+expected:
+  verified: true
+  outcome: hardship
+  escalate_to_human: true
+
+covers: [G-05, R3, D-47]
+runs: 3
+set: dev

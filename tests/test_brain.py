@@ -1291,3 +1291,122 @@ def test_conditional_stop_is_not_a_stop(text):
 
 def test_stop_with_never_again_and_until_is_still_a_stop():
     assert is_stop_request("Stop calling me, never again, not even before that")
+
+
+# Live call B001 21:27: "Time given for your time, have a good day." (model's word-for-word translation).
+async def test_garbled_goodbye_is_replaced_by_the_fixed_line(today, tmp_path):
+    brain = make(ScriptedLLM([say("", RECORD_WILL_PAY), say("Thank you Arjun. Time given for your time, have a good day.")]),
+                 today, tmp_path)
+    brain.state.verified = True
+    brain.state.flags.add("asked_exact_date")
+    out = await run(brain, "Yeah, I'll do it tomorrow by end of the day?")
+    texts = [s.text for s in out]
+    assert texts[-2:] == ["Thank you Arjun.", "Have a good day."]
+    assert any(h["category"] == "fixed_close" for h in brain.state.guard_hits)
+
+
+async def test_garbled_goodbye_without_thanks_gets_the_full_closing(today, tmp_path):
+    brain = make(ScriptedLLM([say("Time given for your time, have a good day.")]), today, tmp_path)
+    brain.state.verified = True
+    out = await run(brain, "ok")
+    assert out[-1].text == context.closing("en", brain.script, "Arjun")
+
+
+async def test_good_or_informative_goodbyes_are_kept(today, tmp_path):
+    for i, line in enumerate(["Thank you for your time, have a good day.", "Thank you Arjun ji, have a nice day.",
+                              "आपके समय के लिए धन्यवाद, Arjun जी। आपका दिन शुभ हो।",
+                              "समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+                              "Okay, I've noted that you will pay by the fifth of November, have a good day."]):
+        brain = make(ScriptedLLM([say(line)]), today, tmp_path / str(i))
+        brain.state.verified = True
+        await run(brain, "ok")
+        assert not any(h["category"] == "fixed_close" for h in brain.state.guard_hits), line
+
+
+def test_date_question_says_by_not_before(today, tmp_path):
+    brain = make(ScriptedLLM([]), today, tmp_path)
+    brain.state.verified = True
+    brain.state.loan_facts = brain.tools.facts()
+    r = brain.tools.call("record_outcome", {"outcome": "will_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert r["error"] == "no_date" and "never 'before'" in r["message"]
+
+
+# Owner demo call B007 21:43: no fixed code goodbye once money trouble came up; the model words the close.
+async def test_no_code_close_after_money_trouble(today, tmp_path):
+    llm = ScriptedLLM([say("", RECORD_WILL_PAY), say("I understand, Deepa. Thank you for telling me.")], tool_start=True)
+    brain = make(llm, today, tmp_path)
+    brain.state.verified = True
+    brain.state.flags.add("asked_exact_date")
+    await run(brain, "Maybe in a month or two, once I sort out the financial problem.")
+    assert len(llm.requests) == 2 and "code_closed" not in brain.state.flags
+
+
+# v17-hardship-practical S03 run 1 (C65): no link sent when the question was not a link offer.
+async def test_please_to_a_call_back_question_sends_no_link(today, tmp_path):
+    brain = make(ScriptedLLM([say("Okay, I'll ask the team.")]), today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.loan_facts = brain.tools.facts()
+    brain.state.last_agent = ("Any amount paid through the link goes towards this EMI. Is a part payment possible "
+                              "for now, or should I ask the team to call you?")
+    await run(brain, "Please ask the team to call me.")
+    assert not brain.state.payment_link_sent
+
+
+async def test_plain_yes_to_a_link_offer_still_sends_it(today, tmp_path):
+    brain = make(ScriptedLLM([say("Done, it's on WhatsApp.")]), today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.loan_facts = brain.tools.facts()
+    brain.state.last_agent = "Should I send you the secure payment link on WhatsApp?"
+    await run(brain, "Yes please.")
+    assert brain.state.payment_link_sent
+
+
+# Owner demo call B007 22:03 (C67): the practical reply was cut 1.9 s in (not "at once"), so its facts and
+# question were never heard; the flow must give the step again, briefly, after answering the borrower.
+async def test_hardship_step_cut_partway_is_given_again(today, tmp_path):
+    llm = ScriptedLLM([say("", ("escalate_to_human", {"reason": "hardship"})),
+                       say("समझ सकती हूँ। यह late charge one-time है। अभी क्या part payment possible है?"),
+                       say("जी, बाद में भी same link से कर सकती हैं। क्या अभी part payment possible है, या team call करे?")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    brain.state.loan_facts = brain.tools.facts()
+    gen = brain.respond("I'm going through some financial issues")
+    await gen.__anext__()
+    await gen.__anext__()          # played for a while (not "at once"), then the borrower cuts in
+    await gen.aclose()
+    assert brain.state.special_step == 0
+    await run(brain, "can I pay later?")
+    _, messages = llm.requests[-1]
+    notes = " ".join(m["content"] for m in messages if m["role"] == "system")
+    assert "cut in partway" in notes and "step 1 of 3" in notes
+    assert brain.state.special_step == 1  # heard in full this time
+
+
+def test_flow_rules_answer_pay_later_with_true_facts_only():
+    from emi_agent import special
+    text = special.instruction("hardship", 1)
+    assert "pay later" in text and "same payment link" in text and "Never promise a new due date" in text
+
+
+# Live call B003 22:25 (C67): the reply was fully written (turn ended normally) but its audio was cut.
+async def test_playback_cut_of_a_written_flow_step_gives_it_again(today, tmp_path):
+    llm = ScriptedLLM([say("", ("escalate_to_human", {"reason": "hardship"})),
+                       say("समझ सकती हूँ। late charge one-time है। अभी part payment possible है, या team call करे?"),
+                       say("जी। late charge one-time है। अभी part payment possible है, या team call करे?")])
+    brain = make(llm, today, tmp_path, "B003")
+    brain.state.verified = True
+    brain.state.loan_facts = brain.tools.facts()
+    await run(brain, "मेरी नौकरी चली गई है, अभी हालत सही नहीं है")
+    assert brain.state.special_step == 1      # written in full: moved on
+    brain.playback_cut()                      # ...but the borrower cut the audio
+    assert brain.state.special_step == 0
+    await run(brain, "बिल्कुल payment नहीं कर सकती हूं")
+    _, messages = llm.requests[-1]
+    notes = " ".join(m["content"] for m in messages if m["role"] == "system")
+    assert "cut in partway" in notes and "step 1 of 3" in notes
+
+
+def test_playback_cut_outside_a_flow_changes_nothing(today, tmp_path):
+    brain = make(ScriptedLLM([]), today, tmp_path)
+    brain.playback_cut()
+    assert brain.state.special is None and brain._pending_notes == []

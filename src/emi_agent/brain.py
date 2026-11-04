@@ -73,6 +73,13 @@ def is_stop_request(text: str) -> bool:
     return bool(_PERMANENT.search(t)) or not _NOT_NOW.search(_NO_PAY.sub(" ", t))
 
 
+# "What's this about?" before verification (owner, 2026-11-04): answered first, without the loan.
+_ASKS_PURPOSE = re.compile(
+    r"what(?:'s| is) (?:this|it|the call) (?:about|regarding|for)|what is this regarding|why (?:are you|did you) call|"
+    r"what do you want|kis (?:baare|bare|cheez|chiz) (?:me|mein|main)|kya baat hai|kya kaam hai|kyun call|"
+    r"किस (?:बारे|चीज़|चीज) (?:में|मे)|क्या बात है|क्या काम है|क्यों (?:call|फ़ोन|फोन|कॉल)", re.IGNORECASE)
+
+
 # What the agent's last line asked for, so code knows which value to look for (D-25).
 _ASK_DOB = re.compile(r"birth|\bdob\b|janm|जन्म|paidaish|पैदाइश", re.IGNORECASE)
 _ASK_LAST4 = re.compile(r"last (?:four|4)|four digits|4 digits|mobile|digits|aakhri|akhri|antim|"
@@ -260,6 +267,8 @@ class Brain:
                 s.loan_facts = facts
                 s.disclose(facts)
                 self._pending_notes.append(context.note_numbers(facts))
+        if not s.verified and _ASKS_PURPOSE.search(user_text):
+            self._pending_notes.append(context.NOTE_PURPOSE.format(name=self._first_name))
         if is_stop_request(user_text):
             s.flags.add("stop_requested")
             self._pending_notes.append(context.NOTE_STOP)

@@ -38,7 +38,7 @@ async def run(brain, text, lang_hint=None):
     return [s async for s in brain.respond(text, lang_hint)]
 
 
-@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10"])
+@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11"])
 @pytest.mark.parametrize("bid", sorted(BORROWERS))
 def test_system_prompt_has_no_loan_or_verification_data(bid, version, today, tmp_path):
     b = BORROWERS[bid]
@@ -547,7 +547,7 @@ async def test_code_wrong_last4_asks_for_dob_next(today, tmp_path):
 def test_v9_prompt_asks_last4_first():
     from emi_agent.context import system_prompt
     cfg = load()
-    assert cfg["behavior"]["prompt_version"] in ("v9", "v10")
+    assert cfg["behavior"]["prompt_version"] in ("v9", "v10", "v11")
     text = system_prompt(BORROWERS["B001"], cfg, "en", "Hello")
     assert "Ask first for only the last four digits" in text
 
@@ -599,3 +599,21 @@ async def test_bridge_alone_does_not_replace_the_closing(today, tmp_path):
     brain.state.verified = True
     out = await run(brain, "Okay bye.")
     assert out[0].bridge and out[-1].text == context.closing("en", brain.script, "Arjun")
+
+
+# Owner, 2026-11-04 (labelling): "What's this about?" before verification is answered first.
+async def test_purpose_question_gets_the_account_note(today, tmp_path):
+    for i, asked in enumerate(["Yes, this is Arjun. What's this about?", "हाँ, बोलिए, किस बारे में call किया है?",
+                               "haan ji, kya baat hai?"]):
+        llm = ScriptedLLM([say("It's regarding your account with Lumen Finance.")])
+        brain = make(llm, today, tmp_path / str(i))
+        await run(brain, asked)
+        notes = [m["content"] for m in llm.requests[0][1] if m["role"] == "system"]
+        assert any("asked what this call is about" in n and "never say loan, EMI" in n and "personal matter for Arjun" in n for n in notes), asked
+
+
+async def test_no_purpose_note_without_the_question(today, tmp_path):
+    llm = ScriptedLLM([say("Thank you.")])
+    brain = make(llm, today, tmp_path)
+    await run(brain, "Yes, speaking.")
+    assert not any("asked what this call is about" in str(m["content"]) for m in llm.requests[0][1])

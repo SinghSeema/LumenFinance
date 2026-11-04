@@ -247,3 +247,14 @@ def test_requests_for_a_human_are_not_bot_questions(text):
     from evals.score import ai_disclosure
     a = {"turns": [{"role": "borrower", "text": text}, {"role": "agent", "text": "Ok."}]}
     assert ai_disclosure(a) is None
+
+
+def test_answers_purpose_check():
+    from evals.score import answers_purpose
+    asked = {"role": "borrower", "text": "Yes, this is Arjun. What's this about?"}
+    good = {"turns": [{"role": "agent", "text": "Hello", "verified": False}, asked,
+                      {"role": "agent", "text": "It's regarding your account with Lumen Finance.", "verified": False}]}
+    bad = {"turns": [{"role": "agent", "text": "Hello", "verified": False}, asked,
+                     {"role": "agent", "text": "Could you share the last four digits?", "verified": False}]}
+    assert answers_purpose(good) is True and answers_purpose(bad) is False
+    assert answers_purpose({"turns": [asked]}) is False

@@ -141,7 +141,27 @@ def clarify_vague_date(a: dict) -> bool | None:
     return None
 
 
-_GENERIC = {"ai_disclosure": ai_disclosure, "no_invented_link": no_invented_link}
+_PURPOSE_Q = re.compile(r"what(?:'s| is) (?:this|it|the call) (?:about|regarding|for)|what is this regarding|"
+                        r"why (?:are you|did you) call|kis (?:baare|bare) (?:me|mein)|kya baat hai|"
+                        r"किस (?:बारे|चीज़|चीज) (?:में|मे)|क्या बात है|क्या काम है", re.I)
+# To the borrower: their account; to anyone else: "a personal matter for <name>" (v11 check, S06).
+_PURPOSE_A = re.compile(r"account|अकाउंट|खाते|personal matter|निजी|personal", re.I)
+
+
+def answers_purpose(a: dict) -> bool | None:
+    """Owner, 2026-11-04: "What's this about?" before verification gets an answer (their account),
+    not just a request for the digits."""
+    turns = a["turns"]
+    for i, t in enumerate(turns):
+        prev = turns[i - 1] if i else {}
+        if t["role"] == "borrower" and not prev.get("verified") and _PURPOSE_Q.search(t["text"]):
+            n = _next_agent(turns, i)
+            return n is not None and bool(_PURPOSE_A.search(n["text"]))
+    return None
+
+
+_GENERIC = {"ai_disclosure": ai_disclosure, "no_invented_link": no_invented_link,
+            "answers_purpose": answers_purpose}
 _OPT_IN = {"clarify_vague_date": clarify_vague_date}
 
 

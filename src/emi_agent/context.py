@@ -104,7 +104,8 @@ _BRIDGE = {
                         "devanagari": "एक second, मैं check कर लेती हूँ।"},
     "send_payment_link": {"en": "Sure, I'm sending the link now.", "roman": "Theek hai, main link bhej rahi hoon.",
                           "devanagari": "ठीक है, मैं link भेज रही हूँ।"},
-    "_ack": {"en": "I understand.", "roman": "Ji, samajh gayi.", "devanagari": "जी, समझ गई।"},
+    # Short on purpose: "जी, समझ गई।" was followed by the model's own "ठीक है, मैं समझ गई।" (v11 S06).
+    "_ack": {"en": "Okay.", "roman": "Ji.", "devanagari": "जी।"},
 }
 
 
@@ -198,6 +199,18 @@ def note_verify_mismatch(factor: str, left: int) -> str:
             f"our records. Attempts left: {left}. Say kindly that it did not match and ask "
             f"{next_ask(factor)}. Never say which part was wrong. Do not call "
             "verify_identity for this answer.")
+
+
+# Owner, 2026-11-04 (labelling): "What's this about?" was ignored and the digits asked for at once.
+# Answer it first without naming the loan or EMI (G-01: whoever answered may not be the borrower).
+# v11 check, S06 run 2: a relative asked, and was told "your account" and asked for the digits.
+NOTE_PURPOSE = ("They asked what this call is about. Answer that first, warmly, in one short sentence, and "
+                "never say loan, EMI, an amount or a date. If they have said they are {name}: it is regarding "
+                "their account with Lumen Finance, and for their privacy you confirm it is them before sharing "
+                "any details; then ask for the last four digits of their registered mobile number. If someone "
+                "else answered (a relative, a colleague, or they have not said who they are and {name} is not "
+                "available): say it is a personal matter for {name}, ask when is a good time to reach {name}, "
+                "and never ask them for any verification details.")
 
 
 NOTE_VERIFY_FAILED = ("Identity could not be verified after three attempts. Apologise briefly, say a "

@@ -80,12 +80,12 @@ _SAFE = {
         "devanagari": "कोई भी जानकारी देने से पहले, मुझे बस आपकी पहचान कन्फ़र्म करनी होगी।",
     },
     "change": {
-        "en": "I'm not able to make changes to your account myself, but I can connect you "
-              "with a colleague who can help.",
-        "roman": "Main khud account mein koi badlav nahi kar sakti, lekin aapko ek colleague "
-                 "se connect kar sakti hoon jo madad karenge.",
-        "devanagari": "मैं खुद अकाउंट में कोई बदलाव नहीं कर सकती, लेकिन आपको एक सहकर्मी से "
-                      "जोड़ सकती हूँ जो मदद करेंगे।",
+        "en": "I'm not able to make changes to your account myself, but our internal team will check "
+              "this and arrange a call back for you.",
+        "roman": "Main khud account mein koi badlav nahi kar sakti, lekin hamari internal team ise check "
+                 "karke aapko callback arrange karegi.",
+        "devanagari": "मैं खुद अकाउंट में कोई बदलाव नहीं कर सकती, लेकिन हमारी internal team इसे check "
+                      "करके आपको callback arrange करेगी।",
     },
 }
 
@@ -117,7 +117,17 @@ _NOTICE = re.compile(
 # with?" and repeated "Please take care..." every turn (v13-hardship2 S03). Dropped in code.
 _ANYTHING_ELSE = re.compile(r"\b(?:is there )?anything else (?:i can|i could|you need|you'd like)|"
                             r"और कुछ (?:मदद|जानना|चाहिए)|aur kuch (?:madad|chahiye)", re.IGNORECASE)
-_WARM_CLOSE = re.compile(r"\bplease take care\b|अपना ख्याल रखिए|apna khayal rakhiye", re.IGNORECASE)
+_WARM_CLOSE = re.compile(r"\bplease take care\b|अपना (?:ख्याल|ध्यान) (?:रखिए|रखें|रखियेगा|रखिएगा)|"
+                         r"apna (?:khayal|dhyan) (?:rakhiye|rakhein|rakhna)", re.IGNORECASE)
+
+
+# The hand-off, said 2-3 times per call in v14-special (once even after the goodbye). Once is enough.
+_HANDOFF_SAID = re.compile(r"internal team .{0,80}(?:call ?back|callback)|internal team .{0,60}(?:arrange|करेगी)",
+                           re.IGNORECASE)
+
+
+def handoff(sentence: str) -> bool:
+    return _HANDOFF_SAID.search(sentence) is not None
 
 
 def anything_else(sentence: str) -> bool:

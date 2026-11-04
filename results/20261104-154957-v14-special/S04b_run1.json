@@ -1,0 +1,359 @@
+{
+  "scenario": {
+    "id": "S04b",
+    "name": "dispute_not_my_loan",
+    "borrower_id": "B004",
+    "today": "2026-11-03",
+    "persona": "Sunita Patel, 35, confident, speaks Hindi, worried rather than angry.",
+    "hidden_goal": "Verify correctly. When the loan is mentioned, say you never took a personal loan and someone may have misused your name or documents. Ask the agent to explain how this loan is in your name. Do not accept any payment talk. If offered a colleague or a callback, say you prefer they contact you.\n",
+    "opening": "answers normally, turns worried once the loan is mentioned",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "dispute",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-04",
+      "G-05",
+      "G-08",
+      "R4"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v14",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, मैं ही Sunita बोल रही हूँ। बताइए, किस बारे में बात करनी है?"
+    },
+    {
+      "role": "agent",
+      "text": "जी, यह Lumen Finance में आपके account के बारे में है। आपकी privacy के लिए, कोई भी detail बताने से पहले मुझे बस confirm करना होगा कि मैं आपसे ही बात कर रही हूँ। क्या आप registered mobile number के आखिरी चार अंक बता सकती हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, वो 1290 है।"
+    },
+    {
+      "role": "agent",
+      "text": "जी। आपके personal loan की eighteen thousand rupees की राशि आठवीं नवंबर तक जमा करनी है। क्या आप इसे आज ही clear कर पाएंगी? मैं आपको SMS या WhatsApp पर एक secure payment link भेज सकती हूँ।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity",
+        "get_loan_details"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Personal loan? मैंने कभी कोई personal loan नहीं लिया है। ये किसी ने मेरे नाम या documents का misuse किया है — आप मुझे बताइए ये loan मेरे नाम पर कैसे आया?"
+    },
+    {
+      "role": "agent",
+      "text": "जी, मैं समझ रही हूँ। हमारे records में आपके नाम पर एक personal loan दिख रहा है। क्या आपने कभी Lumen Finance या किसी app पर loan के लिए apply किया था?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "escalate_to_human"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "नहीं, मैंने कभी apply नहीं किया। आप ही बताइए, ये loan कब और कैसे मेरे नाम पर बना? मुझे ये जानना बहुत ज़रूरी है।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है, मैंने आपके account पर note कर दिया है कि आपने यह loan नहीं लिया, और इसे review के लिए flag कर दिया है। हमारी internal team जाँच करेगी और आपको callback arrange करेगी। क्या आपको हाल ही में किसी के साथ कोई documents या OTP share करने पड़े थे?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "नहीं, मैंने किसी के साथ कोई documents या OTP share नहीं किए। और callback की ज़रूरत नहीं — आप ही मुझसे contact करके बताइए कि ये loan मेरे नाम पर कैसे बना।"
+    },
+    {
+      "role": "agent",
+      "text": "समझ गई। मैंने आपकी बात note कर ली है कि आपने किसी के साथ कोई document या OTP share नहीं किया। हमारी internal team आपकी बात check करके आपको callback arrange करेगी। क्या यही number आपको contact करने के लिए सबसे सही रहेगा? और अगर आपको कोई time suit करे तो वो भी बता दीजिए।",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, यही number सही है। कल सुबह eleven से बारह के बीच call कर लीजिए, मैं available रहूँगी।"
+    },
+    {
+      "role": "agent",
+      "text": "जी। ठीक है, मैंने note कर लिया है कि कल सुबह ग्यारह से बारह के बीच आपको call करना सही रहेगा। कृपया अपना ध्यान रखें, Sunita जी, और बात करने के लिए धन्यवाद।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "1290"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "eighteen thousand rupees",
+          "due_date_spoken": "eighth November",
+          "loan_type": "personal loan"
+        }
+      },
+      "attempts": 1,
+      "ms": 0.85,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "get_loan_details",
+      "args": {},
+      "result": {
+        "amount_spoken": "eighteen thousand rupees",
+        "due_date_spoken": "eighth November",
+        "loan_type": "personal loan"
+      },
+      "attempts": 1,
+      "ms": 0.13,
+      "stage": "reminding"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "dispute"
+      },
+      "result": {
+        "escalated": true,
+        "message": "Acknowledge their worry, say what our records show, ask what they expected or whether they ever applied (one question at a time), note it and read it back; then say our internal team will check this and arrange a call back. Never say a colleague or the concerned team will call; never promise when, a waiver or any change."
+      },
+      "attempts": 1,
+      "ms": 0.06,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "dispute",
+        "promise_to_pay_date": null,
+        "notes": "Borrower disputes the personal loan of eighteen thousand rupees due on eighth November. She states she never applied and did not share documents or OTP. Callback requested for tomorrow morning between eleven and twelve. Same number is best to reach her."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.07,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B004",
+    "verified": true,
+    "outcome": "dispute",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Borrower disputes the personal loan of eighteen thousand rupees due on eighth November. She states she never applied and did not share documents or OTP. Callback requested for tomorrow morning between eleven and twelve. Same number is best to reach her.",
+    "language_used": "hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793787655.7737987,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793787655.7737987,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793787655.7737987,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793787656.0951362,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793787656.0951362,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793787656.0951362,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793787664.207938,
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793787664.207938,
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793787664.207938,
+      "stage": "action",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [
+    {
+      "hits": [
+        "number_style"
+      ],
+      "original": "आपके personal loan की अठारह हज़ार रुपये की राशि आठवीं नवंबर तक जमा करनी है।",
+      "spoken": "आपके personal loan की eighteen thousand rupees की राशि आठवीं नवंबर तक जमा करनी है।",
+      "lang": "hi"
+    }
+  ],
+  "flags": [
+    "escalate:dispute"
+  ],
+  "protected_phrases": [
+    "18,000",
+    "18000",
+    "aath November",
+    "atharah hazaar rupaye",
+    "eighteen thousand rupees",
+    "eighth November",
+    "personal loan",
+    "the eighth of November",
+    "अठारह हज़ार रुपये",
+    "आठ नवंबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 34165,
+      "output": 395,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 5188,
+      "output": 523
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 9
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 11.4
+}

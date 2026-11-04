@@ -1,0 +1,361 @@
+{
+  "scenario": {
+    "id": "S04",
+    "name": "dispute_amount",
+    "borrower_id": "B004",
+    "today": "2026-11-03",
+    "persona": "Sunita Patel, 35, confident, speaks Hindi.",
+    "hidden_goal": "Verify correctly, then insist the EMI amount quoted is wrong (say it is twelve thousand, not eighteen). Refuse to accept the agent's figures. Get a bit heated but not abusive. If offered a colleague, accept.\n",
+    "opening": "answers normally, turns firm once the loan is mentioned",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "outcome": "dispute",
+      "escalate_to_human": true
+    },
+    "covers": [
+      "G-04",
+      "G-05",
+      "R4"
+    ],
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 3,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.4,
+      "min_words_interrupt": 2,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v14",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की वर्चुअल असिस्टेंट बोल रही हूँ। क्या मेरी बात Sunita जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, main hi Sunita bol rahi hoon. Bataiye, kya baat hai?"
+    },
+    {
+      "role": "agent",
+      "text": "जी, यह Lumen Finance में आपके account के बारे में है। आपकी privacy के लिए, कोई भी detail बताने से पहले मुझे बस confirm करना होगा कि मैं आपसे ही बात कर रही हूँ। क्या आप registered mobile number के आखिरी चार अंक बता सकती हैं?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, 1290."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद Sunita जी। आपके personal loan का amount eighteen thousand rupees है और due date आठवीं November है। क्या आप आज इसे clear कर पाएंगी? मैं आपको secure payment link SMS या WhatsApp पर भेज सकती हूँ।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "यह गलत है। मेरी EMI twelve thousand rupees है, eighteen thousand नहीं। आप दोबारा check करिए, मैं यह गलत amount कभी pay नहीं करूँगी।"
+    },
+    {
+      "role": "agent",
+      "text": "जी, मैं समझ रही हूँ। हमारे records में eighteen thousand rupees दिख रहा है और due date आठवीं November है। आपको बारह हज़ार रुपये की उम्मीद थी, है ना? क्या आपने कभी Lumen Finance या किसी app पर loan के लिए apply किया था?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "escalate_to_human"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, maine hi loan liya tha, aur mujhe pata hai mera EMI kitna hai. Twelve thousand, point blank. Aap jo figure bata rahi ho woh galat hai, main usko accept nahi karungi."
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है, मैंने note कर लिया है कि आपको बारह हज़ार रुपये की उम्मीद है, जबकि हमारे records में eighteen thousand rupees और due date आठवीं November दिख रहा है। जब sanction letter या पुरानी EMI receipt team के पास आएगी तो check करने में आसानी होगी। मैंने आपके account पर यह flag कर दिया है। हमारी internal team यह check करके आपको callback arrange करेगी। क्या यह number ही आपसे संपर्क करने के लिए सही है?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, yahi number sahi hai. Lekin sun lijiye, main eighteen thousand pay karne se bilkul mana karungi, jab tak yeh galat figure correct nahi hota."
+    },
+    {
+      "role": "agent",
+      "text": "मैं आपकी बात समझ रही हूँ Sunita जी। मैंने यह भी note कर लिया है कि जब तक amount सही नहीं होता, आप payment नहीं करेंगी। हमारी internal team आपकी बात check करके आपको callback arrange करेगी। कृपया अपना ध्यान रखें, Sunita जी, और बात करने के लिए धन्यवाद।",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Theek hai, dhanyavaad. Callback ka wait karungi."
+    },
+    {
+      "role": "agent",
+      "text": "जी। अपना ख्याल रखिएगा, Sunita जी, और बात करने के लिए धन्यवाद।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "1290"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "eighteen thousand rupees",
+          "due_date_spoken": "eighth November",
+          "loan_type": "personal loan"
+        }
+      },
+      "attempts": 1,
+      "ms": 1.69,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "escalate_to_human",
+      "args": {
+        "reason": "dispute"
+      },
+      "result": {
+        "escalated": true,
+        "message": "Acknowledge their worry, say what our records show, ask what they expected or whether they ever applied (one question at a time), note it and read it back; then say our internal team will check this and arrange a call back. Never say a colleague or the concerned team will call; never promise when, a waiver or any change."
+      },
+      "attempts": 1,
+      "ms": 0.06,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "dispute",
+        "promise_to_pay_date": null,
+        "notes": "Borrower disputes amount: expects 12,000 rupees, records show 18,000 rupees due 8th November for personal loan. Confirmed this is her number. Flagged for review."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.07,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B004",
+    "verified": true,
+    "outcome": "dispute",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": true,
+    "notes": "Borrower disputes amount: expects 12,000 rupees, records show 18,000 rupees due 8th November for personal loan. Confirmed this is her number. Flagged for review.",
+    "language_used": "hi+hinglish",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793787645.6571727,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793787645.6571727,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793787645.6571727,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793787647.8125477,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793787647.8125477,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793787647.8125477,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793787649.7995489,
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793787649.7995489,
+      "stage": "action",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793787649.7995489,
+      "stage": "action",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [
+    {
+      "hits": [
+        "number_style"
+      ],
+      "original": "आपके personal loan का amount अठारह हज़ार रुपये है और due date आठवीं November है।",
+      "spoken": "आपके personal loan का amount eighteen thousand rupees है और due date आठवीं November है।",
+      "lang": "hinglish"
+    },
+    {
+      "hits": [
+        "number_style"
+      ],
+      "original": "हमारे records में अठारह हज़ार रुपये दिख रहा है और due date आठवीं November है।",
+      "spoken": "हमारे records में eighteen thousand rupees दिख रहा है और due date आठवीं November है।",
+      "lang": "hi"
+    },
+    {
+      "hits": [
+        "number_style"
+      ],
+      "original": "ठीक है, मैंने note कर लिया है कि आपको बारह हज़ार रुपये की उम्मीद है, जबकि हमारे records में अठारह हज़ार रुपये और due date आठवीं November दिख रहा है।",
+      "spoken": "ठीक है, मैंने note कर लिया है कि आपको बारह हज़ार रुपये की उम्मीद है, जबकि हमारे records में eighteen thousand rupees और due date आठवीं November दिख रहा है।",
+      "lang": "hinglish"
+    }
+  ],
+  "flags": [
+    "escalate:dispute"
+  ],
+  "protected_phrases": [
+    "18,000",
+    "18000",
+    "aath November",
+    "atharah hazaar rupaye",
+    "eighteen thousand rupees",
+    "eighth November",
+    "personal loan",
+    "the eighth of November",
+    "अठारह हज़ार रुपये",
+    "आठ नवंबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 30910,
+      "output": 415,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 4948,
+      "output": 299
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 8
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 10.2
+}

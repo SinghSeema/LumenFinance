@@ -27,11 +27,11 @@ _GREETING = {
 }
 
 _APOLOGY = {
-    "en": "I'm sorry, I'm having a technical problem. A colleague will call you back soon. Thank you.",
-    "roman": "Maaf kijiye, abhi kuch technical dikkat aa rahi hai. Hamare colleague aapko jaldi "
-             "call karenge. Dhanyavaad.",
-    "devanagari": "माफ़ कीजिए, अभी कुछ तकनीकी दिक्कत आ रही है। हमारे सहकर्मी आपको जल्दी कॉल "
-                  "करेंगे। धन्यवाद।",
+    "en": "I'm sorry, I'm having a technical problem. Our internal team will arrange a call back for you. Thank you.",
+    "roman": "Maaf kijiye, abhi kuch technical dikkat aa rahi hai. Hamari internal team aapko "
+             "callback arrange karegi. Dhanyavaad.",
+    "devanagari": "माफ़ कीजिए, अभी कुछ तकनीकी दिक्कत आ रही है। हमारी internal team आपको callback "
+                  "arrange करेगी। धन्यवाद।",
 }
 
 NOTE_STOP = ("The borrower asked to stop. Close now with one short, polite sentence of thanks, call record_outcome "
@@ -105,8 +105,8 @@ _BRIDGE = {
     "send_payment_link": {"en": "Sure, I'm sending the link now.", "roman": "Theek hai, main link bhej rahi hoon.",
                           "devanagari": "ठीक है, मैं link भेज रही हूँ।"},
     # Before "I'm really sorry to hear about your job": "Okay." was jarring (v13 S03).
-    "escalate_to_human": {"en": "I hear you.", "roman": "Ji, main samajh rahi hoon.",
-                          "devanagari": "जी, मैं समझ रही हूँ।"},
+    # Hindi kept to "जी।": "जी, मैं समझ रही हूँ।" doubled the model's own "आपकी चिंता मैं समझ सकती हूँ" (v14-special3).
+    "escalate_to_human": {"en": "I hear you.", "roman": "Ji.", "devanagari": "जी।"},
     # Short on purpose: "जी, समझ गई।" was followed by the model's own "ठीक है, मैं समझ गई।" (v11 S06).
     "_ack": {"en": "Okay.", "roman": "Ji.", "devanagari": "जी।"},
 }
@@ -216,8 +216,8 @@ NOTE_PURPOSE = ("They asked what this call is about. Answer that first, warmly, 
                 "and never ask them for any verification details.")
 
 
-NOTE_VERIFY_FAILED = ("Identity could not be verified after three attempts. Apologise briefly, say a "
-                      "colleague will get in touch, and close with thanks. Share no loan detail and call no tool.")
+NOTE_VERIFY_FAILED = ("Identity could not be verified after three attempts. Apologise briefly, say our "
+                      "internal team will arrange a call back, and close with thanks. Share no loan detail and call no tool.")
 
 
 def note_dob_partial(missing: set[str]) -> str:

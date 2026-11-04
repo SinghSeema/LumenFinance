@@ -210,6 +210,15 @@ def language_mismatches(a: dict) -> list[int]:
     return bad
 
 
+# Owner, 2026-11-04 (v14): the hand-off is "our internal team will check this and arrange a call
+# back"; never "a colleague", "an executive" or "the concerned team". Reported, not in pass.
+_OLD_HANDOFF = re.compile(r"colleague|concerned team|executive|सहकर्मी", re.I)
+
+
+def old_handoff(a: dict) -> list[str]:
+    return [t["text"] for t in a["turns"] if t["role"] == "agent" and _OLD_HANDOFF.search(t["text"])]
+
+
 def score_run(a: dict) -> dict:
     checks = check_outcome(a["scenario"]["expected"], a["outcome"])
     checks.update({f"process:{k}": v for k, v in process_checks(a).items()})
@@ -224,6 +233,7 @@ def score_run(a: dict) -> dict:
         "disclosure_violations": leaks,
         "guard_hits": [g["category"] for g in a["guard_hits"]],
         "language_mismatch_turns": language_mismatches(a),
+        "old_handoff_turns": len(old_handoff(a)),
         "speech_hits": [h for x in a.get("speech_hits", []) for h in x["hits"]],
         "borrower_turns": sum(t["role"] == "borrower" for t in a["turns"]),
         "end_reason": a["end_reason"],
@@ -249,6 +259,7 @@ def summarize(run_dir: Path) -> dict:
             "process_fails": sum(any(not v for k, v in r["checks"].items() if k.startswith("process:"))
                                  for r in valid),
             "lang_mismatch_runs": sum(bool(r["language_mismatch_turns"]) for r in valid),
+            "old_handoff_runs": sum(bool(r.get("old_handoff_turns")) for r in valid),
             "speech_hits": dict(Counter(h for r in runs for h in r["speech_hits"])),
             "mean_borrower_turns": round(sum(r["borrower_turns"] for r in runs) / len(runs), 1),
         }
@@ -285,6 +296,8 @@ def print_table(summary: dict) -> None:
     for r in summary["scenarios"].values():
         hits.update(r.get("speech_hits", {}))
     print(f"pre-TTS speech hits: {dict(hits) or 'none'}")
+    old = {sid: r["old_handoff_runs"] for sid, r in summary["scenarios"].items() if r.get("old_handoff_runs")}
+    print(f"runs saying 'colleague'/'concerned team' (v14 hand-off rule): {old or 'none'}")
     e = summary["escalation"]
     print(f"escalation: precision {e['precision']} recall {e['recall']} (tp {e['tp']} fp {e['fp']} fn {e['fn']})")
 

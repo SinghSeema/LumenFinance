@@ -378,7 +378,7 @@ def test_already_paid_on_an_overdue_emi_goes_to_a_colleague(today):
     s, t = _verified_tools("B002", today)  # 6 days overdue
     r = t.call("record_outcome", {"outcome": "already_paid", "promise_to_pay_date": None,
                                   "notes": "Paid 2 Nov by UPI"})
-    assert r["recorded"] and r["team_will_check"] and "concerned team" in r["message"]
+    assert r["recorded"] and r["team_will_check"] and "internal team" in r["message"]
     assert s.escalate_to_human and "escalate:payment_check" in s.flags
     assert t.build_record(s.outcome.outcome, None, "x").escalate_to_human
 
@@ -401,20 +401,21 @@ def test_verify_identity_reads_spoken_last4(today):
 
 
 # Owner, 2026-11-04: a dispute goes to "the concerned team" with a callback; never a time or ticket.
-def test_dispute_escalation_says_concerned_team(borrower, today):
+def test_dispute_escalation_says_internal_team_call_back(borrower, today):
+    # Owner, 2026-11-04 (v14): help first, then "our internal team will check this and arrange a call back".
     tools, state = make_tools(borrower, today)
     state.verified = True
     r = tools.call("escalate_to_human", {"reason": "dispute"})
-    assert r["escalated"] and "concerned team" in r["message"] and "callback" in r["message"]
-    assert "no reference number" in r["message"]
+    assert r["escalated"] and "internal team will check this and arrange a call back" in r["message"]
+    assert "read back both amounts" in r["message"] and "never promise when" in r["message"]
 
 
 @pytest.mark.parametrize("reason", ["hardship", "requested"])
-def test_person_escalations_still_say_colleague(borrower, today, reason):
+def test_every_escalation_uses_the_internal_team_hand_off(borrower, today, reason):
     tools, state = make_tools(borrower, today, heard=["I want to talk to a manager"])
     state.verified = True
     r = tools.call("escalate_to_human", {"reason": reason})
-    assert r["escalated"] and "colleague" in r["message"]
+    assert r["escalated"] and "our internal team" in r["message"] and "Never say a colleague" in r["message"]
 
 
 # v10 eval fixes (2026-11-04)
@@ -481,3 +482,17 @@ def test_no_callback_after_an_other_escalation(borrower, today):
     assert tools.call("schedule_callback", {"when_text": "tomorrow"})["status"] == "not_needed"
     tools.call("record_outcome", {"outcome": "callback_requested", "promise_to_pay_date": None, "notes": "x"})
     assert state.outcome.outcome.value == "unresolved"
+
+
+@pytest.mark.parametrize("said,kind", [("मैंने कभी कोई personal loan नहीं लिया है", "not 'not my loan'"),
+                                       ("This is not my loan, someone misused my documents", "not 'not my loan'"),
+                                       ("मेरी EMI twelve thousand है, eighteen thousand नहीं", "never ask whether they applied")])
+def test_dispute_guidance_depends_on_what_was_said(borrower, today, said, kind):
+    tools, state = make_tools(borrower, today, heard=[said])
+    state.verified = True
+    msg = tools.call("escalate_to_human", {"reason": "dispute"})["message"]
+    if kind.startswith("not '"):
+        assert "flagged it for review" in msg and "never ask whether they applied" not in msg
+    else:
+        assert "never ask whether they applied" in msg
+    assert msg.count("internal team will check this and arrange a call back") == 1

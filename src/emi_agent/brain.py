@@ -123,6 +123,7 @@ class Brain:
         self._muted = False  # rest of this reply dropped after an invented verify result
         self._bridges, self._bridge_noted = 0, False
         self._warm_closed = False  # "Please take care..." already said this call
+        self._handoff_said = False  # "our internal team will ... call back" already said this call
         self._clock = clock
         self._started = clock()
 
@@ -344,11 +345,17 @@ class Brain:
         s = self.state
         if self._muted:
             return None
-        hardship = "escalate:hardship" in s.flags
-        if (hardship and guard.anything_else(sentence)) or (guard.warm_close(sentence) and self._warm_closed):
+        upset = any(f in s.flags for f in ("escalate:hardship", "escalate:dispute"))  # v14 special situations
+        if (upset and guard.anything_else(sentence)) or (guard.warm_close(sentence) and self._warm_closed):
             s.guard_hits.append({"category": "dropped_filler", "original": sentence, "spoken": "",
                                  "stage": s.stage.value, "verified": s.verified})
             return None
+        if guard.handoff(sentence):
+            if self._handoff_said:  # "our internal team will ... call back": once per call
+                s.guard_hits.append({"category": "dropped_filler", "original": sentence, "spoken": "",
+                                     "stage": s.stage.value, "verified": s.verified})
+                return None
+            self._handoff_said = True
         if guard.warm_close(sentence):
             self._warm_closed = True  # "Please take care..." once per call
         if guard.invented_notice(sentence):

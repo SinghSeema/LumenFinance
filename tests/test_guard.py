@@ -202,3 +202,11 @@ def test_invented_notices_are_caught(s):
                                "मैंने आपकी बात record कर ली है।", "I've sent the payment link on WhatsApp."])
 def test_real_lines_are_not_notices(s):
     assert not invented_notice(s)
+
+
+from emi_agent.guard import warm_close  # noqa: E402
+
+
+@pytest.mark.parametrize("s", ["Please take care, Deepa.", "कृपया अपना ध्यान रखें, Sunita जी।", "अपना ख्याल रखिए।"])
+def test_warm_close_variants(s):
+    assert warm_close(s)

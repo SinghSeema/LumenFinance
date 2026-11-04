@@ -39,7 +39,7 @@ async def run(brain, text, lang_hint=None):
     return [s async for s in brain.respond(text, lang_hint)]
 
 
-@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13"])
+@pytest.mark.parametrize("version", ["v1", "v2", "v3", "v4", "v5", "v6", "v7", "v8", "v9", "v10", "v11", "v12", "v13", "v14"])
 @pytest.mark.parametrize("bid", sorted(BORROWERS))
 def test_system_prompt_has_no_loan_or_verification_data(bid, version, today, tmp_path):
     b = BORROWERS[bid]
@@ -548,7 +548,7 @@ async def test_code_wrong_last4_asks_for_dob_next(today, tmp_path):
 def test_v9_prompt_asks_last4_first():
     from emi_agent.context import system_prompt
     cfg = load()
-    assert cfg["behavior"]["prompt_version"] in ("v9", "v10", "v11", "v12", "v13")
+    assert cfg["behavior"]["prompt_version"] in ("v9", "v10", "v11", "v12", "v13", "v14")
     text = system_prompt(BORROWERS["B001"], cfg, "en", "Hello")
     assert "Ask first for only the last four digits" in text
 
@@ -637,9 +637,16 @@ async def test_invented_notice_is_dropped(today, tmp_path):
 
 def test_v13_prompt_hardship_is_caring_with_one_handoff():
     from emi_agent.context import system_prompt
-    text = system_prompt(BORROWERS["B007"], load(), "en", "Hello")
+    text = system_prompt(BORROWERS["B007"], load(overrides=["behavior.prompt_version=v13"]), "en", "Hello")
     assert "a colleague from our team" in text and "read back exactly what you noted" in text
-    assert 'Don\'t ask "Is there anything else I can help with?"' in text
+
+
+def test_v14_prompt_helps_first_and_never_says_colleague():
+    from emi_agent.context import system_prompt
+    text = system_prompt(BORROWERS["B004"], load(), "en", "Hello")
+    assert "our internal team will check this and arrange a call back" in text
+    assert "flagged it for review" in text and "ask what amount they expected" in text
+    assert "a colleague will" not in text.lower() and 'Never say "a colleague"' in text
 
 
 async def test_hardship_drops_anything_else_and_repeated_warm_close(today, tmp_path):
@@ -654,3 +661,13 @@ async def test_hardship_drops_anything_else_and_repeated_warm_close(today, tmp_p
     third = [s.text for s in await run(brain, "Please note it.")]
     assert not any("anything else" in x for x in first)
     assert any("Please take care" in x for x in second) and not any("Please take care" in x for x in third)
+
+
+async def test_hand_off_is_said_once_per_call(today, tmp_path):
+    llm = ScriptedLLM([say("I'm sorry. Our internal team will check this and arrange a call back for you."),
+                       say("I understand. Our internal team will check this and arrange a call back for you.")])
+    brain = make(llm, today, tmp_path, "B007")
+    brain.state.verified = True
+    first = [s.text for s in await run(brain, "I lost my job.")]
+    second = [s.text for s in await run(brain, "When will they call?")]
+    assert any("internal team" in x for x in first) and second == ["I understand."]

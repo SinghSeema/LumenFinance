@@ -53,7 +53,7 @@ TOOL_SCHEMAS = [
           "Schedule a callback. Pass the borrower's own words for when, e.g. 'tomorrow evening'.",
           {"when_text": {"type": "string"}}),
     _tool("escalate_to_human",
-          "Flag the call for a human colleague: dispute, hardship, the borrower asked, or other.",
+          "Flag the call for our internal team to check and call back: dispute, hardship, the borrower asked, or other.",
           {"reason": {"type": "string", "enum": _REASONS}}),
     _tool("record_outcome",
           "Record how the call ended. will_pay: they agree to pay but name no date. "
@@ -128,20 +128,36 @@ _YES = re.compile(r"^\W*(?:yes|yeah|yep|sure|ok|okay|please|haan|han|ha|ji|jee|t
                   r"हाँ|हां|जी|ठीक|ज़रूर|जरूर)\b", re.IGNORECASE)
 
 
-# What to tell the borrower after an escalation (owner, 2026-11-04): a dispute or a payment our
-# records do not show goes to "the concerned team", as Indian lenders' calls say; someone who asked
-# for a person, or is in hardship, hears that a colleague will call. No time, no ticket number.
-_TEAM = ("Say you have noted it and that the concerned team will look into it and arrange a "
-         "callback. Do not promise when, and give no reference number.")
+# What to tell the borrower after an escalation (owner, 2026-11-04, prompt v14): help first, then one
+# hand-off in the owner's words, "our internal team will check this and arrange a call back".
+# Never "a colleague" or "the concerned team"; never a time, a ticket number or a change.
+_HANDOFF = ("then say our internal team will check this and arrange a call back. Never say a colleague or "
+            "the concerned team will call; never promise when, a waiver or any change.")
+# "Not my loan" vs "wrong amount" need different questions; both are escalated as "dispute", so code
+# picks by what the borrower said (v14 S04: "did you ever apply?" asked twice in an amount dispute).
+_NOT_MINE = re.compile(r"not my loan|never (?:took|taken|applied|borrowed)|didn'?t (?:take|apply)|not mine|misuse|"
+                       r"kabhi (?:koi )?loan nahi|loan nahi liya|mera nahi|नहीं लिया|मेरा नहीं|misuse|कभी .{0,20}apply नहीं",
+                       re.IGNORECASE)
+# Staged, one step per turn: listing every step at once made the model say them all in one long
+# turn (v14-special2 S04 run 1: seven sentences). This turn / after their answer.
+_DISPUTE_NOT_MINE = ("This is a 'not my loan' concern. THIS TURN, in two or three short sentences: take their fear "
+                     "seriously, say what our records show in their name, and ask only whether they ever applied "
+                     "for a loan with us or any app. LATER TURNS, one step each: ask whether they received loan "
+                     "money or shared documents or an OTP (if not answered yet); then read back what you noted, "
+                     "say you have flagged it for review, advise them not to share an OTP, PIN or bank details, ")
+_DISPUTE_AMOUNT = ("This is an amount or date dispute, not 'not my loan': never ask whether they applied. THIS "
+                   "TURN, in two short sentences: say you understand, say what our records show, and ask what "
+                   "amount they expected (skip the question if they already said). NEXT TURN: read back both "
+                   "amounts, say a sanction letter or past receipt will help, ")
 _ESCALATION_LINE = {
-    "dispute": _TEAM,
-    # Owner review 2026-11-04: one hand-off per call, sorry first, no "anything else?" (prompt v13).
-    "hardship": ("Say you are sorry and thank them for telling you; you can't change the amount or "
-                 "dates yourself; a colleague from our team will call to talk through the options. Use "
-                 "only that hand-off for the rest of the call. Do not promise when, a waiver or any change."),
-    "requested": "Tell them a colleague will call them back. Do not promise when.",
-    "other": "Tell them a colleague will call them back. Do not promise when.",
+    "dispute": _DISPUTE_AMOUNT,
+    "hardship": ("THIS TURN, in two or three short sentences: say you are sorry and thank them for telling "
+                 "you, say you can't change the amount or dates yourself, and gently ask whether it is "
+                 "short-term (only what is comfortable). NEXT TURN: note what they said, " + _HANDOFF),
+    "requested": "Acknowledge the request; " + _HANDOFF,
+    "other": "Acknowledge what they said and note it; " + _HANDOFF,
 }
+_TEAM = _DISPUTE_AMOUNT + _HANDOFF
 
 _DATE_HELP = {
     "ambiguous_phrase": "They gave only a vague time. Ask one clear question: which date exactly "
@@ -149,7 +165,7 @@ _DATE_HELP = {
     "past_date": "That date has already passed (today is {today}). Say so gently and ask which "
                  "coming date they mean.",
 }
-# Escalations whose callback the concerned team arranges (D-35): no schedule_callback, no time.
+# Escalations whose call back our internal team arranges (D-35, v14): no schedule_callback, no time.
 # "other" too: a waiver demand escalated as "other" scheduled its own callback for "tomorrow" (v13 S11 run 2).
 _TEAM_CALLS_BACK = {"escalate:dispute", "escalate:hardship", "escalate:payment_check", "escalate:other"}
 
@@ -270,7 +286,7 @@ class Tools:
 
     def _schedule_callback(self, when_text: str) -> dict:
         if any(f in self.state.flags for f in _TEAM_CALLS_BACK):
-            return {"status": "not_needed", "message": "The concerned team arranges this callback "
+            return {"status": "not_needed", "message": "Our internal team arranges this call back "
                     "themselves. Do not schedule one and do not promise a time; record the outcome "
                     "as the escalation reason."}
         r = dates.normalize(when_text, self.today, self.state.reply_language)
@@ -314,11 +330,16 @@ class Tools:
         if reason == "requested" and not asked_for_human(s.heard[-1] if s.heard else "", s.last_agent):
             return {"escalated": False, "error": "not_requested",
                     "message": "The borrower has not clearly asked for a person. Ask if they would "
-                               "like a colleague to contact them; call this again only if they say yes."}
+                               "like our internal team to arrange a call back; call this again only if they say yes."}
         self.state.escalate_to_human = True
         self.state.flags.add(f"escalate:{reason}")
         self._enter_action()
-        return {"escalated": True, "message": _ESCALATION_LINE.get(reason, _ESCALATION_LINE["other"])}
+        line = _ESCALATION_LINE.get(reason, _ESCALATION_LINE["other"])
+        if reason == "dispute":
+            line = (_DISPUTE_NOT_MINE if any(_NOT_MINE.search(u) for u in s.heard[-3:]) else _DISPUTE_AMOUNT)
+        if reason in ("dispute", "hardship", "other"):
+            line += _HANDOFF if not line.endswith(_HANDOFF) else ""
+        return {"escalated": True, "message": line}
 
     def _record_outcome(self, outcome: str, promise_to_pay_date: str | None, notes: str) -> dict:
         s = self.state
@@ -378,7 +399,8 @@ class Tools:
         s.stage = Stage.CLOSING
         result: dict = {"recorded": True}
         if payment_check:
-            result |= {"team_will_check": True, "message": _ESCALATION_LINE["dispute"]}
+            result |= {"team_will_check": True, "message": "Thank them; say our internal team will check the "
+                       "payment and arrange a call back. Never promise when."}
         if promise:
             result["promise_date_spoken"] = date_to_words(promise, self.today, self._nlang, self.script)
         return result

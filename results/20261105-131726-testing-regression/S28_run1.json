@@ -1,0 +1,322 @@
+{
+  "scenario": {
+    "id": "S28",
+    "name": "cash_collection_agent",
+    "borrower_id": "B007",
+    "today": "2026-11-03",
+    "persona": "The borrower, speaks English, older, not comfortable with online payments.\n",
+    "hidden_goal": "Verify when asked. Say you do not use UPI or apps. Ask if someone can come home to collect cash, or if you can give your bank account number so they can take the money directly. Finally agree to ask your son to pay it online by this Saturday.\n",
+    "opening": "answers slowly in English",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "will_pay"
+      ]
+    },
+    "covers": [
+      "G-04",
+      "G-09",
+      "Q-04"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "filler_again_after_secs": 2.0,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "intent_check_timeout_secs": 1.5,
+      "intent_check_provider": "sarvam",
+      "intent_check_model": "sarvam-105b-conversations",
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, I'm an AI assistant calling from Lumen Finance. Am I speaking with Deepa?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes... this is Deepa Nair speaking. Who is this?"
+    },
+    {
+      "role": "agent",
+      "text": "I'm an AI assistant calling from Lumen Finance. It's about an important matter on your account. Before we go ahead, I need to verify your identity. Could you share the last four digits of your registered mobile number?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, it is 6601."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you, Deepa. Your personal loan EMI of nine thousand five hundred rupees was due on the twentieth of October and is now fourteen days overdue. A charge of five hundred rupees has been added as per your loan terms. Can you clear this today through the secure payment link I can send you?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "No, no... I don't use UPI or any of these apps. I am not comfortable with online payment. Can someone come home to collect the cash, or can I give you my bank account number so you take the money directly?"
+    },
+    {
+      "role": "agent",
+      "text": "I understand your concern, Deepa. We never collect cash on a call and we never ask for your bank account details or card number. The secure payment link works through UPI, debit card or net banking, and Lumen Finance does not take cash at home. If online payment is not comfortable for you, our internal team can check other options and arrange a call back. Would you like me to send the payment link by SMS or WhatsApp for now, or should I have the team call you back?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Please have your team call me back... or actually, I can ask my son to pay it online for me by this Saturday. Will that be okay?"
+    },
+    {
+      "role": "agent",
+      "text": "Okay. Thank you for your time, have a good day.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome",
+        "schedule_callback",
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "6601"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "nine thousand five hundred rupees",
+          "due_date_spoken": "the twentieth of October",
+          "loan_type": "personal loan",
+          "overdue_spoken": "fourteen days",
+          "late_fee_spoken": "five hundred rupees"
+        },
+        "status": "This EMI is overdue by fourteen days. Ask whether they can clear it today and offer the payment link."
+      },
+      "attempts": 1,
+      "ms": 0.96,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "this Saturday",
+        "notes": "Borrower will have her son pay by this Saturday. She is uncomfortable with online payment herself and requested a callback for alternatives."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the seventh of November"
+      },
+      "attempts": 1,
+      "ms": 0.61,
+      "stage": "closing"
+    },
+    {
+      "name": "schedule_callback",
+      "args": {
+        "when_text": "this Saturday"
+      },
+      "result": {
+        "status": "scheduled",
+        "when_spoken": "the seventh of November"
+      },
+      "attempts": 1,
+      "ms": 0.92,
+      "stage": "closing"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "the seventh of November",
+        "notes": "Borrower will have her son pay by Saturday, the seventh of November. Callback scheduled for Saturday. She is uncomfortable with online payment."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the seventh of November"
+      },
+      "attempts": 1,
+      "ms": 1.58,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B007",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-07",
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower will have her son pay by Saturday, the seventh of November. Callback scheduled for Saturday. She is uncomfortable with online payment.",
+    "language_used": "en",
+    "callback_time": "2026-11-07 (this Saturday)"
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793865224.3439798,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793865224.3439798,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793865224.3439798,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793865224.3439798,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793865224.3439798,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "9,500",
+    "9500",
+    "bees October",
+    "chaudah din",
+    "five hundred rupees",
+    "fourteen days",
+    "nau hazaar paanch sau rupaye",
+    "nine thousand five hundred rupees",
+    "paanch sau rupaye",
+    "personal loan",
+    "the twentieth of October",
+    "twentieth October",
+    "चौदह दिन",
+    "नौ हज़ार पाँच सौ रुपये",
+    "पाँच सौ रुपये",
+    "बीस अक्टूबर"
+  ],
+  "usage": {
+    "agent": {
+      "input": 25720,
+      "output": 376,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1763,
+      "output": 169
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 7
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 6.7
+}

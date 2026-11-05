@@ -179,7 +179,10 @@ _PAID = re.compile(r"\balready\b|\b(?:i|i've|we|we've|have|has|had|just)\s+(?:al
                    r"\bpaid (?:it |this |that |the emi )?(?:yesterday|today|last|on|already|ago|by upi|through|via|online)|"
                    r"pay kar (?:diya|di)|bhar (?:diya|di)|jama kar (?:diya|di)|"
                    r"भर दिया|भर दी|जमा कर दिया|जमा कर दी|pay कर दिया|pay कर दी|payment (?:हो गया|हो गई|कर दिया|कर दी)|"
-                   r"कर दिया है|कर दी है|ho gaya hai", re.IGNORECASE)
+                   r"कर दिया है|कर दी है|ho gaya hai|"
+                   # testing-regression S15 run 1: "मैंने तो पूरा amount पहले ही दे दिया था ... pay किया था"
+                   r"दे दिया|दे दी थी|pay किया था|pay की थी|payment किया था|de diya|pay kiya tha|payment kiya tha",
+                   re.IGNORECASE)
 
 _BY_DUE = re.compile(r"due date (?:तक|se pehle|से पहले|tak|par|पर|ko|को)|(?:by|before|on) the due date|"
                      r"(?:by|before|on) (?:the )?(?:due|deadline)\b", re.IGNORECASE)
@@ -468,7 +471,9 @@ class Tools:
         # "मैं try करूँगी पूरा amount due date तक pay करने का" is a promise for the due date (the tool
         # description says the due date counts); the model recorded will_pay and the call ended
         # unresolved (v17-dev3-fix S16 run 2). Code records it as what it is.
-        if (Outcome(outcome) is Outcome.will_pay and not promise_to_pay_date and s.verified
+        # testing-regression S01 run 2: "I'll make the payment before the due date" came as promise_to_pay with
+        # no date, refused three times, ended unresolved. Either label, no date, "by/before the due date": due date.
+        if (Outcome(outcome) in (Outcome.will_pay, Outcome.promise_to_pay) and not promise_to_pay_date and s.verified
                 and (any(_BY_DUE.search(u) for u in s.heard[-2:]) or self._yes_to_due_date_question())):
             outcome, promise_to_pay_date = Outcome.promise_to_pay.value, self.borrower.due_date.isoformat()
         # Not when they are saying bye: "Ok. You. Bye." got one more question (owner call B004 17:59).

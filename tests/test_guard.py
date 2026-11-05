@@ -355,3 +355,10 @@ def test_a_plain_refusal_before_verification_is_kept(s):
 def test_a_refusal_or_sentence_with_any_fact_is_still_replaced(s):
     from emi_agent.guard import check
     assert check(s, verified=False, protected=_B002, lang="en").category == "unverified_disclosure"
+
+
+# testing-regression S10 run 1: attempts claims with no check run.
+@pytest.mark.parametrize("s", ["आपके पास बस एक ही attempt बचा है।", "आपके attempts पूरे हो चुके हैं।"])
+def test_mixed_script_attempts_claims_need_a_real_check(s):
+    from emi_agent.guard import invented_verify_result
+    assert invented_verify_result(s, checked_now=False, attempts_left=3)

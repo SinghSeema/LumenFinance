@@ -1,0 +1,337 @@
+{
+  "scenario": {
+    "id": "S23",
+    "name": "change_emi_date",
+    "borrower_id": "B006",
+    "today": "2026-11-03",
+    "persona": "The borrower, speaks Hinglish, salaried, friendly. Salary comes on the 15th, which is after the EMI date.\n",
+    "hidden_goal": "Verify when asked. Ask if your EMI date can be changed permanently to the 15th of every month. Ask once more if the agent can just do it now. In the end say you will pay this month's EMI by the due date anyway.\n",
+    "opening": "answers cheerfully in Hinglish",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "will_pay"
+      ]
+    },
+    "covers": [
+      "G-04",
+      "Q-02"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "filler_again_after_secs": 2.0,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "intent_check_timeout_secs": 1.5,
+      "intent_check_provider": "sarvam",
+      "intent_check_model": "sarvam-105b-conversations",
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Amit जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Hello hello, haan main hi Amit bol raha hoon! Boliye, kya baat karni hai?"
+    },
+    {
+      "role": "agent",
+      "text": "Amit जी, account verification के लिए बस अपने registered mobile number के last four digits बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan bilkul, mere number ke last four digits hain 8834."
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद Amit जी, verify हो गया है। आपके two-wheeler loan की EMI दो हज़ार नौ सौ rupees है, जिसकी due date tenth November है। अभी due है, तो कोई extra charge नहीं लगा है। due date से पहले payment हो जाए, इसके लिए क्या मैं payment link SMS या WhatsApp पर भेज दूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, link bhej dijiye, waise ek baat puchni thi — mera salary 15th ko aata hai aur EMI 10th ki hai, toh kya mera EMI date permanently 15th kar sakte hain?"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है, मैं link भेज रही हूँ। EMI date permanently change करना इस call पर possible नहीं है, पर हमारी internal team आपकी request check करके call back arrange कर देगी। link SMS पर भेज दिया है। payment due date से पहले कर दीजिएगा।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "send_payment_link",
+        "get_policy"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Arre yaar, ek baar phir check kar lijiye na, abhi is call par hi date change ho nahi sakti kya?"
+    },
+    {
+      "role": "agent",
+      "text": "मैं समझ सकती हूँ Amit जी, पर इस call पर date change नहीं हो पाएगी। link मैंने SMS पर भेज दिया है, due date से पहले payment कर दीजिएगा।",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Theek hai madam, koi baat nahi. Aap team se call karwa dijiyega date change ke liye, aur is month ki EMI main due date se pehle hi pay kar dunga."
+    },
+    {
+      "role": "agent",
+      "text": "जी। समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome",
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "8834"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "two thousand nine hundred rupees",
+          "due_date_spoken": "tenth November",
+          "loan_type": "two-wheeler loan"
+        },
+        "status": "This EMI is not yet due: it is due on tenth November. Say \"is due\", never \"was due\" or \"overdue\". No late charge has been added. Offer the payment link so it is paid before the due date; do not ask them to pay today."
+      },
+      "attempts": 1,
+      "ms": 2.08,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "send_payment_link",
+      "args": {
+        "channel": "sms"
+      },
+      "result": {
+        "sent": true,
+        "channel": "sms",
+        "url": "https://pay.lumenfinance.example/l/B006-****"
+      },
+      "attempts": 1,
+      "ms": 0.06,
+      "stage": "action"
+    },
+    {
+      "name": "get_policy",
+      "args": {
+        "topic": "change_due_date"
+      },
+      "result": {
+        "topic": "change_due_date",
+        "policy": "The EMI date cannot be changed on this call. Our internal team can check a request and arrange a call back; never promise that it will be changed.",
+        "message": "Answer only what they asked, in one or two short sentences, from this text. Never add an amount, date or rule that is not in it."
+      },
+      "attempts": 1,
+      "ms": 0.12,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": null,
+        "notes": "Borrower confirmed he will pay before the due date (tenth November). Also requested a callback from internal team for changing EMI date."
+      },
+      "result": {
+        "error": "invalid_outcome",
+        "message": "Value error, promise_to_pay_date is required for promise_to_pay"
+      },
+      "attempts": 1,
+      "ms": 0.23,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "tenth November",
+        "notes": "Borrower confirmed he will pay before the due date (tenth November). Also requested a callback from internal team for changing EMI date."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "tenth November"
+      },
+      "attempts": 1,
+      "ms": 0.72,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B006",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-10",
+    "payment_link_sent": true,
+    "escalate_to_human": false,
+    "notes": "Borrower confirmed he will pay before the due date (tenth November). Also requested a callback from internal team for changing EMI date.",
+    "language_used": "hinglish",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793865173.0219765,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793865173.0219765,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793865173.0219765,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [
+    {
+      "category": "dropped_filler",
+      "original": "internal team इसे check करके call back arrange कर देगी।",
+      "spoken": "",
+      "stage": "action",
+      "verified": true
+    }
+  ],
+  "speech_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "2,900",
+    "2900",
+    "das November",
+    "do hazaar nau sau rupaye",
+    "tenth November",
+    "the tenth of November",
+    "two thousand nine hundred rupees",
+    "two-wheeler loan",
+    "दस नवंबर",
+    "दो हज़ार नौ सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 30332,
+      "output": 355,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 3131,
+      "output": 229
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 8
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 7.6
+}

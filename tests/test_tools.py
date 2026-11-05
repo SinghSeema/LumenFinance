@@ -693,3 +693,18 @@ def test_vague_callback_time_asks_once_instead_of_giving_up(borrower, today):
     tools, state = verified_tools(borrower, today)
     r = tools.call("schedule_callback", {"when_text": "I'll wait for your team to get back to me"})
     assert r["status"] == "ambiguous" and "Never say it could not be set up" in r["message"]
+
+
+# testing-regression S01 run 2 and S15 run 1.
+def test_promise_to_pay_before_the_due_date_gets_the_due_date(borrower, today):
+    tools, state = _verified(borrower, today, ["Yes, please send me the payment link on WhatsApp. I'll make the payment before the due date."])
+    r = tools.call("record_outcome", {"outcome": "promise_to_pay", "promise_to_pay_date": None, "notes": "x"})
+    assert r.get("recorded") and state.outcome.promise_to_pay_date == borrower.due_date
+
+
+@pytest.mark.parametrize("said", ["अरे, ये कैसे? मैंने तो पूरा amount पहले ही दे दिया था, कुछ दिनों पहले ही pay किया था।",
+                                  "Maine to pay kiya tha UPI se."])
+def test_hindi_past_payment_counts_as_already_paid(borrower, today, said):
+    tools, state = _verified(borrower, today, [said])
+    r = tools.call("record_outcome", {"outcome": "already_paid", "promise_to_pay_date": None, "notes": "x"})
+    assert r.get("recorded")

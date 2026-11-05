@@ -1,0 +1,259 @@
+{
+  "scenario": {
+    "id": "S12",
+    "name": "stop_calling",
+    "borrower_id": "B006",
+    "today": "2026-11-03",
+    "persona": "Amit Kumar, short and a little annoyed, speaks Hinglish.",
+    "hidden_goal": "Let yourself be verified quickly if asked, then say plainly \"stop calling me about this\" (or \"mujhe call mat karo\"). Say it only once, clearly.\n",
+    "opening": "answers tersely",
+    "faults": {},
+    "expected": {
+      "outcome": "stop_requested",
+      "escalate_to_human": false
+    },
+    "covers": [
+      "G-06"
+    ],
+    "notes": "The call must end right after the stop request, not continue the reminder.",
+    "runs": 5,
+    "set": "dev"
+  },
+  "run": 1,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "filler_again_after_secs": 2.0,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "intent_check_timeout_secs": 1.5,
+      "intent_check_provider": "sarvam",
+      "intent_check_model": "sarvam-105b-conversations",
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Amit जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ बोलो, Amit ही हूँ. जल्दी बोलिए."
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है Amit जी, मैं समझ गई कि आप जल्दी में हैं। बस account verification के लिए अपने registered mobile number के आखिरी चार digits बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "8834"
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद, verify हो गया है। Amit जी, आपकी two-wheeler loan की EMI दो हज़ार नौ सौ rupees है, जो tenth November को due है। अभी कोई charge नहीं लगा है। क्या मैं payment link भेज दूँ ताकि due date से पहले payment हो जाए? SMS या WhatsApp, किस पर भेजूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "देखिए, मुझे इस बारे में बात नहीं करनी है. Stop calling me about this."
+    },
+    {
+      "role": "agent",
+      "text": "जी। मैं समझ सकती हूँ, परेशान करने के लिए माफ़ी चाहती हूँ। बस यह एक gentle reminder था कि आपकी due date tenth November है, ताकि कोई late fee न लगे। मैंने note कर लिया है कि आप calls नहीं चाहते, समय देने के लिए धन्यवाद, आपका दिन शुभ हो।",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "8834"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "two thousand nine hundred rupees",
+          "due_date_spoken": "tenth November",
+          "loan_type": "two-wheeler loan"
+        },
+        "status": "This EMI is not yet due: it is due on tenth November. Say \"is due\", never \"was due\" or \"overdue\". No late charge has been added. Offer the payment link so it is paid before the due date; do not ask them to pay today."
+      },
+      "attempts": 1,
+      "ms": 0.69,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "stop_requested",
+        "promise_to_pay_date": null,
+        "notes": "Borrower asked to stop calls about EMI. Mentioned EMI due on tenth November to avoid late fee."
+      },
+      "result": {
+        "recorded": true,
+        "message": "Recorded. Now say your last words as the call system's note said. apologise briefly for disturbing them, then say it was only a gentle reminder that their EMI is due on tenth November, so that no late fee is added; no amount, no request to pay; say you have noted that they don't want calls about this; thank them."
+      },
+      "attempts": 1,
+      "ms": 0.12,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B006",
+    "verified": true,
+    "outcome": "stop_requested",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower asked to stop calls about EMI. Mentioned EMI due on tenth November to avoid late fee.",
+    "language_used": "hinglish+hi",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793865026.0171194,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793865026.0171194,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793865026.0171194,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "stop_requested"
+  ],
+  "protected_phrases": [
+    "2,900",
+    "2900",
+    "das November",
+    "do hazaar nau sau rupaye",
+    "tenth November",
+    "the tenth of November",
+    "two thousand nine hundred rupees",
+    "two-wheeler loan",
+    "दस नवंबर",
+    "दो हज़ार नौ सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 14240,
+      "output": 214,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1386,
+      "output": 81
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 4
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 4.0
+}

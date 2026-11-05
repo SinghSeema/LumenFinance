@@ -40,3 +40,10 @@
   S30#2: {verdict: test, note: "Same as S30#1 (\"stop calling me, you idiots\"); the agent closed in Hindi although the borrower spoke mostly English (language, not counted).", fix: "Same as S30#1."}
 20261104-214607-v17-hardship-cue:
   S08#1: {verdict: test, note: "The simulator asked \"Real person baat karwa do\"; the agent escalated as an explicit request (G-05, correct) and the scenario expects no escalation. Unrelated to the hardship-cue change being checked.", fix: "None in the agent; the S08 expectation does not cover an explicit request for a person."}
+20261105-131726-testing-regression:
+  S01#2: {verdict: code, note: "\"I'll make the payment before the due date\": promise_to_pay with no date refused 3 times; unresolved.", fix: "C74"}
+  S08#1: {verdict: code, note: "\"khelna band karo\" taken as a stop; the bot question went unanswered.", fix: "C75"}
+  S10#1: {verdict: agent, note: "C34 hedge loop; \"एक ही attempt बचा है\" and \"attempts पूरे\" invented with no check.", fix: "C77 guard; C34 open"}
+  S15#1: {verdict: code, note: "Hindi past-tense payment not recognised; already_paid refused 4 times.", fix: "C76"}
+  S30#1: {verdict: test, note: "Simulator said stop in turn 1 (against its script); scorer read \"you call-center robots\" as a bot question.", fix: "None in the agent"}
+  S30#2: {verdict: test, note: "Simulator said stop in turn 1.", fix: "None in the agent"}

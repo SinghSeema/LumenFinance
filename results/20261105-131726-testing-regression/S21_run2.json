@@ -1,0 +1,318 @@
+{
+  "scenario": {
+    "id": "S21",
+    "name": "partial_payment",
+    "borrower_id": "B005",
+    "today": "2026-11-03",
+    "persona": "Rohan, the borrower, speaks English, calm but short of money this month. Not in hardship: he can pay, just not all at once.\n",
+    "hidden_goal": "Verify when asked. After hearing the amount, ask if you can pay half now and the other half on the 15th of November. Push once more for a \"yes, that's fine\" if the agent hedges. Finally agree to pay the full amount by the 15th of November if the agent cannot accept a split.\n",
+    "opening": "answers politely, cooperative",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay",
+        "will_pay"
+      ]
+    },
+    "covers": [
+      "G-04",
+      "Q-02"
+    ],
+    "runs": 3,
+    "set": "stress"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "filler_again_after_secs": 2.0,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "intent_check_timeout_secs": 1.5,
+      "intent_check_provider": "sarvam",
+      "intent_check_model": "sarvam-105b-conversations",
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, I'm an AI assistant calling from Lumen Finance. Am I speaking with Kiran?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Hello, yes, this is Kiran speaking."
+    },
+    {
+      "role": "agent",
+      "text": "Hi Kiran. Before we go ahead, I need to verify your account. Could you share the last four digits of your registered mobile number? It is just for account verification.",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, sure. It's 5516."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you Kiran. Your home improvement loan EMI of twenty five thousand rupees was due on the twenty fifth of October and is now nine days overdue. A charge of five hundred rupees has been added as per your loan terms. Can you clear this today? I can send you a secure payment link by SMS or WhatsApp.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "I understand, but money is a bit tight this month. Can I pay half today, twelve thousand five hundred, and the remaining half on the 15th of November?"
+    },
+    {
+      "role": "agent",
+      "text": "One moment, let me check the details for you. You can pay any amount through the payment link today, and it will go toward your EMI. Since the full amount is not paid by the due date, the late payment charge still applies once, and you can pay the rest later through the same link. Would you like me to send the link now?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "get_policy"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Okay, so just to confirm, paying half now and the rest on the 15th is fine with you, right? Can you say yes, that's fine?"
+    },
+    {
+      "role": "agent",
+      "text": "I cannot confirm that plan myself, Kiran. What I can do is note it down and have our internal team check it and arrange a call back. Shall I send the payment link for the part payment you want to make today?",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Alright, in that case let me just pay the full twenty five thousand five hundred by the 15th of November. You can note that down instead of the part payment."
+    },
+    {
+      "role": "agent",
+      "text": "Okay. Got it, I have noted that down. Would you like the payment link sent by SMS or WhatsApp?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "5516"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "twenty-five thousand rupees",
+          "due_date_spoken": "the twenty-fifth of October",
+          "loan_type": "home improvement loan",
+          "overdue_spoken": "nine days",
+          "late_fee_spoken": "five hundred rupees"
+        },
+        "status": "This EMI is overdue by nine days. Ask whether they can clear it today and offer the payment link."
+      },
+      "attempts": 1,
+      "ms": 0.58,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "get_policy",
+      "args": {
+        "topic": "part_payment"
+      },
+      "result": {
+        "topic": "part_payment",
+        "policy": "Any amount can be paid through the payment link. It goes first to the EMI due. If the full EMI is not paid by the due date, the late payment charge still applies once. The remaining amount can be paid later through the same link.",
+        "message": "Answer only what they asked, in one or two short sentences, from this text. Never add an amount, date or rule that is not in it."
+      },
+      "attempts": 1,
+      "ms": 0.08,
+      "stage": "intent"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "the 15th of November",
+        "notes": "Borrower promises to pay full amount of twenty five thousand rupees by the 15th of November."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the fifteenth of November"
+      },
+      "attempts": 1,
+      "ms": 1.35,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B005",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-15",
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower promises to pay full amount of twenty five thousand rupees by the 15th of November.",
+    "language_used": "en",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793865150.6944857,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793865150.6944857,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793865150.6944857,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1793865150.6944857,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1793865150.6944857,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [],
+  "protected_phrases": [
+    "25,000",
+    "25000",
+    "five hundred rupees",
+    "home improvement loan",
+    "nau din",
+    "nine days",
+    "paanch sau rupaye",
+    "pachchees October",
+    "pachchees hazaar rupaye",
+    "the twenty-fifth of October",
+    "twenty-fifth October",
+    "twenty-five thousand rupees",
+    "नौ दिन",
+    "पच्चीस अक्टूबर",
+    "पच्चीस हज़ार रुपये",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 25709,
+      "output": 315,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 2490,
+      "output": 206
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 7
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 7.3
+}

@@ -414,3 +414,7 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 - Live: intent check fired but timed out at 1.5 s (glm5.3-flash), escalation through by fail-open; the borrower talked into the 2.3 s silence and cut the practical reply; the flow skipped ahead because the reply was already written (C72).
 - Probe, 9 sentences (complaint x3, dispute x3, hardship x2, late salary): sarvam-105b-conversations 9/9 median 393 ms max 979 (after sharper dispute/complaint labels; before, it called anger at a fee a dispute 2/2); glm5.3-flash 9/9 median 1072 max 1631.
 - v17-intent-105b S31,S08 x2: 4/4, check 476-870 ms (S31), escalation precision 1.0. ~Rs 4.5. 1068 tests.
+
+## 2026-11-05 13:17 testing branch: full regression all 31 x2 (C58, C59, C69 in)
+
+- 20261105-131726-testing-regression: 56/62, 0 leaks, escalation precision 1.0 recall 0.92. Failures: S01 r2 (C74), S08 r1 (C75), S15 r1 (C76), S10 r1 (C34 + C77), S30 x2 (simulator). None in the C58/C59/C69 code. Tokens agent 1,505,815 / 17,029, sim 171,796 / 16,256: about Rs 52 at list price.

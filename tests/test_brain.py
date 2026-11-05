@@ -1410,3 +1410,12 @@ def test_playback_cut_outside_a_flow_changes_nothing(today, tmp_path):
     brain = make(ScriptedLLM([]), today, tmp_path)
     brain.playback_cut()
     assert brain.state.special is None and brain._pending_notes == []
+
+
+# testing-regression S08 run 1: "khelna band karo" (stop this game) is not a stop request.
+@pytest.mark.parametrize("text,stop", [
+    ("Aur yeh personal matter personal matter khelna band karo, seedha batao kitna paisa dena baaki hai.", False),
+    ("Bas karo!", True), ("बस करो।", True), ("Yeh roz roz ke calls band karo.", True),
+    ("band karo yeh baat, I will pay", False)])
+def test_stop_it_words_count_only_when_short_or_about_calls(text, stop):
+    assert is_stop_request(text) is stop

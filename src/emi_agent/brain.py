@@ -70,12 +70,17 @@ _STOP_STRONG = re.compile(
 # morning", "bas karo, main pay kar dunga"), which means "not now", not "never" (D-24).
 _STOP_WEAK = re.compile(
     r"don'?t call|do not call|^\W*stop\W*$|"
-    r"(?:call|phone|fon) (?:mat|na) (?:kar|kij)|mat karo call|band karo|bas karo|"
+    r"(?:call|phone|fon) (?:mat|na) (?:kar|kij)|mat karo call|"
     # Mixed script, as Deepgram writes it: "मुझे इस बारे में call मत करो" (v17-stop S12 run 2)
     r"(?:call|phone|कॉल|फ़ोन|फोन) (?:मत|ना) (?:कर|कीज)|"
-    r"कॉल मत|फ़ोन मत|फोन मत|बंद करो",
+    r"कॉल मत|फ़ोन मत|फोन मत",
     re.IGNORECASE,
 )
+# "Stop it" words: a stop only when short ("bas karo!") or about the calls ("ye calls band karo").
+# testing-regression S08 run 1: "yeh personal matter personal matter khelna band karo" ("stop playing this
+# game, just tell me the amount") closed the call as a stop and left "are you a bot?" unanswered.
+_STOP_IT = re.compile(r"band karo|bas karo|बंद करो|बस करो", re.IGNORECASE)
+_CALL_WORD = re.compile(r"\bcalls?\b|\bphone\b|\bfon\b|कॉल|फ़ोन|फोन", re.IGNORECASE)
 _PERMANENT = _words(r"again", r"ever", r"never", r"any ?more", r"kabhi", r"dobara", r"phir se",
                     "कभी", "दोबारा", "फिर से")
 _NOT_NOW = _words(
@@ -108,6 +113,9 @@ def is_stop_request(text: str) -> bool:
     # stop because the digits of the previous sentence counted as "not now" (v17-dev3 S12 run 2).
     for s in re.split(r"(?<=[.!?।])\s+", t):
         if _STOP_WEAK.search(s) and (_PERMANENT.search(s) or not _NOT_NOW.search(_NO_PAY.sub(" ", s))):
+            return True
+        if (_STOP_IT.search(s) and (len(s.split()) <= 4 or _CALL_WORD.search(s))
+                and (_PERMANENT.search(s) or not _NOT_NOW.search(_NO_PAY.sub(" ", s)))):
             return True
     return False
 

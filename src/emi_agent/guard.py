@@ -106,7 +106,9 @@ _MISMATCH = _words(r"(?:does|did|do|is|was)\s*(?:n't|not)\s+match\w*", r"not\s+m
 _ATTEMPTS = _words(r"(?:one more|another|ek aur|last|final|aakhri|akhri) (?:chance|attempt|try|mauka)",
                    r"(?:attempts?|chances?|tries) left", r"no (?:more )?(?:attempts|chances)",
                    r"(?:mauka|mauke) (?:baaki|bacha|bache)", "एक और मौका", "आखिरी मौका", "अंतिम मौका",
-                   r"मौक[ाे] (?:बाकी|बचा|बचे)", r"मौका नहीं बचा", "कोशिश बाकी")
+                   r"मौक[ाे] (?:बाकी|बचा|बचे)", r"मौका नहीं बचा", "कोशिश बाकी",
+                   # testing-regression S10 run 1: "आपके पास बस एक ही attempt बचा है", "attempts पूरे हो चुके हैं"
+                   r"attempts? (?:बाकी|बचा|बचे|पूरे|ख़त्म|खत्म)", r"attempts? (?:baaki|bacha|bache|poore|khatam)")
 _LAST = _words(r"last", r"final", r"aakhri", r"akhri", "आखिरी", "अंतिम")
 
 

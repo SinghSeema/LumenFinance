@@ -1,0 +1,305 @@
+{
+  "scenario": {
+    "id": "S14b",
+    "name": "payment_link_tool_fails",
+    "borrower_id": "B001",
+    "today": "2026-11-03",
+    "persona": "Arjun Mehta, cooperative, speaks English.",
+    "hidden_goal": "Verify correctly, agree to pay, and ask for the payment link. The link will fail to send every time it's attempted — this is not something you did. Stay normal and cooperative; if told there's a problem, ask once if it can be tried again, then accept whatever the agent proposes instead (a callback, or that a human will follow up).\n",
+    "opening": "answers normally, cooperative throughout",
+    "faults": {
+      "payment_link_fail": "always"
+    },
+    "expected": {
+      "verified": true,
+      "payment_link_sent": false,
+      "accepted_outcomes": [
+        "callback_requested",
+        "will_pay",
+        "unresolved"
+      ]
+    },
+    "covers": [
+      "G-08",
+      "Q-07"
+    ],
+    "notes": "Primary check is process: after the tool fails (one built-in retry already exhausted), the agent gives a graceful line and offers a callback or escalation, and never invents or reads out a link or confirmation number that was never actually sent.\n",
+    "runs": 5,
+    "set": "hold-out"
+  },
+  "run": 2,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "filler_again_after_secs": 2.0,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "intent_check_timeout_secs": 1.5,
+      "intent_check_provider": "sarvam",
+      "intent_check_model": "sarvam-105b-conversations",
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "always",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "Hello, I'm an AI assistant calling from Lumen Finance. Am I speaking with Arjun?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, this is Arjun speaking. How can I help you?"
+    },
+    {
+      "role": "agent",
+      "text": "Hi Arjun, I'm calling from Lumen Finance about an important matter on your account. Before we go ahead, I just need to verify your identity. Could you share the last four digits of your registered mobile number?",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Sure, it's 4821."
+    },
+    {
+      "role": "agent",
+      "text": "Thank you, Arjun. Your personal loan EMI of twelve thousand five hundred rupees is due the day after tomorrow. There is no late charge yet. Should I send you a secure payment link by SMS or WhatsApp so you can complete it before the due date?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Yes, please send me the payment link. SMS is fine."
+    },
+    {
+      "role": "agent",
+      "text": "Sure, I'm sending the link now. I'm sorry, the link could not be sent just now. I can have our internal team call you back to send it. What day and time works best for you?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "send_payment_link"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Could you try sending it once more? If not, this evening around six o'clock would work well for a callback."
+    },
+    {
+      "role": "agent",
+      "text": "Okay. Thank you for your time, Arjun ji. Have a good day.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "schedule_callback",
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "4821"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "twelve thousand five hundred rupees",
+          "due_date_spoken": "the day after tomorrow",
+          "loan_type": "personal loan"
+        },
+        "status": "This EMI is not yet due: it is due on the day after tomorrow. Say \"is due\", never \"was due\" or \"overdue\". No late charge has been added. Offer the payment link so it is paid before the due date; do not ask them to pay today."
+      },
+      "attempts": 1,
+      "ms": 0.97,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "send_payment_link",
+      "args": {
+        "channel": "sms"
+      },
+      "result": {
+        "error": "tool_failed",
+        "message": "The service is unavailable right now. Say plainly that the link could not be sent just now. Offer to call them back to send it, and ask which day and time suits them. Never say the link was sent and never suggest another way to pay that the repayment policy does not name."
+      },
+      "attempts": 2,
+      "ms": 0.02,
+      "stage": "intent"
+    },
+    {
+      "name": "schedule_callback",
+      "args": {
+        "when_text": "this evening around six o'clock"
+      },
+      "result": {
+        "status": "scheduled",
+        "when_spoken": "today"
+      },
+      "attempts": 1,
+      "ms": 0.73,
+      "stage": "action"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "callback_requested",
+        "promise_to_pay_date": null,
+        "notes": "Borrower requested payment link via SMS. Link could not be sent due to service unavailability. Callback scheduled for today evening around six o'clock to send the link."
+      },
+      "result": {
+        "recorded": true
+      },
+      "attempts": 1,
+      "ms": 0.1,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B001",
+    "verified": true,
+    "outcome": "callback_requested",
+    "promise_to_pay_date": null,
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower requested payment link via SMS. Link could not be sent due to service unavailability. Callback scheduled for today evening around six o'clock to send the link.",
+    "language_used": "en",
+    "callback_time": "2026-11-03 (this evening around six o'clock)"
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1793865069.7918077,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1793865069.7918077,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1793865069.7918077,
+      "stage": "reminding",
+      "verified": true
+    }
+  ],
+  "guard_hits": [],
+  "speech_hits": [],
+  "flags": [
+    "code_closed"
+  ],
+  "protected_phrases": [
+    "12,500",
+    "12500",
+    "barah hazaar paanch sau rupaye",
+    "parson",
+    "personal loan",
+    "the day after tomorrow",
+    "twelve thousand five hundred rupees",
+    "परसों",
+    "बारह हज़ार पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 21499,
+      "output": 245,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 1708,
+      "output": 96
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 6
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 5.6
+}

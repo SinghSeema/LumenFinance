@@ -57,7 +57,8 @@ def _latency(rows: list[dict]) -> tuple[str, str]:
     for i, r in enumerate(rows, 1):
         notes = ", ".join(n for n, on in (("interrupted", r.get("interrupted")),
                                            ("after barge-in", r.get("after_barge_in")),
-                                           ("filler (model slow)", r.get("filler")),
+                                           ("filler (model slow)" + (f"; answer at {r['ms']['to_answer']} ms"
+                                            if "to_answer" in r["ms"] else ""), r.get("filler")),
                                            ("bridge line", r.get("bridge") and not r.get("filler"))) if on)
         cells = "".join(f'<td class="n">{r["ms"].get(k, "")}</td>' for k in keys)
         body += f"<tr><td>{i}</td>{cells}<td>{escape(notes)}</td></tr>"

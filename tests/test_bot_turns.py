@@ -30,6 +30,10 @@ class FakeBrain:
         self.fillers = getattr(self, "fillers", 0) + 1
         return "जी, एक second।" if self.fillers == 1 else None
 
+    def slow_filler_again(self):
+        self.fillers_again = getattr(self, "fillers_again", 0) + 1
+        return "बस एक moment और, देख रही हूँ।"
+
     def reply_unheard(self):
         self.unheard = getattr(self, "unheard", 0) + 1
 
@@ -52,8 +56,9 @@ def make(tmp_path, monkeypatch):
     monkeypatch.setattr(FrameProcessor, "process_frame", lambda self, f, d: _noop())
 
     def _make(brain, stt_wait=0.2, unfinished_wait=0.05, silence=(0.2, 0.3, 0.3), hardship_wait=0.05,
-              filler_after=1.2):
+              filler_after=1.2, filler_again=2.0):
         cfg = load(overrides=[f"turn.stt_wait_secs={stt_wait}", f"turn.filler_after_secs={filler_after}",
+                              f"turn.filler_again_after_secs={filler_again}",
                               f"turn.unfinished_wait_secs={unfinished_wait}",
                               f"turn.hardship_unfinished_wait_secs={hardship_wait}",
                               f"turn.silence_after_barge_in_secs={silence[0]}",
@@ -415,3 +420,28 @@ async def test_barge_in_on_audio_of_a_written_reply_tells_the_brain(make):
     p.reply, p.bot_speaking = None, True
     await p._barge_in("बिल्कुल payment नहीं", "interim")
     assert getattr(brain, "playback_cuts", 0) == 1
+
+
+# C69, live calls 4 Nov: Sarvam timed out and the Groq fallback answered ~4 s after the filler, in silence.
+async def test_very_slow_model_gets_one_more_filler_then_the_reply(make):
+    brain = FakeBrain(delay=0.5)
+    p = make(brain, filler_after=0.1, filler_again=0.15)
+    await feed(p, VADUserStartedSpeakingFrame(), final("Mera date of birth 18 December 1983."),
+               VADUserStoppedSpeakingFrame(), settle=0.8)
+    assert _texts(p) == ["जी, एक second।", "FLUSH", "बस एक moment और, देख रही हूँ।", "FLUSH", "Theek hai."]
+    assert brain.fillers_again == 1
+
+
+async def test_reply_before_the_second_filler_gets_none(make):
+    brain = FakeBrain(delay=0.2)
+    p = make(brain, filler_after=0.1, filler_again=0.4)
+    await feed(p, VADUserStartedSpeakingFrame(), final("Yes."), VADUserStoppedSpeakingFrame(), settle=0.8)
+    assert _texts(p) == ["जी, एक second।", "FLUSH", "Theek hai."] and not hasattr(brain, "fillers_again")
+
+
+def test_filler_turn_reports_the_real_wait_to_the_answer():
+    from emi_agent.latency import Turn, report
+    t = Turn(vad_stop=10.0, stt_final=10.5, first_sentence=11.2, playback_start=11.5, filler=True, answer=15.3)
+    assert t.stages_ms()["gap"] == 1500 and t.stages_ms()["to_answer"] == 5300
+    row = {"interrupted": False, "filler": True, "stop_secs": 0.5, "ms": t.stages_ms()}
+    assert "real wait to the answer on those turns: 5300 ms" in report([row])

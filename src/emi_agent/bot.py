@@ -114,6 +114,7 @@ class BrainProcessor(FrameProcessor):
         self.slowed = False            # the slower pace was sent to TTS (kept for the rest of the call)
         self.min_words = config["turn"]["min_words_interrupt"]
         self.filler_after = config["turn"].get("filler_after_secs") or 0  # 0: no slow-model filler (C47)
+        self.filler_again_after = config["turn"].get("filler_again_after_secs") or 0  # second filler (C69)
         self.latency_path = latency_path
         self.heard: list[str] = []      # final transcript pieces of the borrower's current turn
         self.pending = ""               # latest interim text Deepgram has not finalized yet
@@ -280,7 +281,7 @@ class BrainProcessor(FrameProcessor):
         """All sentences of one reply go to TTS as one LLM-style response, so Sarvam speaks them
         back to back. Separate TTSSpeakFrames made TTS wait for each sentence to finish playing
         before starting the next (0.2-0.9 s gaps, owner calls 2026-11-03)."""
-        reply = {"started": False, "first": False}  # TTS response opened; a first line went out
+        reply = {"started": False, "first": False, "model": False}  # TTS opened; a first line; the reply itself
         lock = asyncio.Lock()  # the filler and the reply's first sentence must not interleave
         self.last_agent_text = ""
 
@@ -315,15 +316,27 @@ class BrainProcessor(FrameProcessor):
             if reply["first"]:
                 return
             line = self.brain.slow_filler()
-            if line:
-                reply["first"] = True
-                await send(Sentence(line, bridge=True), filler=True)
+            if not line:
+                return
+            reply["first"] = True
+            await send(Sentence(line, bridge=True), filler=True)
+            # C69, live calls 4 Nov: Sarvam timed out at 2.5 s and the Groq fallback answered ~4 s after the
+            # filler, in silence. Still nothing from the reply this long after the filler: one more line.
+            if not self.filler_again_after:
+                return
+            await asyncio.sleep(self.filler_again_after)
+            if not reply["model"]:
+                await send(Sentence(self.brain.slow_filler_again(), bridge=True), filler=True)
 
         watch = self.create_task(filler_after_silence()) if self.filler_after else None
         try:
             async with aclosing(self.brain.respond(text, hint)) as sentences:
                 async for s in sentences:
                     reply["first"] = True  # set before any await: the filler must not follow it
+                    if not reply["model"]:
+                        reply["model"] = True
+                        if turn and turn.filler and turn.answer is None:
+                            turn.answer = time.monotonic()  # the real wait on a filler turn (C69)
                     await send(s)
         finally:
             if watch and not watch.done():

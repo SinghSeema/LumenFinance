@@ -386,6 +386,10 @@ class Brain:
         self._filler = context.bridge("_slow", self.state.reply_language, self.script, n=n)
         return self._filler
 
+    def slow_filler_again(self) -> str:
+        """The second, last filler of a turn, when the model is still silent after the first (C69)."""
+        return context.bridge("_slow_again", self.state.reply_language, self.script)
+
     def _plain_close(self, calls: list, results: list[dict], spoken: list[str]) -> bool:
         """C45, live call B004 19:31: after record_outcome the model took one more request (0.4 s, more
         with retries) only to say the fixed goodbye. Skip it when nothing else is owed: the only call

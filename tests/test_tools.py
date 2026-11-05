@@ -679,3 +679,17 @@ def test_hardship_step_two_sends_the_link_only_on_a_clear_yes():
     from emi_agent import special
     text = special.instruction("hardship", 1)
     assert "Only if they clearly said they will pay a part now" in text and "shayad" in text
+
+
+# C58, v17-holdout-fix S14b run 1: failed link, then a call back offered with no time.
+def test_failed_link_tells_the_agent_to_ask_for_a_call_back_time(borrower, today):
+    tools, state = verified_tools(borrower, today, payment_link_fail="always")
+    r = tools.call("send_payment_link", {"channel": "whatsapp"})
+    assert r["error"] == "tool_failed" and "which day and time suits them" in r["message"]
+    assert "Never say the link was sent" in r["message"]
+
+
+def test_vague_callback_time_asks_once_instead_of_giving_up(borrower, today):
+    tools, state = verified_tools(borrower, today)
+    r = tools.call("schedule_callback", {"when_text": "I'll wait for your team to get back to me"})
+    assert r["status"] == "ambiguous" and "Never say it could not be set up" in r["message"]

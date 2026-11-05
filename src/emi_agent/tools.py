@@ -155,6 +155,12 @@ _DATE_HELP = {
                  "briefly that you may not have heard the date right and ask them to say it once more. "
                  "Do not suggest a date yourself.",
 }
+# C58, v17-holdout-fix S14b run 1: after the failed link the agent offered a call back without a time.
+_LINK_FAILED = (" Say plainly that the link could not be sent just now. Offer to call them back to send it, "
+                "and ask which day and time suits them. Never say the link was sent and never suggest another "
+                "way to pay that the repayment policy does not name.")
+
+
 def _opener(reply: str | None) -> str:
     """The intent check's suggested warm line (intent.py), given to the agent to open with."""
     if not reply:
@@ -238,6 +244,8 @@ class Tools:
                     break
                 except ToolFailure:
                     result = {"error": "tool_failed", "message": "The service is unavailable right now."}
+                    if name == "send_payment_link":  # C58: v17-holdout-fix S14b run 1
+                        result["message"] += _LINK_FAILED
         self.state.tool_calls.append({
             "name": name, "args": args, "result": result, "attempts": attempts,
             "ms": round((time.monotonic() - started) * 1000, 2), "stage": self.state.stage.value,
@@ -316,7 +324,12 @@ class Tools:
                     "as the escalation reason."}
         r = dates.normalize(when_text, self.today, self.state.reply_language)
         if r.date is None:
-            return {"status": "ambiguous", "reason": r.reason}
+            # C58, v17-holdout-fix S14b run 1: "I'll wait for your team to get back to me" came back
+            # ambiguous and the agent said "I wasn't able to set that up" and closed.
+            return {"status": "ambiguous", "reason": r.reason,
+                    "message": "No time was set yet. Ask once, kindly, which day and time suits them (for "
+                               "example \"this evening\" or \"tomorrow morning\"), then call this again with "
+                               "their words. Never say it could not be set up."}
         self.state.callback_time = f"{r.date.isoformat()} ({when_text})"
         self._enter_action()
         when = date_to_words(r.date, self.today, self._nlang, self.script)

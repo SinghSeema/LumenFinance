@@ -46,6 +46,7 @@ turn:
   hardship_unfinished_wait_secs: 1.2  # unfinished wait once hardship is heard: an upset borrower pauses mid-sentence (live call 16:03)
   min_words_interrupt: 2      # words needed to count as a real barge-in (a stop request always counts)
   filler_after_secs: 1.2      # the model has said nothing this long after the turn: code says "जी, एक second" (C47); 0 = off
+  filler_again_after_secs: 2.0  # still nothing this long after that filler: "बस एक moment और, देख रही हूँ" once (C69); 0 = off
   silence_after_barge_in_secs: 4  # a barge-in with no borrower turn after it: prompt this soon (live call 2026-11-04)
   silence_prompts_secs: 8     # agent finished and nobody spoke: "can you hear me?" (or the greeting again if it was cut)
   silence_close_secs: 10      # still silent this long after that prompt: polite close, outcome unresolved

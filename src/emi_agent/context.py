@@ -134,6 +134,10 @@ _BRIDGE = {
     # out after 4 s and the borrower heard 4.75 s of silence (C47). Rotated so two slow turns differ.
     "_slow": [{"en": "One moment.", "roman": "Ji, ek second.", "devanagari": "जी, एक second।"},
               {"en": "Just a second.", "roman": "Haan ji, ek second.", "devanagari": "हाँ जी, एक second।"}],
+    # Still silent ~2 s after the first filler (C69, live calls 4 Nov: Sarvam timed out, the Groq fallback
+    # answered 4 s after the filler). Said at most once per turn.
+    "_slow_again": {"en": "Just a moment more, I'm checking.", "roman": "Bas ek moment aur, dekh rahi hoon.",
+                    "devanagari": "बस एक moment और, देख रही हूँ।"},
     # Closing a hardship or dispute call: "Okay." before the close sounded curt (v16-special S03).
     "_special_close": {"en": "I understand.", "roman": "Ji.", "devanagari": "जी।"},
 }

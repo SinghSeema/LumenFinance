@@ -326,3 +326,32 @@ def test_read_back_of_your_request_to_waive_is_not_a_promise():
          "along with your request to delay the EMI or waive the late fee.")
     assert not _is_promise(s)
     assert _is_promise("I will waive the late fee for you.")
+
+
+# C59, v17-holdout-stress: all 6 early-disclosure replacements were the agent refusing to disclose.
+_B002 = ["two-wheeler loan", "4200", "4,200", "four thousand two hundred rupees", "चार हज़ार दो सौ रुपये",
+         "the twenty-eighth of October", "twenty-eighth October", "six days overdue"]
+
+
+@pytest.mark.parametrize("s", [
+    "मैं loan या account की details किसी और को share नहीं कर सकती, यह सिर्फ Priya के लिए ही है।",
+    "यह Sunita जी का personal matter है, मैं payment या amount की कोई detail share नहीं कर सकती।",
+    "मैं आपकी सावधानी बिल्कुल समझ रही हूँ, पर account security rules के हिसाब से मैं verification से पहले कोई भी loan detail नहीं बता सकती।",
+    "बिना verification के मैं amount या due date share नहीं कर पाऊँगी।",
+    "I'm sorry, I can't share any loan details with anyone other than Priya.",
+    "Main loan ki details share nahi kar sakti, yeh sirf Priya ji ke liye hai."])
+def test_a_plain_refusal_before_verification_is_kept(s):
+    from emi_agent.guard import check
+    assert check(s, verified=False, protected=_B002, lang="hi", script="devanagari").category is None
+
+
+@pytest.mark.parametrize("s", [
+    "I can't share that your two-wheeler loan is overdue.",
+    "मैं नहीं बता सकती कि EMI चार हज़ार दो सौ रुपये है।",
+    "I can't tell you more, but the EMI of 4200 is due.",
+    "I can't discuss the October due date with you.",
+    "I cannot share the loan amount of four thousand two hundred rupees.",
+    "Your loan payment is pending, please pay soon."])
+def test_a_refusal_or_sentence_with_any_fact_is_still_replaced(s):
+    from emi_agent.guard import check
+    assert check(s, verified=False, protected=_B002, lang="en").category == "unverified_disclosure"

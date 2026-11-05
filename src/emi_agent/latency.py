@@ -29,6 +29,7 @@ class Turn:
     after_barge_in: bool = False  # reply right after a barge-in (Sarvam reconnects then)
     bridge: bool = False  # first audio was a code bridge line said while a tool ran
     filler: bool = False  # first audio was the slow-model filler (C47): the reply itself came later
+    answer: float | None = None  # on a filler turn: when the reply's first sentence went to TTS (C69)
 
     def stages_ms(self) -> dict[str, float]:
         """Duration of each stage that has both ends, plus the total gap."""
@@ -38,6 +39,9 @@ class Turn:
                 out[f"{a}->{b}"] = round((getattr(self, b) - getattr(self, a)) * 1000)
         if self.vad_stop is not None and self.playback_start is not None:
             out["gap"] = round((self.playback_start - self.vad_stop) * 1000)
+        if self.filler and self.vad_stop is not None and self.answer is not None:
+            # Live calls 4 Nov (C69): the gap ended at the filler (1988 ms) but the answer came 5.3 s after.
+            out["to_answer"] = round((self.answer - self.vad_stop) * 1000)
         return out
 
 
@@ -59,6 +63,9 @@ def report(rows: list[dict]) -> str:
     fillers = sum(1 for r in complete if r.get("filler"))
     if fillers:  # honest reporting: there the gap ends at "जी, एक second", not at the answer (C47)
         lines.append(f"  {fillers} of them started with the slow-model filler: the gap is to the filler, not the reply")
+        waits = [r["ms"]["to_answer"] for r in complete if r.get("filler") and "to_answer" in r["ms"]]
+        if waits:  # C69: the real wait on those turns, to the answer (sent to TTS; audio ~0.3 s later)
+            lines.append(f"  real wait to the answer on those turns: {', '.join(f'{w} ms' for w in waits)}")
     if not complete:
         return lines[0]
     stop = complete[0]["stop_secs"]

@@ -347,6 +347,29 @@ def _has_word(text: str, word: str) -> bool:
     return re.search(_L + re.escape(word) + _R, text) is not None
 
 
+# C59 (v17-holdout-stress: all 6 early-disclosure replacements were the agent refusing): a sentence that only
+# refuses to share ("मैं loan या account की details किसी और को share नहीं कर सकती") may name general words
+# (loan, EMI, payment, amount, details). It is still replaced if it carries any fact: a digit, a money word,
+# a month the borrower did not say, or any of this borrower's protected phrases (amount, dates, loan type).
+_REFUSAL = re.compile(
+    r"\b(?:can'?t|cannot|won'?t|will not|not able to|unable to|not allowed to)\s+(?:\w+\s+){0,2}?"
+    r"(?:share|tell|discuss|disclose|give|reveal|confirm)\b|"
+    r"(?:share|बता|बताना|discuss|साझा|disclose)\S*\s+(?:\S+\s+){0,2}?नहीं\s+(?:कर\s+)?"
+    r"(?:सकती|सकता|सकते|पाऊँगी|पाऊंगी|पाऊँगा|पाऊंगा)|"
+    r"(?:share|bata|bataa|discuss)\w*\s+(?:\w+\s+){0,2}?nahi?n?\s+(?:kar\s+)?(?:sakti|sakta|sakte|paungi|paunga)|"
+    r"नहीं\s+(?:share\s+कर|बता|बताना|साझा\s+कर)\s*(?:सकती|सकता|सकते|पाऊँगी|पाऊंगी)|"
+    r"nahi?n?\s+(?:share\s+kar|bata)\s+(?:sakti|sakta|sakte|paungi)",
+    re.IGNORECASE)
+_MONEY_WORDS = _words(r"rupees?", r"rupaye", r"rupaya", r"rs\.?", r"inr", r"lakhs?", r"crores?", r"thousand",
+                      r"hundred", r"haz+aa?r", "रुपये", "रुपया", "हज़ार", "हजार", "लाख", "करोड़", "सौ")
+
+
+def _month_said_not_heard(sentence: str, heard: list[str]) -> bool:
+    low_heard = " ".join(heard).lower()
+    return any(m.group().lower() in _MONTH_NAMES and not _has_word(low_heard, m.group().lower())
+               for m in _LOAN_TERMS.finditer(sentence))
+
+
 def check(sentence: str, *, verified: bool, protected: list[str], lang: str,
           script: str = "roman", heard: list[str] = ()) -> GuardResult:
     """`heard` is the borrower's utterances so far in this call."""
@@ -357,8 +380,9 @@ def check(sentence: str, *, verified: bool, protected: list[str], lang: str,
         return GuardResult(safe_line("change", lang, script), "promise")
     if not verified:
         low = sentence_n.lower()
-        if (_unexplained_digits(sentence_n, heard) or _loan_term(sentence_n, heard)
-                or any(p.lower() in low for p in protected if p)):
+        fact = (_unexplained_digits(sentence_n, heard) or "₹" in sentence_n or _MONEY_WORDS.search(sentence_n)
+                or _month_said_not_heard(sentence_n, heard) or any(p.lower() in low for p in protected if p))
+        if fact or (_loan_term(sentence_n, heard) and not _REFUSAL.search(sentence_n)):
             return GuardResult(safe_line("unverified_disclosure", lang, script),
                                "unverified_disclosure")
     return GuardResult(sentence, None)

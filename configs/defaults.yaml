@@ -26,10 +26,10 @@ llm:
   model: sarvam-105b-conversations
   effort: low                 # Anthropic only; Haiku 5.5 rejects temperature, so none is sent
   max_tokens: 1024            # replies are short; headroom keeps tool inputs from truncating
-  temperature: 0.3            # Groq only
+  temperature: 0.3               # agent model (Sarvam and Groq); the intent check uses 0
   reasoning_effort: low       # Groq gpt-oss only: low | medium | high; null = Groq default (medium). Owner set low 2026-11-03 (T5 n=1: first text 632 vs 1512 ms)
   max_retries: 2              # SDK retries on 429/5xx; evals raise it to ride out the free-tier per-minute cap
-  timeout_secs: null          # per-request network timeout; null = SDK default (60 s). Voice sets 4
+  timeout_secs: null          # per-request network timeout; null = SDK default (60 s). Voice sets 2.5 (bot.py, D-46)
   fallback:                   # tried in order if the primary errors; each Groq model has its own quota
     - provider: groq
       model: openai/gpt-oss-20b
@@ -70,7 +70,7 @@ behavior:
 
 evals:
   judge_provider: sarvam      # groq | sarvam. evals/judge.py (2026-11-04); a different family from the agent (E-08)
-  judge_model: glm5.3-flash   # tone (M7) and guardrail wording (M5); uncalibrated until hand labels
+  judge_model: glm5.3-flash   # tone (M7) and guardrail wording (M5); calibrated 2026-11-04 on 9 owner labels: 78% within one point, about +1 lenient on clarity and naturalness
   simulator_provider: sarvam  # groq | sarvam. Sarvam since 2026-11-04: Groq's free daily cap cut the v5 dev run short
   simulator_model: glm5.3-flash  # different model family from the agent (was qwen/qwen3.8-27b on Groq)
   simulator_temperature: 0.8

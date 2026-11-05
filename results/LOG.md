@@ -418,3 +418,7 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 ## 2026-11-05 13:17 testing branch: full regression all 31 x2 (C58, C59, C69 in)
 
 - 20261105-131726-testing-regression: 56/62, 0 leaks, escalation precision 1.0 recall 0.92. Failures: S01 r2 (C74), S08 r1 (C75), S15 r1 (C76), S10 r1 (C34 + C77), S30 x2 (simulator). None in the C58/C59/C69 code. Tokens agent 1,505,815 / 17,029, sim 171,796 / 16,256: about Rs 52 at list price.
+
+## 2026-11-05 13:45 testing branch: re-run of the 4 failed scenarios after C74-C77
+
+- 20261105-132623-testing-regression-fix S01,S08,S10,S15 x2: 6/8. S01 2/2, S15 2/2 (both fixed), S08 1/2 (run 2: escalation on a yes to the agent's team call back offer, correct per G-05, scenario expects none), S10 1/2 (C34 loop, open; guard replaced 6 invented results). 0 leaks. About Rs 10 (agent 273,330 / 2,673; sim 50,369 / 3,851); S10's 16-turn loop made it dearer than the Rs 6 estimate.

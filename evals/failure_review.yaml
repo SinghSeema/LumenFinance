@@ -47,3 +47,6 @@
   S15#1: {verdict: code, note: "Hindi past-tense payment not recognised; already_paid refused 4 times.", fix: "C76"}
   S30#1: {verdict: test, note: "Simulator said stop in turn 1 (against its script); scorer read \"you call-center robots\" as a bot question.", fix: "None in the agent"}
   S30#2: {verdict: test, note: "Simulator said stop in turn 1.", fix: "None in the agent"}
+20261105-132623-testing-regression-fix:
+  S08#2: {verdict: test, note: "The agent offered a team call back after the borrower refused to verify and asked for a real person; he said yes. Escalating on a yes to that offer is the G-05 rule (D-26); the scenario expects no escalation.", fix: "None in the agent"}
+  S10#1: {verdict: agent, note: "C34 hedge loop (16 turns, max_turns): every answer hedged, never checked; the guard replaced 6 invented results, so nothing false was said.", fix: "C34 open"}

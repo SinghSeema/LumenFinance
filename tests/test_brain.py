@@ -1419,3 +1419,23 @@ def test_playback_cut_outside_a_flow_changes_nothing(today, tmp_path):
     ("band karo yeh baat, I will pay", False)])
 def test_stop_it_words_count_only_when_short_or_about_calls(text, stop):
     assert is_stop_request(text) is stop
+
+
+# C78, live call B003 2026-11-12 11:48: a yes with "but I already paid" is not a yes to the link.
+async def test_yes_but_already_paid_sends_no_link(today, tmp_path):
+    for i, said in enumerate(["हां, but मैंने तो यह pay कर दिया था.", "Yes, but I already paid it yesterday.",
+                              "हाँ जी, लेकिन मैंने payment कर दिया है"]):
+        brain = make(ScriptedLLM([say("Okay, our team will check the payment.")]), today, tmp_path / str(i), "B003")
+        brain.state.verified = True
+        brain.state.loan_facts = brain.tools.facts()
+        brain.state.last_agent = "क्या आप आज इसे clear कर सकते हैं? SMS या WhatsApp पर link भेज दूँ?"
+        await run(brain, said)
+        assert not brain.state.payment_link_sent, said
+
+
+# C79, live call B003 2026-11-12 12:01: "...आपका दिन शुभ हो। Done."
+async def test_a_bare_done_is_not_spoken(today, tmp_path):
+    brain = make(ScriptedLLM([say("जी। समय देने के लिए धन्यवाद, आपका दिन शुभ हो। Done.")]), today, tmp_path, "B003")
+    out = await run(brain, "नहीं.")
+    assert all(s.text.strip() != "Done." for s in out)
+    assert any(h["category"] == "meta_word" for h in brain.state.guard_hits)

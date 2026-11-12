@@ -18,7 +18,7 @@ from emi_agent.llm import LLMError
 from emi_agent.outcome import Outcome, OutcomeRecord, append_record
 from emi_agent.state import Borrower, CallState, Stage
 from emi_agent.speech_format import amount_to_words, hindi_date_forms
-from emi_agent.tools import _YES, TOOL_SCHEMAS, Tools, loan_facts, protected_phrases
+from emi_agent.tools import _PAID, _YES, TOOL_SCHEMAS, Tools, loan_facts, protected_phrases
 
 # "भेज दीजिए" / "send it" without a "yes" first (C48).
 _SEND_IT = re.compile(r"^\W*(?:भेज (?:दीजिए|दीजिये|दो|दें|देना)|bhej (?:dijiye|do|dein|dena)|send (?:it|me|the link))",
@@ -130,6 +130,12 @@ _GOOD_LEAD = re.compile(
     r"(?:aapke |aapka )?(?:bahut )?(?:samay (?:dene )?ke liye )?(?:bahut )?dhanyavaa?d|shukriya)?", re.IGNORECASE)
 _CLOSE_LEAD = re.compile(r"thank|time|समय|samay|धन्यवाद|dhanyavaa?d|shukriya|शुक्रिया|okay|ok|ji|जी|theek|ठीक",
                          re.IGNORECASE)
+
+
+_BUT = re.compile(r"\b(?:but|however|lekin|magar|par)\b|लेकिन|मगर|(?<![ऀ-ॿ])पर(?![ऀ-ॿ])", re.IGNORECASE)
+# C79, live call B003 2026-11-12 12:01: "...आपका दिन शुभ हो। Done." A bare word the model adds to mark its
+# own end is not speech.
+_META_WORD = re.compile(r"\W*(?:done|finished|end|over|end of (?:reply|response|call))\W*", re.IGNORECASE)
 
 
 # The borrower asks to be called later ("call me back", "do ghante baad call kar lijiye").
@@ -377,8 +383,11 @@ class Brain:
         question = s.last_agent.rsplit("?", 1)[0].rsplit("।", 1)[-1].rsplit(".", 1)[-1] if "?" in s.last_agent else ""
         offered = "link" in question.lower() and not s.special
         plain_yes = (bool(_YES.search(user_text)) or bool(_SEND_IT.search(user_text))) and "?" not in user_text
+        # C78, live call B003 2026-11-12 11:48: "हां, but मैंने तो यह pay कर दिया था" sent the link to a borrower
+        # saying she had paid. A yes with "but" or a payment already made is not a yes to the link.
         if (not s.verified or s.payment_link_sent or not offered or not plain_yes
-                or guard.names_channel(user_text) or _NEGATION.search(user_text)):
+                or guard.names_channel(user_text) or _NEGATION.search(user_text)
+                or _PAID.search(user_text) or _BUT.search(user_text)):
             return
         result = self.tools.call("send_payment_link", {"channel": "whatsapp"})
         if result.get("sent"):
@@ -618,6 +627,10 @@ class Brain:
         """The sentence as it will be spoken, or None to drop it."""
         s = self.state
         if self._muted:
+            return None
+        if _META_WORD.fullmatch(sentence):
+            s.guard_hits.append({"category": "meta_word", "original": sentence, "spoken": "",
+                                 "stage": s.stage.value, "verified": s.verified})
             return None
         if s.special and self._asked_this_turn:
             # A person stops after a question: "Is this short-term? ... They will arrange a call back."

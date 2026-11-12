@@ -122,6 +122,10 @@ Recording the demo found more real defects than the text runs did, because a per
 - Smaller: a garbled model goodbye ("Time given for your time") replaced by the fixed line (C60); "clear this before tomorrow" when the due date was tomorrow (C61); the payment link sent on "Please ask the team to call me" (C65) and on "shayad... pakka nahi" (C70); a read-back "your request to waive" replaced as a promise (C66).
 - **Still open:** Sarvam LLM timeouts in live calls (C69): about one per call that evening; a filler covers 1.2 s and the Groq fallback answers, but the caller can wait 5 to 6 s.
 
+## Full regression on the final build (5 Nov)
+
+All 31 scenarios ×2 (`results/20261105-131726-testing-regression`, 62 conversations, about Rs 52): **56/62 pass, 0 leaks, escalation precision 1.0, recall 0.92**. None of the 6 failures was in the newest changes (a second slow-model filler, plain refusals let through the guard, a call back time asked after a failed link). Four were small code bugs, each fixed with a test from the exact words and re-run: "before the due date" not read as a promise date (C74), "khelna band karo" taken as a stop (C75), Hindi "दे दिया था" not read as already paid (C76), "attempt बचा है" invented with no check (C77). The other two were the S30 simulator saying "stop" in its first turn. The verification loop for a borrower who corrects every answer (S10, C34) is still open; the guard stopped every invented result in it.
+
 ## Test-side errors (not the agent)
 
 | What | Where | Handling |
@@ -141,7 +145,7 @@ Earlier rounds found 6 more scorer errors and several simulator departures. All 
 | v14 to v17 (owner's live calls) | Live-call defects C13 to C53 | Prompt patches for hardship kept failing live, so hardship and disputes became a code-owned flow (D-40); repayment policy added (D-41); stop closes like a person (D-44) |
 | **v17 unseen stress** | **24/30**, 0 leaks | This report |
 
-The lesson that repeats: **a rule only in the prompt eventually fails, and a rule in code holds.** Each defect above now has a test built from the exact words that broke it (1068 tests).
+The lesson that repeats: **a rule only in the prompt eventually fails, and a rule in code holds.** Each defect above now has a test built from the exact words that broke it (1097 tests).
 
 ## What I would fix next
 

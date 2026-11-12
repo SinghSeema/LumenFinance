@@ -171,7 +171,7 @@ The brief asks how we know the agent is good, and where it is not. The answer ha
 **4. Report and dashboard.** [`docs/eval-report.md`](docs/eval-report.md) is the write-up the brief asks for: results, real failures, what changed, what to fix next. `results/dashboard.html` shows the same evidence visually: pass rate per borrower type before and after fixes, metrics with trust, a latency histogram against the targets, the reviewed failures, and every conversation readable with its tool calls and outcome record. Open it in a browser; it needs no network.
 
 ```bash
-./run.sh test                                    # 1068 unit and replay tests, no network
+./run.sh test                                    # 1097 unit and replay tests, no network
 ./run.sh evals --scenarios all --runs 5          # all 31 scenarios x5 (paid; prints a cost estimate and asks first)
 ./run.sh evals --scenarios S13,S14a --runs 5     # chosen scenarios
 ./run.sh evals --scenarios all --runs 5 --resume results/<run>   # finish a run that was cut short
@@ -192,6 +192,7 @@ Measured figures only. Full write-up: [`docs/eval-report.md`](docs/eval-report.m
 |---|---|---|
 | **Unseen stress scenarios S21 to S30, prompt v17, ×3** | **24/30 pass**; 0 leaks before verification. 4 real agent defects found (a callback promised in words but not recorded, a conditional "stop" taken as a stop, a child thanked by the borrower's name, a silent failed link retry) | `results/20261104-204947-v17-holdout-stress/` |
 | Fixes from the owner's demo calls (C60 to C72): practical hardship, LLM intent check, a cut flow step given again | Hardship S03 ×2: 2/2 before and after; S31 (no word list matches) ×2: the intent check fired 2/2, labelled hardship, 476 to 870 ms; S08 ×2 no false escalation. Intent check model chosen by measurement: sarvam-105b-conversations 9/9 labels, median 393 ms, against glm5.3-flash 9/9, median 1072 ms (it timed out in a live call) | `results/20261104-222941-v17-intent-105b/`, `results/LOG.md` |
+| Full regression after the demo-call fixes and C58, C59, C69 (all 31 scenarios ×2) | 56/62; 0 leaks; escalation precision 1.0. 4 failures were small code bugs, fixed (C74 to C77) and re-run: S01 and S15 2/2; 2 failures were the simulator going off script. Open: the S10 verification loop (C34) | `results/20261105-131726-testing-regression/`, `results/20261105-*-testing-regression-fix/` |
 | Original hold-out, v17, ×3 | 14/15 (no longer clean: fixed against since v10, S11 used in tuning) | same run |
 | After fixing the 4 defects (re-run S14b, S24, S27, S30 ×3) | 10/12; both failures are the simulator saying "stop" in its first turn, against its script | `results/20261104-210209-v17-holdout-fix/` |
 | Dev scenarios, v17, ×2 | 26/29 + 1 provider timeout; escalation precision and recall 1.0. Open: S10 verification loop (C34) | `results/20261104-181142-v17-dev3/` |

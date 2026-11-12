@@ -106,6 +106,8 @@ How issues are found: text evals (the real agent Brain against an LLM-played bor
 | C75 | "yeh personal matter khelna band karo" (stop this game) closed the call as a stop; "are you a bot?" left unanswered | testing-regression S08 run 1 | Bare "band karo/bas karo" counted as a stop | Only when short ("bas karo!") or about the calls | 5 tests | Done on testing |
 | C76 | "मैंने तो पूरा amount पहले ही दे दिया था ... pay किया था" refused as already paid 4 times; the payment check never reached the team | testing-regression S15 run 1 | C32's past-tense list missed these Hindi forms | Forms added (दे दिया, pay किया था, payment किया था, de diya, pay kiya tha) | 2 tests | Done on testing |
 | C77 | "आपके पास बस एक ही attempt बचा है" and "attempts पूरे हो चुके हैं" said with no check run (S10, C34 loop) | testing-regression S10 run 1 | The invented-result guard knew "मौका बचा" but not "attempt बचा / पूरे" | Patterns added; C34 (the loop itself) still open | 2 tests | Done on testing |
+| C78 | "हां, but मैंने तो यह pay कर दिया था" got the payment link sent and "link मैंने WhatsApp पर भेज दिया है" said to a borrower saying she had paid | Owner live call B003 2026-11-12 11:48 (results/calls/20261112-114843-B003.html) | The yes-to-link rule (C48) saw "हां" | A yes with but/lekin/पर or a payment already made is not a yes to the link | 3 tests from the call | Done; not yet tried live |
+| C79 | "...आपका दिन शुभ हो। Done." spoken | Owner live call B003 2026-11-12 12:01 | The model marked its own end with "Done." | A bare "Done/Finished/End" sentence is dropped before speech | Test | Done; not yet tried live |
 
 ### Verification and dates (guardrails)
 

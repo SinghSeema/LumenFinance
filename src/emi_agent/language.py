@@ -57,8 +57,20 @@ class LanguageTracker:
         self.current = initial
         self.used = [initial]
         self._pending = 0
+        self.pinned = False
+
+    def pin(self, lang: str) -> bool:
+        """C80: the borrower asked for this language by name. It holds until they ask again: their
+        own words in the other language ("haan theek hai" after "can you speak in English?") no
+        longer flip it. A request for the family already spoken changes nothing."""
+        self.pinned, self._pending = True, 0
+        if _family(lang) == _family(self.current):
+            return False
+        return self._set(lang)
 
     def update(self, detected: str, words: int = 0) -> bool:
+        if self.pinned and _family(detected) != _family(self.current):
+            return False
         if _family(detected) == _family(self.current):
             self._pending = 0
             return self._set(detected)
@@ -107,6 +119,49 @@ def asks_numbers_in(text: str) -> str | None:
         return None
     hits = [style for style, pattern in _ASK_NUMBERS.items() if pattern.search(text)]
     return hits[0] if len(hits) == 1 else None
+
+
+# C80 (live call B002, 2026-11-12): "क्या आप English में बात कर सकते हैं?" is itself a Hindi sentence,
+# and "Can you speak in English?" is too short to switch alone, so the call stayed in Hindi. A request
+# for the reply language by name now switches at once. Only with a speaking verb: "amount English mein
+# bataiye" still asks for the numbers only (C44).
+_LANG_NAMES = {
+    "en": re.compile(r"(?<![a-z])(?:english|angrezi|angreji)(?![a-z])|इंग्लिश|अंग्रेज़ी|अंग्रेजी", re.IGNORECASE),
+    "hi": re.compile(r"(?<![a-z])hindi(?![a-z])|हिंदी|हिन्दी", re.IGNORECASE),
+}
+_TALK = re.compile(r"\b(?:speak\w*|talk\w*|conversation|converse|chat|communicate|continue|baat|bol\w*)\b"
+                   r"|बात|बोल", re.IGNORECASE)
+_NUMBER_TOPIC = re.compile(r"\b(?:amount|number|numbers|rupees?|rupaye|rupaiye|digits?|figures?|dates?|tareekh|tarikh"
+                           r"|paise|paisa)\b|रकम|राशि|अमाउंट|नंबर|रुपय|रुपए|रुपये|तारीख|पैसे", re.IGNORECASE)
+# "I don't understand Hindi", "Hindi samajh nahi aati", "मुझे English नहीं आती": asks for the other one.
+_CANT = re.compile(r"\b(?:don'?t|do not|can'?t|cannot)\s+(?:speak|understand|follow|know)\b"
+                   r"|\bsamajh\w*\s+(?:nahi|nahin|nai)\b|\b(?:nahi|nahin|nai)\s+(?:samajh|aat|bol|kar\s+(?:sak|pa))\w*"
+                   r"|(?:नहीं|नही)\s*(?:आत|समझ|बोल|कर\s*(?:सक|पा))|समझ\S*\s+(?:नहीं|नही)\b|(?:नहीं|नही)\s*$"
+                   # "Hindi mein money ki baat thodi difficult lagti hai" (text run S32, C80)
+                   r"|\b(?:difficult|mushkil|hard)\b|मुश्किल|कठिन", re.IGNORECASE)
+_PLEASE_ONLY = re.compile(r"\W*(?:in\s+)?\S+\s*(?:please|plz|प्लीज़|प्लीज)\W*", re.IGNORECASE)
+
+
+def asks_language(text: str) -> str | None:
+    """'en' or 'hi' when the borrower asks for the reply language by name, else None. Each sentence is
+    read alone: "Kya aap English mein baat kar sakte hain? Hindi mein money ki baat difficult lagti hai"
+    names both languages, but both sentences ask for English. Sentences that disagree: None."""
+    asked = {a for part in re.split(r"[?.!।,;]+", text) if (a := _asks_one(part))}
+    return asked.pop() if len(asked) == 1 else None
+
+
+def _asks_one(text: str) -> str | None:
+    names = [lang for lang, p in _LANG_NAMES.items() if p.search(text)]
+    if len(names) != 1 or _NUMBER_TOPIC.search(text):
+        return None  # "Hindi nahi, English mein" or "amount in English": left as before
+    named = names[0]
+    if _CANT.search(text):
+        return "hi" if named == "en" else "en"
+    if _NEGATION.search(text):
+        return None
+    if _TALK.search(text) or _PLEASE_ONLY.fullmatch(text.strip()):
+        return named
+    return None
 
 
 def says_hindi_numbers(text: str) -> bool:

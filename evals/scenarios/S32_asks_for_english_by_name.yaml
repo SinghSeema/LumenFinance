@@ -1,0 +1,31 @@
+id: S32
+name: asks_for_english_by_name
+borrower_id: B002
+today: "2026-11-03"
+
+# C80, live call B002 2026-11-12: "क्या आप English में बात कर सकते हैं?" is itself a Hindi sentence, so the
+# call stayed in Hindi. A request by name now switches at once and holds, even when Hindi words follow.
+persona: >
+  Priya Sharma, 31, works in an office in Pune; she grew up speaking English at school and finds English
+  easier for anything about money, though she answers the phone in Hindi out of habit.
+
+hidden_goal: >
+  Answer and verify in Hindi. As soon as the agent tells you about the EMI, ask in Hindi for English, for
+  example "Sorry, kya aap English mein baat kar sakte hain?". After that, keep using a few Hindi words out of
+  habit ("haan", "ji", "theek hai") but ask your questions in English. Ask once when exactly the late charge
+  was added. End by promising to pay the full amount on the 6th of November.
+
+opening: "answers in Hindi, polite and a little rushed"
+
+faults: {}
+
+expected:
+  verified: true
+  accepted_outcomes: [promise_to_pay]
+  escalate_to_human: false
+  # The simulator may write Roman Hinglish before the request.
+  language_used: ["hi+en", "hi+hinglish+en"]
+
+covers: [Q-08, R8, C80]
+runs: 3
+set: dev

@@ -7,7 +7,7 @@ import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from emi_agent.language import FULL_SENTENCE_WORDS, detect, language_words
+from emi_agent.language import FULL_SENTENCE_WORDS, asks_language, detect, language_words
 
 _RECORD_FIELDS = ("verified", "escalate_to_human", "payment_link_sent", "language_used",
                   "promise_to_pay_date")
@@ -206,15 +206,18 @@ def language_mismatches(a: dict) -> list[int]:
     """M6 (reported, not in pass): agent turns whose script family differs from the borrower turn
     just before it, for borrower turns of FULL_SENTENCE_WORDS+ words (the code switches on those
     at once, so a mismatch there is a defect, not tracker lag)."""
-    bad = []
+    bad, asked = [], None
     for i, t in enumerate(a["turns"]):
+        if t["role"] == "borrower":
+            asked = asks_language(t["text"]) or asked  # C80: a language asked for by name holds
         if t["role"] == "borrower" and len(t["text"].split()) >= FULL_SENTENCE_WORDS:
             n = _next_agent(a["turns"], i)
             # Numbers and months carry no language ("twenty second July nineteen ninety four").
             content = language_words(t["text"])
             if len(content.split()) < 2:
                 continue
-            if n and n["text"] and _family(n["text"]) != _family(content):
+            want = ("en" if asked == "en" else "hi") if asked else _family(content)
+            if n and n["text"] and _family(n["text"]) != want:
                 bad.append(i + 1)
     return bad
 

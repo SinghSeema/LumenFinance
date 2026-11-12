@@ -128,3 +128,33 @@ def test_live_call_replay_follows_the_borrower():
             t.update(detect(content, "hi"), len(content.split()))
         seen.append(t.current)
     assert seen == ["hi", "hi", "en", "hi", "hi", "hi"]
+
+
+# C80: a request for the reply language by name (live call B002, 2026-11-12).
+@pytest.mark.parametrize("said,lang", [
+    ("Can you speak you आप क्या आप English में बात कर सकते हैं?", "en"),  # the live line, Hindi-heavy
+    ("Can you speak in English?", "en"), ("Do you speak English?", "en"), ("English please", "en"),
+    ("English mein baat karo", "en"), ("अंग्रेज़ी में बोलिए", "en"),
+    ("Can you speak in Hindi?", "hi"), ("kya aap hindi mein baat kar sakte hain", "hi"),
+    ("आप हिंदी में बात कीजिए", "hi"),
+    ("मुझे English नहीं आती", "hi"), ("मैं English में बात नहीं कर सकता", "hi"),   # can't: the other one
+    ("I don't understand Hindi", "en"), ("Hindi samajh nahi aati", "en"),
+    ("Amount English mein bataiye", None), ("Please repeat the amount in English", None),  # numbers only (C44)
+    ("Can you please tell me the EMI amount in English?", None), ("English mein bataiye please", None),
+    ("Hindi nahi, English mein", None), ("Hinglish mein", None), ("English medium school", None),
+    ("I can't talk now, call later", None),
+    ("Sorry, kya aap English mein baat kar sakte hain? Hindi mein money ki baat thodi difficult lagti hai mujhe.", "en"),
+    ("Can you speak in Hindi? English mein baat karna mushkil hai", "hi"),
+    ("Can you speak in English? Hindi mein baat kijiye", None)])
+def test_asks_language(said, lang):
+    from emi_agent.language import asks_language
+    assert asks_language(said) == lang
+
+
+def test_a_pinned_language_holds_until_asked_again():
+    t = LanguageTracker("hi")
+    assert t.pin("en") is True and t.current == "en"
+    assert t.update("hi", 8) is False and t.current == "en"      # "जी, ठीक है, मैं कल कर दूँगा" stays English
+    assert t.update("hi", 2) is False and t.update("hi", 2) is False and t.current == "en"
+    assert t.pin("hi") is True and t.current == "hi"              # asked again: switches back
+    assert t.pin("hinglish") is False and t.current == "hi"       # same family: nothing to change

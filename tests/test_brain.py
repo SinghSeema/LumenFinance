@@ -1439,3 +1439,46 @@ async def test_a_bare_done_is_not_spoken(today, tmp_path):
     out = await run(brain, "नहीं.")
     assert all(s.text.strip() != "Done." for s in out)
     assert any(h["category"] == "meta_word" for h in brain.state.guard_hits)
+
+
+# C80: live call B002, 2026-11-12. The request was itself Hindi, so the call stayed in Hindi and the
+# model said "मैं English में ही बात कर रही हूँ" in Hindi.
+async def test_asking_for_english_by_name_switches_at_once_and_holds(today, tmp_path):
+    llm = ScriptedLLM([say("Sure."), say("Okay."), say("ठीक है।")])
+    brain = make(llm, today, tmp_path, "B002")
+    brain.state.verified = True
+    await run(brain, "Can you speak you आप क्या आप English में बात कर सकते हैं?", lang_hint="hi")
+    note = [m["content"] for m in llm.requests[0][1] if m["role"] == "system"][-1]
+    assert brain.state.reply_language == "en" and "asked you to speak English" in note
+    assert "never say you were already speaking it" in note and "four thousand two hundred" in note
+    await run(brain, "जी ठीक है, मैं कल payment कर दूँगी", lang_hint="hi")  # their own Hindi does not flip it
+    assert brain.state.reply_language == "en"
+    await run(brain, "Hindi mein baat kijiye", lang_hint="hi")
+    assert brain.state.reply_language == "hi"
+
+
+async def test_asking_for_hindi_in_an_english_call(today, tmp_path):
+    llm = ScriptedLLM([say("जी।")])
+    brain = make(llm, today, tmp_path, "B001")
+    await run(brain, "Can you speak in Hindi?")
+    assert brain.state.reply_language == "hi" and "hi" in brain.state.languages_used
+
+
+async def test_numbers_in_english_still_keeps_the_hindi_call(today, tmp_path):
+    llm = ScriptedLLM([say("जी।")])
+    brain = make(llm, today, tmp_path, "B002")
+    brain.state.verified = True
+    await run(brain, "Amount English mein bataiye", lang_hint="hi")
+    assert brain.state.reply_language == "hi" and brain.state.numbers == "english"
+
+
+async def test_after_asking_for_english_the_goodbye_and_notes_stay_english(today, tmp_path):
+    close = "समय देने के लिए धन्यवाद, आपका दिन शुभ हो।"
+    llm = ScriptedLLM([say("Sure."), say(close)])
+    brain = make(llm, today, tmp_path, "B002")
+    brain.state.verified = True
+    await run(brain, "Sorry, kya aap English mein baat kar sakte hain?", lang_hint="hi")
+    out = await run(brain, "Haan ji, theek hai, main chhe tareekh ko kar dungi", lang_hint="hi")
+    note = [m["content"] for m in llm.requests[1][1] if m["role"] == "system"][-1]
+    assert "Keep every sentence of this reply, the goodbye too, in English" in note
+    assert close not in [s.text for s in out] and any("good day" in s.text.lower() for s in out)

@@ -223,12 +223,22 @@ def note_numbers(facts: LoanFacts, style: str = "hindi", asked: bool = False) ->
             f"Loan facts as phrases: {spoken}.")
 
 
-def note_language(lang: str, facts: LoanFacts | None) -> str:
-    note = f"The borrower is now speaking {LANGUAGE_NAMES[lang]}. Reply in that language from now on."
+def note_language(lang: str, facts: LoanFacts | None, asked: bool = False) -> str:
+    if asked:  # C80: live call B002 12 Nov, the model answered "मैं English में ही बात कर रही हूँ" in Hindi
+        note = (f"The borrower asked you to speak {LANGUAGE_NAMES[lang]}. From this reply on, speak only "
+                f"{LANGUAGE_NAMES[lang]}, even if they mix in the other language. Agree in a few words and go on "
+                "from where the call was; never say you were already speaking it.")
+    else:
+        note = f"The borrower is now speaking {LANGUAGE_NAMES[lang]}. Reply in that language from now on."
     if facts:
         spoken = "; ".join(f"{k}: {v}" for k, v in facts.as_dict().items())
         note += f" Loan facts in this language: {spoken}."
     return note
+
+
+def note_pinned(lang: str) -> str:
+    return (f"The borrower asked for {LANGUAGE_NAMES[lang]} earlier and is only mixing in other words. Keep "
+            f"every sentence of this reply, the goodbye too, in {LANGUAGE_NAMES[lang]}.")
 
 
 def note_guard(spoken_instead: str) -> str:

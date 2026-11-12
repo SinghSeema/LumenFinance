@@ -422,3 +422,11 @@ Groq gpt-oss-20b in the 21:47 owner call: 787 ms. Sarvam bills in rupees from th
 ## 2026-11-05 13:45 testing branch: re-run of the 4 failed scenarios after C74-C77
 
 - 20261105-132623-testing-regression-fix S01,S08,S10,S15 x2: 6/8. S01 2/2, S15 2/2 (both fixed), S08 1/2 (run 2: escalation on a yes to the agent's team call back offer, correct per G-05, scenario expects none), S10 1/2 (C34 loop, open; guard replaced 6 invented results). 0 leaks. About Rs 10 (agent 273,330 / 2,673; sim 50,369 / 3,851); S10's 16-turn loop made it dearer than the Rs 6 estimate.
+
+## 2026-11-12 13:30 testing branch: C80 language asked by name (live call B002 13:07)
+
+- Live: "क्या आप English में बात कर सकते हैं?" kept the call in Hindi (the request was a Hindi sentence); "Can you speak in English?" (4 words) waited for a second English turn. Fix: asks_language() + LanguageTracker.pin(); per-sentence; numbers-only requests unchanged (C44).
+- New dev scenario S32 asks_for_english_by_name (B002). c80 S32,S09 x3: 6/6 but S32 lang mismatch 3/3 (Hindi goodbye, "ठीक है, मैंने note कर लिया है" after record). Fix: note while pinned on mixed turns; fixed goodbye in the pinned language; M6 scorer follows a requested language.
+- c80b x3: S32 2/3 (run 2 named both languages: "English mein baat... Hindi mein difficult lagti"; fixed with per-sentence reading and difficult/mushkil = can't), S09 2/3 (run 2: promise never recorded after two date confirmations, not language).
+- c80c x3: S32 3/3, S09 3/3, 0 language mismatches, 0 leaks. Three runs about Rs 3 each (last: agent 170,737 / 1,974, sim 20,882 / 1,607). 1127 tests.
+- Seen, not changed: the agent sends the WhatsApp link after a dated promise without asking (S32 3 of 9 runs); prompt step 4 and D-46 allow it.

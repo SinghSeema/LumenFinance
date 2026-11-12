@@ -1,0 +1,393 @@
+{
+  "scenario": {
+    "id": "S32",
+    "name": "asks_for_english_by_name",
+    "borrower_id": "B002",
+    "today": "2026-11-03",
+    "persona": "Priya Sharma, 31, works in an office in Pune; she grew up speaking English at school and finds English easier for anything about money, though she answers the phone in Hindi out of habit.\n",
+    "hidden_goal": "Answer and verify in Hindi. As soon as the agent tells you about the EMI, ask in Hindi for English, for example \"Sorry, kya aap English mein baat kar sakte hain?\". After that, keep using a few Hindi words out of habit (\"haan\", \"ji\", \"theek hai\") but ask your questions in English. Ask once when exactly the late charge was added. End by promising to pay the full amount on the 6th of November.\n",
+    "opening": "answers in Hindi, polite and a little rushed",
+    "faults": {},
+    "expected": {
+      "verified": true,
+      "accepted_outcomes": [
+        "promise_to_pay"
+      ],
+      "escalate_to_human": false,
+      "language_used": [
+        "hi+en",
+        "hi+hinglish+en"
+      ]
+    },
+    "covers": [
+      "Q-08",
+      "R8",
+      "C80"
+    ],
+    "runs": 3,
+    "set": "dev"
+  },
+  "run": 3,
+  "agent_llm": "sarvam:sarvam-105b-conversations",
+  "simulator_llm": "sarvam:glm5.3-flash",
+  "config": {
+    "stt": {
+      "provider": "deepgram",
+      "model": "nova-3",
+      "language": "multi",
+      "language_hints": [
+        "hi",
+        "en"
+      ],
+      "endpointing": 100,
+      "keyterms": "full",
+      "host": "api.eu.deepgram.com",
+      "deepgram_api_key": "***"
+    },
+    "tts": {
+      "provider": "sarvam",
+      "model": "bulbul:v4-flash",
+      "voice": "simran_enhi_customer",
+      "language": "hi-IN",
+      "script": "devanagari",
+      "sample_rate": 16000,
+      "hardship_pace": 0.9,
+      "sarvam_api_key": "***",
+      "cartesia_api_key": "***"
+    },
+    "llm": {
+      "provider": "sarvam",
+      "model": "sarvam-105b-conversations",
+      "effort": "low",
+      "max_tokens": 1024,
+      "temperature": 0.3,
+      "reasoning_effort": "low",
+      "max_retries": 8,
+      "timeout_secs": null,
+      "fallback": [],
+      "groq_api_key": "***",
+      "gemini_api_key": "***"
+    },
+    "turn": {
+      "detector": "vad",
+      "smart_turn_stop_secs": 2.0,
+      "vad_stop_secs": 0.5,
+      "vad_start_secs": 0.1,
+      "stt_wait_secs": 1.0,
+      "unfinished_wait_secs": 0.7,
+      "hardship_unfinished_wait_secs": 1.2,
+      "min_words_interrupt": 2,
+      "filler_after_secs": 1.2,
+      "filler_again_after_secs": 2.0,
+      "silence_after_barge_in_secs": 4,
+      "silence_prompts_secs": 8,
+      "silence_close_secs": 10
+    },
+    "livekit": {
+      "room_name": "emi-call",
+      "agent_identity": "lumen-agent",
+      "url": "ws://localhost:7880",
+      "api_key": "***",
+      "api_secret": "***"
+    },
+    "behavior": {
+      "hindi_numbers": "english",
+      "max_call_secs": 300,
+      "filler_delay_ms": 300,
+      "intent_check_timeout_secs": 1.5,
+      "intent_check_provider": "sarvam",
+      "intent_check_model": "sarvam-105b-conversations",
+      "tool_timeout_s": 8,
+      "verify_max_attempts": 3,
+      "lender_name": "Lumen Finance",
+      "prompt_version": "v17",
+      "calls_log": "results/calls.jsonl"
+    },
+    "evals": {
+      "judge_provider": "sarvam",
+      "judge_model": "glm5.3-flash",
+      "simulator_provider": "sarvam",
+      "simulator_model": "glm5.3-flash",
+      "simulator_temperature": 0.8,
+      "max_turns": 16,
+      "secs_per_turn": 10
+    },
+    "faults": {
+      "payment_link_fail": "none",
+      "added_latency_ms": 0
+    }
+  },
+  "turns": [
+    {
+      "role": "agent",
+      "text": "नमस्ते, मैं Lumen Finance की तरफ़ से AI assistant बोल रही हूँ। क्या मेरी बात Priya जी से हो रही है?",
+      "verified": false,
+      "guard": []
+    },
+    {
+      "role": "borrower",
+      "text": "हाँ, बोलिए, मैं Priya ही हूँ।"
+    },
+    {
+      "role": "agent",
+      "text": "ठीक है Priya जी। account verification के लिए अपने registered mobile number के आखिरी चार digits बता दीजिए।",
+      "verified": false,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "3367"
+    },
+    {
+      "role": "agent",
+      "text": "धन्यवाद Priya जी। आपके two-wheeler loan की EMI चार हज़ार दो सौ rupees है, जिसकी due date twenty-eighth October थी। six days बीत जाने की वजह से पाँच सौ rupees का late charge भी जुड़ गया है, जो आपके loan terms के हिसाब से लगाया गया है। क्या आप आज इसे online payment link के through clear कर पाएँगी? मैं इसे SMS या WhatsApp पर भेज दूँ?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "verify_identity"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "Sorry, kya aap English mein baat kar sakte hain? It's easier for me to discuss money matters in English."
+    },
+    {
+      "role": "agent",
+      "text": "Sure, no problem. Your two-wheeler loan EMI is four thousand two hundred rupees, due on the twenty-eighth of October. It is now six days overdue, and a late fee of five hundred rupees has been added as per your loan terms. Can you clear it today? I can send the secure payment link to you via SMS or WhatsApp.",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Haan, ji. Okay, so the total is four thousand seven hundred with the late fee. Can you tell me exactly when this late charge was added? I don't remember seeing it before."
+    },
+    {
+      "role": "agent",
+      "text": "Yes, the total comes to four thousand seven hundred rupees. This charge was added as per your loan terms once the due date passed. I do not have the exact timestamp of when it was applied, but our internal team can confirm that detail and arrange a call back if needed.",
+      "verified": true,
+      "guard": [],
+      "tools": []
+    },
+    {
+      "role": "borrower",
+      "text": "Theek hai, no problem. I can't pay today, but I will pay the full amount on the sixth of November, Friday. Is that okay?"
+    },
+    {
+      "role": "agent",
+      "text": "Okay. Noted, I have recorded that date. Is there anything else you need help with right now?",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    },
+    {
+      "role": "borrower",
+      "text": "No, that's all, thank you. I'll make the payment on the sixth."
+    },
+    {
+      "role": "agent",
+      "text": "Okay. Thank you for your time, have a good day.",
+      "verified": true,
+      "guard": [],
+      "tools": [
+        "record_outcome"
+      ]
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "verify_identity",
+      "args": {
+        "factor": "last4",
+        "value": "3367"
+      },
+      "result": {
+        "verified": true,
+        "loan_facts": {
+          "amount_spoken": "four thousand two hundred rupees",
+          "due_date_spoken": "twenty-eighth October",
+          "loan_type": "two-wheeler loan",
+          "overdue_spoken": "six days",
+          "late_fee_spoken": "five hundred rupees"
+        },
+        "status": "This EMI is overdue by six days. Ask whether they can clear it today and offer the payment link."
+      },
+      "attempts": 1,
+      "ms": 0.95,
+      "stage": "reminding",
+      "by": "code"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "the sixth of November",
+        "notes": "Borrower promised to pay full amount by Friday, the sixth of November."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the sixth of November"
+      },
+      "attempts": 1,
+      "ms": 0.57,
+      "stage": "closing"
+    },
+    {
+      "name": "record_outcome",
+      "args": {
+        "outcome": "promise_to_pay",
+        "promise_to_pay_date": "the sixth of November",
+        "notes": "Borrower confirmed she will pay the full amount on the sixth of November, Friday. No further assistance needed."
+      },
+      "result": {
+        "recorded": true,
+        "promise_date_spoken": "the sixth of November"
+      },
+      "attempts": 1,
+      "ms": 1.34,
+      "stage": "closing"
+    }
+  ],
+  "outcome": {
+    "borrower_id": "B002",
+    "verified": true,
+    "outcome": "promise_to_pay",
+    "promise_to_pay_date": "2026-11-06",
+    "payment_link_sent": false,
+    "escalate_to_human": false,
+    "notes": "Borrower confirmed she will pay the full amount on the sixth of November, Friday. No further assistance needed.",
+    "language_used": "hi+en",
+    "callback_time": null
+  },
+  "disclosure_log": [
+    {
+      "field": "amount_spoken",
+      "timestamp": 1794469876.5341923,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1794469876.5341923,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1794469876.5341923,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1794469876.5341923,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1794469876.5341923,
+      "stage": "reminding",
+      "verified": true
+    },
+    {
+      "field": "amount_spoken",
+      "timestamp": 1794469877.9294772,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "due_date_spoken",
+      "timestamp": 1794469877.9294772,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "loan_type",
+      "timestamp": 1794469877.9294772,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "overdue_spoken",
+      "timestamp": 1794469877.9294772,
+      "stage": "intent",
+      "verified": true
+    },
+    {
+      "field": "late_fee_spoken",
+      "timestamp": 1794469877.9294772,
+      "stage": "intent",
+      "verified": true
+    }
+  ],
+  "guard_hits": [
+    {
+      "category": "channel_again",
+      "original": "Would you like to go ahead with the payment link now via SMS or WhatsApp?",
+      "spoken": "",
+      "stage": "intent",
+      "verified": true
+    }
+  ],
+  "speech_hits": [
+    {
+      "hits": [
+        "number_style"
+      ],
+      "original": "आपके two-wheeler loan की EMI चार हज़ार दो सौ rupees है, जिसकी due date अट्ठाईस October थी।",
+      "spoken": "आपके two-wheeler loan की EMI चार हज़ार दो सौ rupees है, जिसकी due date twenty-eighth October थी।",
+      "lang": "hi"
+    },
+    {
+      "hits": [
+        "number_style"
+      ],
+      "original": "छह दिन बीत जाने की वजह से पाँच सौ rupees का late charge भी जुड़ गया है, जो आपके loan terms के हिसाब से लगाया गया है।",
+      "spoken": "six days बीत जाने की वजह से पाँच सौ rupees का late charge भी जुड़ गया है, जो आपके loan terms के हिसाब से लगाया गया है।",
+      "lang": "hi"
+    }
+  ],
+  "flags": [
+    "invited_more",
+    "numbers_chosen"
+  ],
+  "protected_phrases": [
+    "4,200",
+    "4200",
+    "atthaees October",
+    "chaar hazaar do sau rupaye",
+    "chhah din",
+    "five hundred rupees",
+    "four thousand two hundred rupees",
+    "paanch sau rupaye",
+    "six days",
+    "the twenty-eighth of October",
+    "twenty-eighth October",
+    "two-wheeler loan",
+    "अट्ठाईस अक्टूबर",
+    "चार हज़ार दो सौ रुपये",
+    "छह दिन",
+    "पाँच सौ रुपये"
+  ],
+  "usage": {
+    "agent": {
+      "input": 30505,
+      "output": 407,
+      "cache_read": 0
+    },
+    "simulator": {
+      "input": 4388,
+      "output": 188
+    }
+  },
+  "llm_turns_by_provider": {
+    "sarvam:sarvam-105b-conversations": 8
+  },
+  "end_reason": "agent_ended",
+  "infra_error": null,
+  "wall_secs": 8.4
+}

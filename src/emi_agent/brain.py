@@ -13,7 +13,7 @@ from typing import AsyncIterator
 
 from emi_agent import context, dates, guard, intent, policy, speakable, special
 from emi_agent.heard import find_dob, find_last4, partial_digits
-from emi_agent.language import _NEGATION, LanguageTracker, asks_numbers_in, detect, language_words, says_hindi_numbers
+from emi_agent.language import _NEGATION, LanguageTracker, _family, asks_language, asks_numbers_in, detect, language_words, says_hindi_numbers
 from emi_agent.llm import LLMError
 from emi_agent.outcome import Outcome, OutcomeRecord, append_record
 from emi_agent.state import Borrower, CallState, Stage
@@ -435,6 +435,14 @@ class Brain:
         """Live call B001 21:27: the model's goodbye was "Time given for your time, have a good day." (a
         word-for-word "समय देने के लिए धन्यवाद"). The goodbye is a fixed line, so code says it. Only when
         the words before "have a good day" are a short thanks; a read-back before it is left alone."""
+        lang = self.state.reply_language
+        thanked = any(_THANKS.search(x) for x in self._turn_spoken)
+        fixed = (context.good_day(lang, self.script) if thanked
+                 else context.closing(lang, self.script, self._close_name()))
+        if self.lang.pinned and _family(detect(sentence)) != _family(lang):
+            # C80, text run S32: "समय देने के लिए धन्यवाद, आपका दिन शुभ हो।" closed a call the borrower had
+            # asked to have in English. The goodbye is a fixed line, so it is said in the call's language.
+            return fixed
         lead = guard.warm_close_lead(sentence)
         bare = " ".join(w for w in lead.split()
                         if w.lower() not in {self._first_name.lower(), "ji", "जी"})
@@ -443,10 +451,6 @@ class Brain:
         words = lead.split()
         if len(words) > 6 or (words and not _CLOSE_LEAD.search(lead)):
             return None
-        lang = self.state.reply_language
-        thanked = any(_THANKS.search(x) for x in self._turn_spoken)
-        fixed = (context.good_day(lang, self.script) if thanked
-                 else context.closing(lang, self.script, self._close_name()))
         return None if fixed == sentence.strip() else fixed
 
     def _close_name(self) -> str | None:
@@ -518,7 +522,17 @@ class Brain:
         content = language_words(lang_text)
         # A turn that was mostly numbers or months ("Buys, July 19 94.") says nothing about language.
         counts = content == lang_text.strip() or len(content.split()) >= 2
-        if counts and self.lang.update(detect(content, lang_hint), len(content.split())):
+        wanted = asks_language(user_text)  # C80: asked by name, so it switches now and holds
+        if wanted:
+            changed = self.lang.pin(wanted)
+        else:
+            heard = detect(content, lang_hint)
+            changed = counts and self.lang.update(heard, len(content.split()))
+            if counts and self.lang.pinned and not changed and _family(heard) != _family(self.lang.current):
+                # Text run S32 (C80): after "haan, theek hai, ji" the model wrote "ठीक है, मैंने note कर लिया
+                # है" in an English call, since the tool result says "in the borrower's language".
+                self._pending_notes.append(context.note_pinned(self.lang.current))
+        if changed:
             s.reply_language = self.lang.current
             s.languages_used = list(self.lang.used)
             facts = None
@@ -526,7 +540,7 @@ class Brain:
                 facts = self.tools.facts()
                 s.loan_facts = facts
                 s.disclose(facts)
-            self._pending_notes.append(context.note_language(s.reply_language, facts))
+            self._pending_notes.append(context.note_language(s.reply_language, facts, asked=bool(wanted)))
         asked = asks_numbers_in(user_text)
         if asked:
             # C44: the borrower named the language for numbers ("amount English mein bataiye"). Their
